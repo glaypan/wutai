@@ -114,9 +114,14 @@ return i=this.parent.children.indexOf(this),removed=this.parent.children.splice(
   --bg-base: #000000;
   --bg-elev: rgba(28,28,30,0.72);
   --bg-elev-2: rgba(44,44,46,0.66);
+  --bg-1: rgba(0,0,0,0.3);
   --stroke: rgba(255,255,255,0.10);
+  --border: rgba(255,255,255,0.10);
   --text: #f2f2f7;
+  --text-1: #e2e8f0;
   --text-2: #98989f;
+  --text-3: #64748b;
+  --primary: #0a84ff;
   --ios-blue: #0a84ff;
   --ios-green: #30d158;
   --ios-red: #ff453a;
@@ -314,7 +319,6 @@ body {
 .stage-mics {
   display:flex;
   flex-wrap:wrap;
-  margin:14px 0;
   margin:-4px;
 }
 .mic-tag {
@@ -834,8 +838,7 @@ body {
 }
 .detail-set-btn:disabled { cursor:default; }
 /* 节目卡片详情按钮 */
-.prog-action-row { display:flex; margin-top:8px; justify-content:flex-end; }
-.prog-action-row > * + * { margin-left:6px; }
+.prog-action-row { display:flex; align-items:center; gap:6px; margin-top:8px; justify-content:flex-end; }
 .prog-detail-btn { padding:5px 12px; font-size:12px;
   background: rgba(44,44,46,0.66); color:#cbd5e1; border:1px solid var(--stroke);
   border-radius:8px; cursor:pointer; min-height:32px; transition: background 0.15s; }
@@ -889,9 +892,15 @@ body {
   .header-right > * { margin:4px; }
   .show-name {font-size:18px; flex:1; text-align:center;}
   .timer-display {font-size:44px; margin:10px 0;}
-  .stage-program-name {font-size:18px;}
+  .stage-program-name {font-size:20px;}
+  .stage-program-name.small {font-size:18px;}
+  .card-label {font-size:15px;}
   .stage-cards { grid-template-columns: 1fr; }
-  .stage-card { padding:14px; }
+  .stage-card { padding:16px; }
+  .mic-tag { font-size:14px; padding:6px 10px; }
+  .music-cue-display { font-size:14px; padding:10px 12px; }
+  .stage-notes { font-size:14px; padding:8px 10px; }
+  .card-duration { font-size:16px; }
   .timer-controls { flex-wrap:wrap; }
   .timer-controls > * { margin:4px; }
   .modal-box {
@@ -972,6 +981,11 @@ body {
 .main-layout.mode-performance { grid-template-columns: 1fr !important; }
 .main-layout.mode-performance .panel-list { display:none !important; }
 .main-layout.mode-perf-list { grid-template-columns: 340px 1fr !important; }
+/* 手机竖屏：演出模式显示列表时改为上下堆叠 */
+@media (max-width: 768px) {
+  .main-layout.mode-perf-list { grid-template-columns: 1fr !important; }
+  .main-layout.mode-perf-list .panel-list { max-height:35vh; overflow-y:auto; border-bottom:1px solid var(--stroke); border-right:none; }
+}
 /* 节目进度条 */
 .perf-progress-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
 .perf-progress-text { font-size:14px; color:var(--text-2); }
@@ -1023,9 +1037,8 @@ body {
 /* 节目项重置按钮 */
 .prog-reset-btn { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; border:1px solid rgba(255,159,10,0.3); background:rgba(255,159,10,0.12); color:#ff9f0a; cursor:pointer; font-size:15px; margin-right:6px; transition: background .2s ease; }
 .prog-reset-btn:hover { background:rgba(255,159,10,0.25); }
-.prog-action-row { display:flex; align-items:center; gap:6px; margin-top:8px; }
-/* 完成打勾可点击 */
-.completed-check-icon { cursor:pointer; pointer-events:auto; }
+/* 完成打勾可点击：仅在设置模式下可点击 */
+body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
 /* 重置确认弹窗 */
 .reset-confirm-box { text-align:center; padding:8px 0; }
 .reset-confirm-box p { font-size:16px; margin-bottom:16px; color:#fff; }
@@ -1275,8 +1288,8 @@ body {
           </div>
 
           <div class="form-group">
-            <label>节目时长（秒，0 = 不计时）</label>
-            <input type="number" id="edit-duration" class="text-input" placeholder="例如 300 = 5分钟" min="0">
+            <label>节目时长（分钟，0 = 不计时）</label>
+            <input type="number" id="edit-duration" class="text-input" placeholder="例如 5 = 5分钟" min="0">
           </div>
 
           <div class="form-group">
@@ -1393,7 +1406,7 @@ body {
         <input type="text" id="add-name" class="text-input" placeholder="输入节目名称">
       </div>
       <div class="form-group">
-        <label>节目时长（秒，0 = 不计时）</label>
+        <label>节目时长（分钟，0 = 不计时）</label>
         <input type="number" id="add-duration" class="text-input" placeholder="0" min="0" value="0">
       </div>
       <div class="form-group">
@@ -1533,6 +1546,8 @@ function showToast(msg){ var t=document.createElement('div'); t.className='toast
 let editingIndex = null;
 let programSortable = null;
 var perfListVisible = true;
+var userListToggleInit = false;  // 标记用户是否已手动操作过列表显隐
+var _realMode = null;  // 非control角色的原始mode，避免被强制performance覆盖localStorage
 
 // ---------- 尝试连接 WebSocket ----------
 let ws = null;
@@ -1561,7 +1576,8 @@ function tryConnectWS(backgroundOnly) {
       if (!wsMode) { /* 连接失败，静默降级到localStorage */ }
     };
     ws.onmessage = (ev) => {
-      const data = JSON.parse(ev.data);
+      var data;
+      try { data = JSON.parse(ev.data); } catch(e) { return; }
       switch (data.type) {
         case "full_state":
           // backgroundOnly 模式下仅当本地无数据时接受 full_state
@@ -1569,6 +1585,7 @@ function tryConnectWS(backgroundOnly) {
             // 只接受 timer 和 client_count，不覆盖本地数据
           } else {
             localState = mergeState(data.state || localState);
+            _realMode = localState.mode;
             renderAll();
           }
           if (data.clientCount !== undefined) updateClientCount(data.clientCount);
@@ -1714,6 +1731,7 @@ function tryConnectManualServer(host) {
       switch (data.type) {
         case "full_state":
           localState = mergeState(data.state || localState);
+          _realMode = localState.mode;
           renderAll();
           if (data.clientCount !== undefined) updateClientCount(data.clientCount);
           break;
@@ -1756,7 +1774,7 @@ function mergeState(s) {
   var merged = {
     showName: s.showName || "舞台流程表",
     mode: s.mode || "setup",
-    currentProgramIndex: s.currentProgramIndex || 0,
+    currentProgramIndex: Number(s.currentProgramIndex) || 0,
     version: 3,
     globalChannels: s.globalChannels || { mics: [], lines: [] },
     programs: (s.programs || []).map(function(p) {
@@ -1795,16 +1813,22 @@ function loadFromStorage() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       localState = mergeState(JSON.parse(saved));
+      _realMode = localState.mode;
       // 迁移后立即落盘，避免重复迁移
       saveToStorage();
     }
-  } catch(e) {}
+  } catch(e) { console.warn('loadFromStorage失败:', e); }
 }
 
 function saveToStorage() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
-  } catch(e) {}
+    var toSave = localState;
+    // 非control角色：不覆盖mode字段，避免强制performance覆盖control角色的设置
+    if (ROLE !== 'control' && _realMode !== null) {
+      toSave = Object.assign({}, localState, { mode: _realMode });
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch(e) { console.warn('saveToStorage失败:', e); }
 }
 
 // ---------- 消息发送 ----------
@@ -1824,6 +1848,7 @@ function handleLocalMessage(msg) {
     case "update_state":
       if (msg.data && typeof msg.data === 'object') {
         localState = { ...localState, ...msg.data };
+        _realMode = localState.mode;
         if (localState.programs.length > 0 && localState.currentProgramIndex > localState.programs.length - 1) {
           localState.currentProgramIndex = Math.max(0, localState.programs.length - 1);
         }
@@ -1871,6 +1896,8 @@ function handleLocalMessage(msg) {
       if (msg.mode === 'replace') { localState.programs = imProgs; localState.currentProgramIndex = 0; }
       else { localState.programs = localState.programs.concat(imProgs); }
       saveToStorage(); renderAll(); break;
+    default:
+      console.warn('未知消息类型:', msg.type);
   }
 }
 
@@ -1901,9 +1928,11 @@ window.toggleMode = function () {
   const newMode = localState.mode === 'setup' ? 'performance' : 'setup';
   localState.mode = newMode;
   perfListVisible = true;
+  userListToggleInit = false;  // 重置用户操作标记
   var btn = document.getElementById('list-toggle-btn');
   if (btn) btn.textContent = '✕ 隐藏列表';
   sendMsg({ type: "update_state", data: { mode: newMode } });
+  renderAll();  // 立即更新UI，不等待服务器广播
 };
 
 // ---------- 全局通道设置弹窗 ----------
@@ -2305,7 +2334,11 @@ function applyRoleVisibility() {
   // 非 control 强制 performance 模式
   if (ROLE !== 'control') {
     localState.mode = 'performance';
-    perfListVisible = true;
+    // 首次进入时默认显示列表，但用户手动隐藏后不强制弹出
+    if (!userListToggleInit) {
+      perfListVisible = true;
+      userListToggleInit = true;
+    }
     document.getElementById('setup-view').classList.add('hidden');
     document.getElementById('performance-view').classList.remove('hidden');
     var mt = document.getElementById('mode-toggle-btn');
@@ -2326,6 +2359,9 @@ window.openRoleSwitcher = function() {
 
 // ---------- 全局渲染入口 ----------
 function renderAll() {
+  // 先应用角色权限（可能强制修改 mode），再做布局
+  applyRoleVisibility();
+
   document.getElementById('show-name-display').innerText = localState.showName || "舞台流程表";
   const toggleBtn = document.getElementById('mode-toggle-btn');
   if (localState.mode === 'setup') {
@@ -2337,6 +2373,7 @@ function renderAll() {
   }
   document.getElementById('setup-view').classList.toggle('hidden', localState.mode !== 'setup');
   document.getElementById('performance-view').classList.toggle('hidden', localState.mode !== 'performance');
+  document.body.classList.toggle('mode-setup', localState.mode === 'setup');
 
   // 演出模式布局：默认隐藏节目列表，舞台全宽
   var mainLayout = document.querySelector('.main-layout');
@@ -2357,7 +2394,6 @@ function renderAll() {
   initProgramDragSort();
   renderStageView();
   renderProgramChannelSelector();
-  applyRoleVisibility();
 }
 
 // ---------- 节目列表拖拽排序 ----------
@@ -2387,6 +2423,7 @@ function initProgramDragSort() {
       localState.programs = arr;
       localState.currentProgramIndex = newCurrent;
       sendMsg({ type: "update_state", data: { programs: arr, currentProgramIndex: newCurrent } });
+      renderAll();  // 立即刷新舞台视图
     }
   });
 }
@@ -2442,6 +2479,7 @@ function renderProgramList() {
     for (var ri = 0; ri < rbtns.length; ri++) {
       rbtns[ri].onclick = function(e) {
         if(e) e.stopPropagation();
+        if (typeof can === 'function' && !can('reset')) { showToast('无重置权限'); return; }
         var rIdx = Number(this.getAttribute('data-reset-idx'));
         var rProg = localState.programs[rIdx];
         if (rProg && rProg.status === 'completed') {
@@ -2580,6 +2618,10 @@ function renderProgramChannelSelector() {
       }
       prog.useChannels = used;
       renderProgramChannelSelector();
+      // 立即同步通道变更到服务器和本地存储
+      if (typeof can === 'function' && can('editChannel')) {
+        sendMsg({ type: "update_program_field", idx: editingIndex, field: 'useChannels', value: used, role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+      }
     };
     wrap.appendChild(btn);
   });
@@ -2702,6 +2744,7 @@ window.openAddProgram = function () {
 };
 
 window.saveShowName = function () {
+  if (typeof can === 'function' && !can('rename')) return;
   const val = document.getElementById('input-show-name').value.trim();
   if (val) sendMsg({ type: "update_state", data: { showName: val } });
   closeModal('modal-show-name');
@@ -2796,15 +2839,20 @@ window.saveProgram = function () {
     var arr = localState.programs.slice();
     var oldProg = arr[editingIndex];
     arr[editingIndex] = { name:name, duration:duration, notes:notes, musicCue:musicCue, status:oldProg.status||'pending', useChannels:oldProg.useChannels||[] };
+    localState.programs = arr;
+    saveToStorage();
     sendMsg({ type: "update_state", data: { programs: arr }, role: 'control' });
   } else {
-    if (can('editMusic')) updateProgramField(editingIndex, 'musicCue', musicCue);
-    if (can('editNotes')) updateProgramField(editingIndex, 'notes', notes);
+    // 非 control 角色只能编辑音乐和备注，通过 sendMsg 发送
+    if (can('editMusic')) { localState.programs[editingIndex].musicCue = musicCue; sendMsg({ type: "update_program_field", idx: editingIndex, field: 'musicCue', value: musicCue, role: ROLE }); }
+    if (can('editNotes')) { localState.programs[editingIndex].notes = notes; sendMsg({ type: "update_program_field", idx: editingIndex, field: 'notes', value: notes, role: ROLE }); }
+    saveToStorage();
   }
   closeEditPanel();
 };
 
 window.deleteProgram = function () {
+  if (typeof can === 'function' && !can('addDel')) return;
   if (!confirm("确定删除这个节目？")) return;
   const arr = [...localState.programs];
   arr.splice(editingIndex, 1);
@@ -2812,12 +2860,16 @@ window.deleteProgram = function () {
   if (editingIndex < newIdx) newIdx--;
   if (newIdx < 0) newIdx = 0;
   if (newIdx > arr.length - 1) newIdx = Math.max(0, arr.length - 1);
+  localState.programs = arr;
+  localState.currentProgramIndex = newIdx;
+  saveToStorage();
   sendMsg({ type: "update_state", data: { programs: arr, currentProgramIndex: newIdx } });
   closeEditPanel();
 };
 
 // ---------- 新建节目 ----------
 window.confirmAddProgram = function () {
+  if (typeof can === 'function' && !can('addDel')) return;
   const name = document.getElementById('add-name').value.trim();
   const dur = Number(document.getElementById('add-duration').value) || 0;
   const notes = document.getElementById('add-notes').value.trim();
@@ -2825,10 +2877,12 @@ window.confirmAddProgram = function () {
   if (!name) return alert("节目名称不能为空");
   const newProg = {
     name, duration: dur, notes, musicCue,
-    completed: false,
+    status: 'pending',
     useChannels: []
   };
   const arr = [...(localState.programs || []), newProg];
+  localState.programs = arr;
+  saveToStorage();
   sendMsg({ type: "update_state", data: { programs: arr } });
   closeModal('modal-add');
 };
@@ -2950,6 +3004,7 @@ window.detailResetOne = function() {
 // 演出模式：切换节目列表显示
 window.togglePerfList = function() {
   perfListVisible = !perfListVisible;
+  userListToggleInit = true;  // 标记用户已手动操作
   var btn = document.getElementById('list-toggle-btn');
   if (btn) btn.textContent = perfListVisible ? '✕ 隐藏列表' : '📋 节目列表';
   // 同步顶部按钮
