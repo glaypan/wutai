@@ -3080,7 +3080,9 @@ function parsePdf(buf) {
         chain = chain.then(function() {
           return pdf.getPage(pageNum).then(function(page) {
             return page.getTextContent().then(function(tc) {
-              parts.push(tc.items.map(function(it) { return it.str; }).join(' '));
+              // 按 Y 坐标分行，恢复表格行结构
+              var lines = groupTextItemsByLine(tc.items);
+              parts.push(lines.join('\n'));
             });
           });
         });
@@ -3088,6 +3090,88 @@ function parsePdf(buf) {
     }
     return chain.then(function() { handleParsedText(parts.join('\n')); });
   }).catch(function(err) { showToast('PDF 解析失败: ' + (err.message || err)); });
+}
+
+// 将 PDF 文本项按 Y 坐标分组为行，模拟表格结构
+function groupTextItemsByLine(items) {
+  if (!items || items.length === 0) return [];
+  // 先过滤掉纯空白的项（但保留有意义的空格）
+  var validItems = items.filter(function(it) {
+    return it.str !== undefined && it.str !== null;
+  });
+  // 按 transform[5] (Y 坐标) 降序排列（PDF 坐标系 Y 轴向上）
+  var sorted = validItems.slice().sort(function(a, b) {
+    var ya = a.transform ? a.transform[5] : 0;
+    var yb = b.transform ? b.transform[5] : 0;
+    if (Math.abs(ya - yb) > 3) return yb - ya; // 不同行
+    var xa = a.transform ? a.transform[4] : 0;
+    var xb = b.transform ? b.transform[4] : 0;
+    return xa - xb; // 同行按 X 排序
+  });
+  var lines = [];
+  var currentLine = [];
+  var currentY = null;
+  for (var i = 0; i < sorted.length; i++) {
+    var item = sorted[i];
+    var y = item.transform ? item.transform[5] : 0;
+    var str = item.str || '';
+    if (currentY === null || Math.abs(y - currentY) <= 3) {
+      currentLine.push({ str: str, x: item.transform ? item.transform[4] : 0 });
+      currentY = y;
+    } else {
+      if (currentLine.length > 0) {
+        lines.push(mergeLineItems(currentLine));
+      }
+      currentLine = [{ str: str, x: item.transform ? item.transform[4] : 0 }];
+      currentY = y;
+    }
+  }
+  if (currentLine.length > 0) {
+    lines.push(mergeLineItems(currentLine));
+  }
+  return lines;
+}
+
+// 合并同一行的文本项，智能添加分隔符
+// 输入: [{str: '19', x: 100}, {str: '：', x: 110}, {str: '06', x: 115}, {str: '灯光秀', x: 200}]
+function mergeLineItems(items) {
+  if (!items || items.length === 0) return '';
+  // 过滤纯空字符串
+  var filtered = items.filter(function(it) { return it.str && it.str.length > 0; });
+  if (filtered.length === 0) return '';
+  
+  var result = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var s = filtered[i].str;
+    var x = filtered[i].x;
+    var prevX = i > 0 ? filtered[i - 1].x : 0;
+    var prevStr = i > 0 ? filtered[i - 1].str : '';
+    var gap = x - prevX;
+    
+    if (i === 0) {
+      result = s;
+    } else {
+      // 判断是否应该直接连接（无分隔符）
+      // 时间数字和冒号应该直接连接: "19" + "：" + "06" => "19：06"
+      var isTimeDigit = /^[\d：:]+$/.test(s);
+      var prevIsTimeDigit = /^[\d：:~～\-—]+$/.test(prevStr);
+      
+      if (isTimeDigit && prevIsTimeDigit) {
+        // 时间片段直接连接
+        result += s;
+      } else if (/\s$/.test(result) || /^\s/.test(s)) {
+        // 已有空格
+        result += s;
+      } else if (gap < 15 && (isTimeDigit || prevIsTimeDigit)) {
+        // 紧邻的时间片段
+        result += s;
+      } else {
+        // 用双空格分隔（表格列分隔）
+        result += '  ' + s;
+      }
+    }
+  }
+  return result.trim();
 }
 function parseDocx(buf) {
   if (typeof mammoth === 'undefined') { showToast('Word 解析库未加载，请检查网络'); return; }
@@ -3133,9 +3217,66 @@ function textToPrograms(text) {
   }
 
   // 策略2：时间+项目格式（表格型节目单）
+  // 预处理：将跨行内容合并到对应的时间行
+  // PDF表格中，长内容可能在时间行的上方或下方跨行
+  var timePattern0 = /^(\d{1,2}\s*[：:]\s*\d{2})/;
+  var mergedLines = [];
+  var pendingContent = []; // 暂存非时间非标题行（可能是跨行内容）
+  
+  for (var li = 0; li < lines.length; li++) {
+    var ln = lines[li];
+    if (!ln) continue;
+    var normLn = ln.replace(/\s*([：:])\s*/g, '$1').replace(/\s*(～|~)\s*/g, '$1');
+    var isTitle = /(?:准备|仪式|流程|环节|休息|晚宴|午宴|开始)(?:\s*[（(].*[)）])?\s*$/.test(normLn) &&
+                  !timePattern0.test(normLn);
+    var isHeader = /^(?:时间|项目|内容|备注|新郎|新娘|举行)/.test(normLn);
+    
+    if (timePattern0.test(ln)) {
+      // 时间行：如果有暂存的前置内容，合并为内容前缀
+      if (pendingContent.length > 0) {
+        // 暂存内容可能是这一行的内容列的前半部分
+        // 但也可能是上一个时间行的内容后半部分
+        // 策略：如果上一行也是时间行，则暂存内容归上一行；否则归当前行
+        if (mergedLines.length > 0 && timePattern0.test(mergedLines[mergedLines.length - 1])) {
+          mergedLines[mergedLines.length - 1] = mergedLines[mergedLines.length - 1] + '  ' + pendingContent.join('  ');
+        } else {
+          // 归当前行，作为内容后缀（将在后面追加）
+          ln = ln + '  ' + pendingContent.join('  ');
+        }
+        pendingContent = [];
+      }
+      mergedLines.push(ln);
+    } else if (isTitle || isHeader) {
+      // 标题/表头行：如果有暂存内容，先提交
+      if (pendingContent.length > 0) {
+        if (mergedLines.length > 0 && timePattern0.test(mergedLines[mergedLines.length - 1])) {
+          mergedLines[mergedLines.length - 1] = mergedLines[mergedLines.length - 1] + '  ' + pendingContent.join('  ');
+        } else {
+          mergedLines = mergedLines.concat(pendingContent);
+        }
+        pendingContent = [];
+      }
+      mergedLines.push(ln);
+    } else {
+      // 非时间非标题行：暂存为跨行内容
+      pendingContent.push(ln);
+    }
+  }
+  // 处理末尾暂存内容
+  if (pendingContent.length > 0) {
+    if (mergedLines.length > 0 && timePattern0.test(mergedLines[mergedLines.length - 1])) {
+      mergedLines[mergedLines.length - 1] = mergedLines[mergedLines.length - 1] + '  ' + pendingContent.join('  ');
+    } else {
+      mergedLines = mergedLines.concat(pendingContent);
+    }
+  }
+  lines = mergedLines;
+
   lines.forEach(function(line) {
-    // 跳过纯分组标题（如"开场前的准备（16:30～19:00）"、"晚宴仪式"）
-    if (/^[^\d]{2,}(?:准备|仪式|流程|环节|休息|晚宴|午宴)[^\d]*$/.test(line) && !timePattern.test(line)) {
+    var normalizedLine = line.replace(/\s*([：:])\s*/g, '$1').replace(/\s*(～|~)\s*/g, '$1');
+    var isGroupTitle = /(?:准备|仪式|流程|环节|休息|晚宴|午宴|开始)(?:\s*[（(].*[)）])?\s*$/.test(normalizedLine) &&
+                       !timePattern0.test(normalizedLine);
+    if (/^(?:时间|项目|内容|备注|新郎|新娘|举行)/.test(normalizedLine) || isGroupTitle) {
       if (cur) {
         cur.notes = (cur.notes ? cur.notes + '\n' : '') + '【' + line + '】';
       }
@@ -3147,15 +3288,12 @@ function textToPrograms(text) {
       var timeStr = tm[1].replace(/\s/g, '') + (tm[2] ? '~' + tm[2].replace(/\s/g, '') : '');
       var rest = (tm[3] || '').trim();
 
-      // 从剩余文本分离项目名和内容
-      // 尝试用 2+空格 / 制表符分隔（表格转文本的特征）
       var parts = rest.split(/\s{2,}|\t/);
       var name = '', notes = '';
       if (parts.length >= 2) {
         name = parts[0].trim();
         notes = parts.slice(1).join(' ').trim();
       } else {
-        // 尝试用第一个中文标点分隔
         var firstPunct = rest.search(/[。，,；;：:!！?？]/);
         if (firstPunct > 1 && firstPunct < 20) {
           name = rest.substring(0, firstPunct).trim();
@@ -3175,14 +3313,11 @@ function textToPrograms(text) {
         useChannels: []
       };
     } else if (cur) {
-      // 无时间模式的续行，追加到当前节目
       if (/音乐|music|cue|节点|切入|前奏|间奏|副歌/i.test(line)) {
         cur.musicCue = cur.musicCue ? cur.musicCue + '\n' + line : line;
       } else {
         cur.notes = cur.notes ? cur.notes + '\n' + line : line;
       }
-    } else {
-      cur = { name: line, duration: 0, notes: '', musicCue: '', status: 'pending', useChannels: [] };
     }
   });
   if (cur) programs.push(cur);
