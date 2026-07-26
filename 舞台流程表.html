@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="舞台流程表">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#000000">
+  <title>舞台流程表</title>
+  <!-- 导出PDF/Word 前端库（仅导出时使用，离线时自动降级） -->
+  <script defer src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+  <!-- 拖拽排序库 SortableJS (内联，支持离线) -->
+<script>/*! Sortable 1.15.0 - MIT | git://github.com/SortableJS/Sortable.git */
+!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t=t||self).Sortable=e()}(this,function(){"use strict";function e(e,t){var n,o=Object.keys(e);return Object.getOwnPropertySymbols&&(n=Object.getOwnPropertySymbols(e),t&&(n=n.filter(function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable})),o.push.apply(o,n)),o}function M(o){for(var t=1;t<arguments.length;t++){var i=null!=arguments[t]?arguments[t]:{};t%2?e(Object(i),!0).forEach(function(t){var e,n;e=o,t=i[n=t],n in e?Object.defineProperty(e,n,{value:t,enumerable:!0,configurable:!0,writable:!0}):e[n]=t}):Object.getOwnPropertyDescriptors?Object.defineProperties(o,Object.getOwnPropertyDescriptors(i)):e(Object(i)).forEach(function(t){Object.defineProperty(o,t,Object.getOwnPropertyDescriptor(i,t))})}return o}function o(t){return(o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function a(){return(a=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var n,o=arguments[e];for(n in o)Object.prototype.hasOwnProperty.call(o,n)&&(t[n]=o[n])}return t}).apply(this,arguments)}function i(t,e){if(null==t)return{};var n,o=function(t,e){if(null==t)return{};for(var n,o={},i=Object.keys(t),r=0;r<i.length;r++)n=i[r],0<=e.indexOf(n)||(o[n]=t[n]);return o}(t,e);if(Object.getOwnPropertySymbols)for(var i=Object.getOwnPropertySymbols(t),r=0;r<i.length;r++)n=i[r],0<=e.indexOf(n)||Object.prototype.propertyIsEnumerable.call(t,n)&&(o[n]=t[n]);return o}function r(t){return function(t){if(Array.isArray(t))return l(t)}(t)||function(t){if("undefined"!=typeof Symbol&&null!=t[Symbol.iterator]||null!=t["@@iterator"])return Array.from(t)}(t)||function(t,e){if(t){if("string"==typeof t)return l(t,e);var n=Object.prototype.toString.call(t).slice(8,-1);return"Map"===(n="Object"===n&&t.constructor?t.constructor.name:n)||"Set"===n?Array.from(t):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?l(t,e):void 0}}(t)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function l(t,e){(null==e||e>t.length)&&(e=t.length);for(var n=0,o=new Array(e);n<e;n++)o[n]=t[n];return o}function t(t){if("undefined"!=typeof window&&window.navigator)return!!navigator.userAgent.match(t)}var y=t(/(?:Trident.*rv[ :]?11\.|msie|iemobile|Windows Phone)/i),w=t(/Edge/i),s=t(/firefox/i),u=t(/safari/i)&&!t(/chrome/i)&&!t(/android/i),n=t(/iP(ad|od|hone)/i),c=t(/chrome/i)&&t(/android/i),d={capture:!1,passive:!1};function h(t,e,n){t.addEventListener(e,n,!y&&d)}function f(t,e,n){t.removeEventListener(e,n,!y&&d)}function p(t,e){if(e&&(">"===e[0]&&(e=e.substring(1)),t))try{if(t.matches)return t.matches(e);if(t.msMatchesSelector)return t.msMatchesSelector(e);if(t.webkitMatchesSelector)return t.webkitMatchesSelector(e)}catch(t){return}}function N(t,e,n,o){if(t){n=n||document;do{if(null!=e&&(">"!==e[0]||t.parentNode===n)&&p(t,e)||o&&t===n)return t}while(t!==n&&(t=(i=t).host&&i!==document&&i.host.nodeType?i.host:i.parentNode))}var i;return null}var g,m=/\s+/g;function I(t,e,n){var o;t&&e&&(t.classList?t.classList[n?"add":"remove"](e):(o=(" "+t.className+" ").replace(m," ").replace(" "+e+" "," "),t.className=(o+(n?" "+e:"")).replace(m," ")))}function P(t,e,n){var o=t&&t.style;if(o){if(void 0===n)return document.defaultView&&document.defaultView.getComputedStyle?n=document.defaultView.getComputedStyle(t,""):t.currentStyle&&(n=t.currentStyle),void 0===e?n:n[e];o[e=!(e in o||-1!==e.indexOf("webkit"))?"-webkit-"+e:e]=n+("string"==typeof n?"":"px")}}function v(t,e){var n="";if("string"==typeof t)n=t;else do{var o=P(t,"transform")}while(o&&"none"!==o&&(n=o+" "+n),!e&&(t=t.parentNode));var i=window.DOMMatrix||window.WebKitCSSMatrix||window.CSSMatrix||window.MSCSSMatrix;return i&&new i(n)}function b(t,e,n){if(t){var o=t.getElementsByTagName(e),i=0,r=o.length;if(n)for(;i<r;i++)n(o[i],i);return o}return[]}function O(){var t=document.scrollingElement;return t||document.documentElement}function k(t,e,n,o,i){if(t.getBoundingClientRect||t===window){var r,a,l,s,c,u,d=t!==window&&t.parentNode&&t!==O()?(a=(r=t.getBoundingClientRect()).top,l=r.left,s=r.bottom,c=r.right,u=r.height,r.width):(l=a=0,s=window.innerHeight,c=window.innerWidth,u=window.innerHeight,window.innerWidth);if((e||n)&&t!==window&&(i=i||t.parentNode,!y))do{if(i&&i.getBoundingClientRect&&("none"!==P(i,"transform")||n&&"static"!==P(i,"position"))){var h=i.getBoundingClientRect();a-=h.top+parseInt(P(i,"border-top-width")),l-=h.left+parseInt(P(i,"border-left-width")),s=a+r.height,c=l+r.width;break}}while(i=i.parentNode);return o&&t!==window&&(o=(e=v(i||t))&&e.a,t=e&&e.d,e&&(s=(a/=t)+(u/=t),c=(l/=o)+(d/=o))),{top:a,left:l,bottom:s,right:c,width:d,height:u}}}function R(t,e,n){for(var o=A(t,!0),i=k(t)[e];o;){var r=k(o)[n];if(!("top"===n||"left"===n?r<=i:i<=r))return o;if(o===O())break;o=A(o,!1)}return!1}function X(t,e,n,o){for(var i=0,r=0,a=t.children;r<a.length;){if("none"!==a[r].style.display&&a[r]!==Bt.ghost&&(o||a[r]!==Bt.dragged)&&N(a[r],n.draggable,t,!1)){if(i===e)return a[r];i++}r++}return null}function Y(t,e){for(var n=t.lastElementChild;n&&(n===Bt.ghost||"none"===P(n,"display")||e&&!p(n,e));)n=n.previousElementSibling;return n||null}function B(t,e){var n=0;if(!t||!t.parentNode)return-1;for(;t=t.previousElementSibling;)"TEMPLATE"===t.nodeName.toUpperCase()||t===Bt.clone||e&&!p(t,e)||n++;return n}function E(t){var e=0,n=0,o=O();if(t)do{var i=v(t),r=i.a,i=i.d}while(e+=t.scrollLeft*r,n+=t.scrollTop*i,t!==o&&(t=t.parentNode));return[e,n]}function A(t,e){if(!t||!t.getBoundingClientRect)return O();var n=t,o=!1;do{if(n.clientWidth<n.scrollWidth||n.clientHeight<n.scrollHeight){var i=P(n);if(n.clientWidth<n.scrollWidth&&("auto"==i.overflowX||"scroll"==i.overflowX)||n.clientHeight<n.scrollHeight&&("auto"==i.overflowY||"scroll"==i.overflowY)){if(!n.getBoundingClientRect||n===document.body)return O();if(o||e)return n;o=!0}}}while(n=n.parentNode);return O()}function D(t,e){return Math.round(t.top)===Math.round(e.top)&&Math.round(t.left)===Math.round(e.left)&&Math.round(t.height)===Math.round(e.height)&&Math.round(t.width)===Math.round(e.width)}function S(e,n){return function(){var t;g||(1===(t=arguments).length?e.call(this,t[0]):e.apply(this,t),g=setTimeout(function(){g=void 0},n))}}function F(t,e,n){t.scrollLeft+=e,t.scrollTop+=n}function _(t){var e=window.Polymer,n=window.jQuery||window.Zepto;return e&&e.dom?e.dom(t).cloneNode(!0):n?n(t).clone(!0)[0]:t.cloneNode(!0)}function C(t,e){P(t,"position","absolute"),P(t,"top",e.top),P(t,"left",e.left),P(t,"width",e.width),P(t,"height",e.height)}function T(t){P(t,"position",""),P(t,"top",""),P(t,"left",""),P(t,"width",""),P(t,"height","")}var j="Sortable"+(new Date).getTime();function x(){var e,o=[];return{captureAnimationState:function(){o=[],this.options.animation&&[].slice.call(this.el.children).forEach(function(t){var e,n;"none"!==P(t,"display")&&t!==Bt.ghost&&(o.push({target:t,rect:k(t)}),e=M({},o[o.length-1].rect),!t.thisAnimationDuration||(n=v(t,!0))&&(e.top-=n.f,e.left-=n.e),t.fromRect=e)})},addAnimationState:function(t){o.push(t)},removeAnimationState:function(t){o.splice(function(t,e){for(var n in t)if(t.hasOwnProperty(n))for(var o in e)if(e.hasOwnProperty(o)&&e[o]===t[n][o])return Number(n);return-1}(o,{target:t}),1)},animateAll:function(t){var c=this;if(!this.options.animation)return clearTimeout(e),void("function"==typeof t&&t());var u=!1,d=0;o.forEach(function(t){var e=0,n=t.target,o=n.fromRect,i=k(n),r=n.prevFromRect,a=n.prevToRect,l=t.rect,s=v(n,!0);s&&(i.top-=s.f,i.left-=s.e),n.toRect=i,n.thisAnimationDuration&&D(r,i)&&!D(o,i)&&(l.top-i.top)/(l.left-i.left)==(o.top-i.top)/(o.left-i.left)&&(t=l,s=r,r=a,a=c.options,e=Math.sqrt(Math.pow(s.top-t.top,2)+Math.pow(s.left-t.left,2))/Math.sqrt(Math.pow(s.top-r.top,2)+Math.pow(s.left-r.left,2))*a.animation),D(i,o)||(n.prevFromRect=o,n.prevToRect=i,e=e||c.options.animation,c.animate(n,l,i,e)),e&&(u=!0,d=Math.max(d,e),clearTimeout(n.animationResetTimer),n.animationResetTimer=setTimeout(function(){n.animationTime=0,n.prevFromRect=null,n.fromRect=null,n.prevToRect=null,n.thisAnimationDuration=null},e),n.thisAnimationDuration=e)}),clearTimeout(e),u?e=setTimeout(function(){"function"==typeof t&&t()},d):"function"==typeof t&&t(),o=[]},animate:function(t,e,n,o){var i,r;o&&(P(t,"transition",""),P(t,"transform",""),i=(r=v(this.el))&&r.a,r=r&&r.d,i=(e.left-n.left)/(i||1),r=(e.top-n.top)/(r||1),t.animatingX=!!i,t.animatingY=!!r,P(t,"transform","translate3d("+i+"px,"+r+"px,0)"),this.forRepaintDummy=t.offsetWidth,P(t,"transition","transform "+o+"ms"+(this.options.easing?" "+this.options.easing:"")),P(t,"transform","translate3d(0,0,0)"),"number"==typeof t.animated&&clearTimeout(t.animated),t.animated=setTimeout(function(){P(t,"transition",""),P(t,"transform",""),t.animated=!1,t.animatingX=!1,t.animatingY=!1},o))}}}var H=[],L={initializeByDefault:!0},K={mount:function(e){for(var t in L)!L.hasOwnProperty(t)||t in e||(e[t]=L[t]);H.forEach(function(t){if(t.pluginName===e.pluginName)throw"Sortable: Cannot mount plugin ".concat(e.pluginName," more than once")}),H.push(e)},pluginEvent:function(e,n,o){var t=this;this.eventCanceled=!1,o.cancel=function(){t.eventCanceled=!0};var i=e+"Global";H.forEach(function(t){n[t.pluginName]&&(n[t.pluginName][i]&&n[t.pluginName][i](M({sortable:n},o)),n.options[t.pluginName]&&n[t.pluginName][e]&&n[t.pluginName][e](M({sortable:n},o)))})},initializePlugins:function(n,o,i,t){for(var e in H.forEach(function(t){var e=t.pluginName;(n.options[e]||t.initializeByDefault)&&((t=new t(n,o,n.options)).sortable=n,t.options=n.options,n[e]=t,a(i,t.defaults))}),n.options){var r;n.options.hasOwnProperty(e)&&(void 0!==(r=this.modifyOption(n,e,n.options[e]))&&(n.options[e]=r))}},getEventProperties:function(e,n){var o={};return H.forEach(function(t){"function"==typeof t.eventProperties&&a(o,t.eventProperties.call(n[t.pluginName],e))}),o},modifyOption:function(e,n,o){var i;return H.forEach(function(t){e[t.pluginName]&&t.optionListeners&&"function"==typeof t.optionListeners[n]&&(i=t.optionListeners[n].call(e[t.pluginName],o))}),i}};function W(t){var e=t.sortable,n=t.rootEl,o=t.name,i=t.targetEl,r=t.cloneEl,a=t.toEl,l=t.fromEl,s=t.oldIndex,c=t.newIndex,u=t.oldDraggableIndex,d=t.newDraggableIndex,h=t.originalEvent,f=t.putSortable,p=t.extraEventProperties;if(e=e||n&&n[j]){var g,m=e.options,t="on"+o.charAt(0).toUpperCase()+o.substr(1);!window.CustomEvent||y||w?(g=document.createEvent("Event")).initEvent(o,!0,!0):g=new CustomEvent(o,{bubbles:!0,cancelable:!0}),g.to=a||n,g.from=l||n,g.item=i||n,g.clone=r,g.oldIndex=s,g.newIndex=c,g.oldDraggableIndex=u,g.newDraggableIndex=d,g.originalEvent=h,g.pullMode=f?f.lastPutMode:void 0;var v,b=M(M({},p),K.getEventProperties(o,e));for(v in b)g[v]=b[v];n&&n.dispatchEvent(g),m[t]&&m[t].call(e,g)}}function z(t,e){var n=(o=2<arguments.length&&void 0!==arguments[2]?arguments[2]:{}).evt,o=i(o,G);K.pluginEvent.bind(Bt)(t,e,M({dragEl:q,parentEl:V,ghostEl:Z,rootEl:$,nextEl:Q,lastDownEl:J,cloneEl:tt,cloneHidden:et,dragStarted:pt,putSortable:lt,activeSortable:Bt.active,originalEvent:n,oldIndex:nt,oldDraggableIndex:it,newIndex:ot,newDraggableIndex:rt,hideGhostForTarget:kt,unhideGhostForTarget:Rt,cloneNowHidden:function(){et=!0},cloneNowShown:function(){et=!1},dispatchSortableEvent:function(t){U({sortable:e,name:t,originalEvent:n})}},o))}var G=["evt"];function U(t){W(M({putSortable:lt,cloneEl:tt,targetEl:q,rootEl:$,oldIndex:nt,oldDraggableIndex:it,newIndex:ot,newDraggableIndex:rt},t))}var q,V,Z,$,Q,J,tt,et,nt,ot,it,rt,at,lt,st,ct,ut,dt,ht,ft,pt,gt,mt,vt,bt,yt=!1,wt=!1,Et=[],Dt=!1,St=!1,_t=[],Ct=!1,Tt=[],xt="undefined"!=typeof document,Ot=n,At=w||y?"cssFloat":"float",Mt=xt&&!c&&!n&&"draggable"in document.createElement("div"),Nt=function(){if(xt){if(y)return!1;var t=document.createElement("x");return t.style.cssText="pointer-events:auto","auto"===t.style.pointerEvents}}(),It=function(t,e){var n=P(t),o=parseInt(n.width)-parseInt(n.paddingLeft)-parseInt(n.paddingRight)-parseInt(n.borderLeftWidth)-parseInt(n.borderRightWidth),i=X(t,0,e),r=X(t,1,e),a=i&&P(i),l=r&&P(r),s=a&&parseInt(a.marginLeft)+parseInt(a.marginRight)+k(i).width,t=l&&parseInt(l.marginLeft)+parseInt(l.marginRight)+k(r).width;if("flex"===n.display)return"column"===n.flexDirection||"column-reverse"===n.flexDirection?"vertical":"horizontal";if("grid"===n.display)return n.gridTemplateColumns.split(" ").length<=1?"vertical":"horizontal";if(i&&a.float&&"none"!==a.float){e="left"===a.float?"left":"right";return!r||"both"!==l.clear&&l.clear!==e?"horizontal":"vertical"}return i&&("block"===a.display||"flex"===a.display||"table"===a.display||"grid"===a.display||o<=s&&"none"===n[At]||r&&"none"===n[At]&&o<s+t)?"vertical":"horizontal"},Pt=function(t){function l(r,a){return function(t,e,n,o){var i=t.options.group.name&&e.options.group.name&&t.options.group.name===e.options.group.name;if(null==r&&(a||i))return!0;if(null==r||!1===r)return!1;if(a&&"clone"===r)return r;if("function"==typeof r)return l(r(t,e,n,o),a)(t,e,n,o);e=(a?t:e).options.group.name;return!0===r||"string"==typeof r&&r===e||r.join&&-1<r.indexOf(e)}}var e={},n=t.group;n&&"object"==o(n)||(n={name:n}),e.name=n.name,e.checkPull=l(n.pull,!0),e.checkPut=l(n.put),e.revertClone=n.revertClone,t.group=e},kt=function(){!Nt&&Z&&P(Z,"display","none")},Rt=function(){!Nt&&Z&&P(Z,"display","")};xt&&!c&&document.addEventListener("click",function(t){if(wt)return t.preventDefault(),t.stopPropagation&&t.stopPropagation(),t.stopImmediatePropagation&&t.stopImmediatePropagation(),wt=!1},!0);function Xt(t){if(q){t=t.touches?t.touches[0]:t;var e=(i=t.clientX,r=t.clientY,Et.some(function(t){var e=t[j].options.emptyInsertThreshold;if(e&&!Y(t)){var n=k(t),o=i>=n.left-e&&i<=n.right+e,e=r>=n.top-e&&r<=n.bottom+e;return o&&e?a=t:void 0}}),a);if(e){var n,o={};for(n in t)t.hasOwnProperty(n)&&(o[n]=t[n]);o.target=o.rootEl=e,o.preventDefault=void 0,o.stopPropagation=void 0,e[j]._onDragOver(o)}}var i,r,a}function Yt(t){q&&q.parentNode[j]._isOutsideThisEl(t.target)}function Bt(t,e){if(!t||!t.nodeType||1!==t.nodeType)throw"Sortable: `el` must be an HTMLElement, not ".concat({}.toString.call(t));this.el=t,this.options=e=a({},e),t[j]=this;var n,o,i={group:null,sort:!0,disabled:!1,store:null,handle:null,draggable:/^[uo]l$/i.test(t.nodeName)?">li":">*",swapThreshold:1,invertSwap:!1,invertedSwapThreshold:null,removeCloneOnHide:!0,direction:function(){return It(t,this.options)},ghostClass:"sortable-ghost",chosenClass:"sortable-chosen",dragClass:"sortable-drag",ignore:"a, img",filter:null,preventOnFilter:!0,animation:0,easing:null,setData:function(t,e){t.setData("Text",e.textContent)},dropBubble:!1,dragoverBubble:!1,dataIdAttr:"data-id",delay:0,delayOnTouchOnly:!1,touchStartThreshold:(Number.parseInt?Number:window).parseInt(window.devicePixelRatio,10)||1,forceFallback:!1,fallbackClass:"sortable-fallback",fallbackOnBody:!1,fallbackTolerance:0,fallbackOffset:{x:0,y:0},supportPointer:!1!==Bt.supportPointer&&"PointerEvent"in window&&!u,emptyInsertThreshold:5};for(n in K.initializePlugins(this,t,i),i)n in e||(e[n]=i[n]);for(o in Pt(e),this)"_"===o.charAt(0)&&"function"==typeof this[o]&&(this[o]=this[o].bind(this));this.nativeDraggable=!e.forceFallback&&Mt,this.nativeDraggable&&(this.options.touchStartThreshold=1),e.supportPointer?h(t,"pointerdown",this._onTapStart):(h(t,"mousedown",this._onTapStart),h(t,"touchstart",this._onTapStart)),this.nativeDraggable&&(h(t,"dragover",this),h(t,"dragenter",this)),Et.push(this.el),e.store&&e.store.get&&this.sort(e.store.get(this)||[]),a(this,x())}function Ft(t,e,n,o,i,r,a,l){var s,c,u=t[j],d=u.options.onMove;return!window.CustomEvent||y||w?(s=document.createEvent("Event")).initEvent("move",!0,!0):s=new CustomEvent("move",{bubbles:!0,cancelable:!0}),s.to=e,s.from=t,s.dragged=n,s.draggedRect=o,s.related=i||e,s.relatedRect=r||k(e),s.willInsertAfter=l,s.originalEvent=a,t.dispatchEvent(s),c=d?d.call(u,s,a):c}function jt(t){t.draggable=!1}function Ht(){Ct=!1}function Lt(t){return setTimeout(t,0)}function Kt(t){return clearTimeout(t)}Bt.prototype={constructor:Bt,_isOutsideThisEl:function(t){this.el.contains(t)||t===this.el||(gt=null)},_getDirection:function(t,e){return"function"==typeof this.options.direction?this.options.direction.call(this,t,e,q):this.options.direction},_onTapStart:function(e){if(e.cancelable){var n=this,o=this.el,t=this.options,i=t.preventOnFilter,r=e.type,a=e.touches&&e.touches[0]||e.pointerType&&"touch"===e.pointerType&&e,l=(a||e).target,s=e.target.shadowRoot&&(e.path&&e.path[0]||e.composedPath&&e.composedPath()[0])||l,c=t.filter;if(!function(t){Tt.length=0;var e=t.getElementsByTagName("input"),n=e.length;for(;n--;){var o=e[n];o.checked&&Tt.push(o)}}(o),!q&&!(/mousedown|pointerdown/.test(r)&&0!==e.button||t.disabled)&&!s.isContentEditable&&(this.nativeDraggable||!u||!l||"SELECT"!==l.tagName.toUpperCase())&&!((l=N(l,t.draggable,o,!1))&&l.animated||J===l)){if(nt=B(l),it=B(l,t.draggable),"function"==typeof c){if(c.call(this,e,l,this))return U({sortable:n,rootEl:s,name:"filter",targetEl:l,toEl:o,fromEl:o}),z("filter",n,{evt:e}),void(i&&e.cancelable&&e.preventDefault())}else if(c=c&&c.split(",").some(function(t){if(t=N(s,t.trim(),o,!1))return U({sortable:n,rootEl:t,name:"filter",targetEl:l,fromEl:o,toEl:o}),z("filter",n,{evt:e}),!0}))return void(i&&e.cancelable&&e.preventDefault());t.handle&&!N(s,t.handle,o,!1)||this._prepareDragStart(e,a,l)}}},_prepareDragStart:function(t,e,n){var o,i=this,r=i.el,a=i.options,l=r.ownerDocument;n&&!q&&n.parentNode===r&&(o=k(n),$=r,V=(q=n).parentNode,Q=q.nextSibling,J=n,at=a.group,st={target:Bt.dragged=q,clientX:(e||t).clientX,clientY:(e||t).clientY},ht=st.clientX-o.left,ft=st.clientY-o.top,this._lastX=(e||t).clientX,this._lastY=(e||t).clientY,q.style["will-change"]="all",o=function(){z("delayEnded",i,{evt:t}),Bt.eventCanceled?i._onDrop():(i._disableDelayedDragEvents(),!s&&i.nativeDraggable&&(q.draggable=!0),i._triggerDragStart(t,e),U({sortable:i,name:"choose",originalEvent:t}),I(q,a.chosenClass,!0))},a.ignore.split(",").forEach(function(t){b(q,t.trim(),jt)}),h(l,"dragover",Xt),h(l,"mousemove",Xt),h(l,"touchmove",Xt),h(l,"mouseup",i._onDrop),h(l,"touchend",i._onDrop),h(l,"touchcancel",i._onDrop),s&&this.nativeDraggable&&(this.options.touchStartThreshold=4,q.draggable=!0),z("delayStart",this,{evt:t}),!a.delay||a.delayOnTouchOnly&&!e||this.nativeDraggable&&(w||y)?o():Bt.eventCanceled?this._onDrop():(h(l,"mouseup",i._disableDelayedDrag),h(l,"touchend",i._disableDelayedDrag),h(l,"touchcancel",i._disableDelayedDrag),h(l,"mousemove",i._delayedDragTouchMoveHandler),h(l,"touchmove",i._delayedDragTouchMoveHandler),a.supportPointer&&h(l,"pointermove",i._delayedDragTouchMoveHandler),i._dragStartTimer=setTimeout(o,a.delay)))},_delayedDragTouchMoveHandler:function(t){t=t.touches?t.touches[0]:t;Math.max(Math.abs(t.clientX-this._lastX),Math.abs(t.clientY-this._lastY))>=Math.floor(this.options.touchStartThreshold/(this.nativeDraggable&&window.devicePixelRatio||1))&&this._disableDelayedDrag()},_disableDelayedDrag:function(){q&&jt(q),clearTimeout(this._dragStartTimer),this._disableDelayedDragEvents()},_disableDelayedDragEvents:function(){var t=this.el.ownerDocument;f(t,"mouseup",this._disableDelayedDrag),f(t,"touchend",this._disableDelayedDrag),f(t,"touchcancel",this._disableDelayedDrag),f(t,"mousemove",this._delayedDragTouchMoveHandler),f(t,"touchmove",this._delayedDragTouchMoveHandler),f(t,"pointermove",this._delayedDragTouchMoveHandler)},_triggerDragStart:function(t,e){e=e||"touch"==t.pointerType&&t,!this.nativeDraggable||e?this.options.supportPointer?h(document,"pointermove",this._onTouchMove):h(document,e?"touchmove":"mousemove",this._onTouchMove):(h(q,"dragend",this),h($,"dragstart",this._onDragStart));try{document.selection?Lt(function(){document.selection.empty()}):window.getSelection().removeAllRanges()}catch(t){}},_dragStarted:function(t,e){var n;yt=!1,$&&q?(z("dragStarted",this,{evt:e}),this.nativeDraggable&&h(document,"dragover",Yt),n=this.options,t||I(q,n.dragClass,!1),I(q,n.ghostClass,!0),Bt.active=this,t&&this._appendGhost(),U({sortable:this,name:"start",originalEvent:e})):this._nulling()},_emulateDragOver:function(){if(ct){this._lastX=ct.clientX,this._lastY=ct.clientY,kt();for(var t=document.elementFromPoint(ct.clientX,ct.clientY),e=t;t&&t.shadowRoot&&(t=t.shadowRoot.elementFromPoint(ct.clientX,ct.clientY))!==e;)e=t;if(q.parentNode[j]._isOutsideThisEl(t),e)do{if(e[j])if(e[j]._onDragOver({clientX:ct.clientX,clientY:ct.clientY,target:t,rootEl:e})&&!this.options.dragoverBubble)break}while(e=(t=e).parentNode);Rt()}},_onTouchMove:function(t){if(st){var e=this.options,n=e.fallbackTolerance,o=e.fallbackOffset,i=t.touches?t.touches[0]:t,r=Z&&v(Z,!0),a=Z&&r&&r.a,l=Z&&r&&r.d,e=Ot&&bt&&E(bt),a=(i.clientX-st.clientX+o.x)/(a||1)+(e?e[0]-_t[0]:0)/(a||1),l=(i.clientY-st.clientY+o.y)/(l||1)+(e?e[1]-_t[1]:0)/(l||1);if(!Bt.active&&!yt){if(n&&Math.max(Math.abs(i.clientX-this._lastX),Math.abs(i.clientY-this._lastY))<n)return;this._onDragStart(t,!0)}Z&&(r?(r.e+=a-(ut||0),r.f+=l-(dt||0)):r={a:1,b:0,c:0,d:1,e:a,f:l},r="matrix(".concat(r.a,",").concat(r.b,",").concat(r.c,",").concat(r.d,",").concat(r.e,",").concat(r.f,")"),P(Z,"webkitTransform",r),P(Z,"mozTransform",r),P(Z,"msTransform",r),P(Z,"transform",r),ut=a,dt=l,ct=i),t.cancelable&&t.preventDefault()}},_appendGhost:function(){if(!Z){var t=this.options.fallbackOnBody?document.body:$,e=k(q,!0,Ot,!0,t),n=this.options;if(Ot){for(bt=t;"static"===P(bt,"position")&&"none"===P(bt,"transform")&&bt!==document;)bt=bt.parentNode;bt!==document.body&&bt!==document.documentElement?(bt===document&&(bt=O()),e.top+=bt.scrollTop,e.left+=bt.scrollLeft):bt=O(),_t=E(bt)}I(Z=q.cloneNode(!0),n.ghostClass,!1),I(Z,n.fallbackClass,!0),I(Z,n.dragClass,!0),P(Z,"transition",""),P(Z,"transform",""),P(Z,"box-sizing","border-box"),P(Z,"margin",0),P(Z,"top",e.top),P(Z,"left",e.left),P(Z,"width",e.width),P(Z,"height",e.height),P(Z,"opacity","0.8"),P(Z,"position",Ot?"absolute":"fixed"),P(Z,"zIndex","100000"),P(Z,"pointerEvents","none"),Bt.ghost=Z,t.appendChild(Z),P(Z,"transform-origin",ht/parseInt(Z.style.width)*100+"% "+ft/parseInt(Z.style.height)*100+"%")}},_onDragStart:function(t,e){var n=this,o=t.dataTransfer,i=n.options;z("dragStart",this,{evt:t}),Bt.eventCanceled?this._onDrop():(z("setupClone",this),Bt.eventCanceled||((tt=_(q)).removeAttribute("id"),tt.draggable=!1,tt.style["will-change"]="",this._hideClone(),I(tt,this.options.chosenClass,!1),Bt.clone=tt),n.cloneId=Lt(function(){z("clone",n),Bt.eventCanceled||(n.options.removeCloneOnHide||$.insertBefore(tt,q),n._hideClone(),U({sortable:n,name:"clone"}))}),e||I(q,i.dragClass,!0),e?(wt=!0,n._loopId=setInterval(n._emulateDragOver,50)):(f(document,"mouseup",n._onDrop),f(document,"touchend",n._onDrop),f(document,"touchcancel",n._onDrop),o&&(o.effectAllowed="move",i.setData&&i.setData.call(n,o,q)),h(document,"drop",n),P(q,"transform","translateZ(0)")),yt=!0,n._dragStartId=Lt(n._dragStarted.bind(n,e,t)),h(document,"selectstart",n),pt=!0,u&&P(document.body,"user-select","none"))},_onDragOver:function(n){var o,i,r,t,a=this.el,l=n.target,e=this.options,s=e.group,c=Bt.active,u=at===s,d=e.sort,h=lt||c,f=this,p=!1;if(!Ct){if(void 0!==n.preventDefault&&n.cancelable&&n.preventDefault(),l=N(l,e.draggable,a,!0),T("dragOver"),Bt.eventCanceled)return p;if(q.contains(n.target)||l.animated&&l.animatingX&&l.animatingY||f._ignoreWhileAnimating===l)return O(!1);if(wt=!1,c&&!e.disabled&&(u?d||(i=V!==$):lt===this||(this.lastPutMode=at.checkPull(this,c,q,n))&&s.checkPut(this,c,q,n))){if(r="vertical"===this._getDirection(n,l),o=k(q),T("dragOverValid"),Bt.eventCanceled)return p;if(i)return V=$,x(),this._hideClone(),T("revert"),Bt.eventCanceled||(Q?$.insertBefore(q,Q):$.appendChild(q)),O(!0);var g=Y(a,e.draggable);if(!g||function(t,e,n){n=k(Y(n.el,n.options.draggable));return e?t.clientX>n.right+10||t.clientX<=n.right&&t.clientY>n.bottom&&t.clientX>=n.left:t.clientX>n.right&&t.clientY>n.top||t.clientX<=n.right&&t.clientY>n.bottom+10}(n,r,this)&&!g.animated){if(g===q)return O(!1);if((l=g&&a===n.target?g:l)&&(w=k(l)),!1!==Ft($,a,q,o,l,w,n,!!l))return x(),g&&g.nextSibling?a.insertBefore(q,g.nextSibling):a.appendChild(q),V=a,A(),O(!0)}else if(g&&function(t,e,n){n=k(X(n.el,0,n.options,!0));return e?t.clientX<n.left-10||t.clientY<n.top&&t.clientX<n.right:t.clientY<n.top-10||t.clientY<n.bottom&&t.clientX<n.left}(n,r,this)){var m=X(a,0,e,!0);if(m===q)return O(!1);if(w=k(l=m),!1!==Ft($,a,q,o,l,w,n,!1))return x(),a.insertBefore(q,m),V=a,A(),O(!0)}else if(l.parentNode===a){var v,b,y,w=k(l),E=q.parentNode!==a,D=(D=q.animated&&q.toRect||o,C=l.animated&&l.toRect||w,S=(t=r)?D.left:D.top,s=t?D.right:D.bottom,g=t?D.width:D.height,m=t?C.left:C.top,D=t?C.right:C.bottom,C=t?C.width:C.height,!(S===m||s===D||S+g/2===m+C/2)),S=r?"top":"left",g=R(l,"top","top")||R(q,"top","top"),m=g?g.scrollTop:void 0;if(gt!==l&&(b=w[S],Dt=!1,St=!D&&e.invertSwap||E),0!==(v=function(t,e,n,o,i,r,a,l){var s=o?t.clientY:t.clientX,c=o?n.height:n.width,t=o?n.top:n.left,o=o?n.bottom:n.right,n=!1;if(!a)if(l&&vt<c*i){if(Dt=!Dt&&(1===mt?t+c*r/2<s:s<o-c*r/2)?!0:Dt)n=!0;else if(1===mt?s<t+vt:o-vt<s)return-mt}else if(t+c*(1-i)/2<s&&s<o-c*(1-i)/2)return function(t){return B(q)<B(t)?1:-1}(e);if((n=n||a)&&(s<t+c*r/2||o-c*r/2<s))return t+c/2<s?1:-1;return 0}(n,l,w,r,D?1:e.swapThreshold,null==e.invertedSwapThreshold?e.swapThreshold:e.invertedSwapThreshold,St,gt===l)))for(var _=B(q);(y=V.children[_-=v])&&("none"===P(y,"display")||y===Z););if(0===v||y===l)return O(!1);mt=v;var C=(gt=l).nextElementSibling,E=!1,D=Ft($,a,q,o,l,w,n,E=1===v);if(!1!==D)return 1!==D&&-1!==D||(E=1===D),Ct=!0,setTimeout(Ht,30),x(),E&&!C?a.appendChild(q):l.parentNode.insertBefore(q,E?C:l),g&&F(g,0,m-g.scrollTop),V=q.parentNode,void 0===b||St||(vt=Math.abs(b-k(l)[S])),A(),O(!0)}if(a.contains(q))return O(!1)}return!1}function T(t,e){z(t,f,M({evt:n,isOwner:u,axis:r?"vertical":"horizontal",revert:i,dragRect:o,targetRect:w,canSort:d,fromSortable:h,target:l,completed:O,onMove:function(t,e){return Ft($,a,q,o,t,k(t),n,e)},changed:A},e))}function x(){T("dragOverAnimationCapture"),f.captureAnimationState(),f!==h&&h.captureAnimationState()}function O(t){return T("dragOverCompleted",{insertion:t}),t&&(u?c._hideClone():c._showClone(f),f!==h&&(I(q,(lt||c).options.ghostClass,!1),I(q,e.ghostClass,!0)),lt!==f&&f!==Bt.active?lt=f:f===Bt.active&&lt&&(lt=null),h===f&&(f._ignoreWhileAnimating=l),f.animateAll(function(){T("dragOverAnimationComplete"),f._ignoreWhileAnimating=null}),f!==h&&(h.animateAll(),h._ignoreWhileAnimating=null)),(l===q&&!q.animated||l===a&&!l.animated)&&(gt=null),e.dragoverBubble||n.rootEl||l===document||(q.parentNode[j]._isOutsideThisEl(n.target),t||Xt(n)),!e.dragoverBubble&&n.stopPropagation&&n.stopPropagation(),p=!0}function A(){ot=B(q),rt=B(q,e.draggable),U({sortable:f,name:"change",toEl:a,newIndex:ot,newDraggableIndex:rt,originalEvent:n})}},_ignoreWhileAnimating:null,_offMoveEvents:function(){f(document,"mousemove",this._onTouchMove),f(document,"touchmove",this._onTouchMove),f(document,"pointermove",this._onTouchMove),f(document,"dragover",Xt),f(document,"mousemove",Xt),f(document,"touchmove",Xt)},_offUpEvents:function(){var t=this.el.ownerDocument;f(t,"mouseup",this._onDrop),f(t,"touchend",this._onDrop),f(t,"pointerup",this._onDrop),f(t,"touchcancel",this._onDrop),f(document,"selectstart",this)},_onDrop:function(t){var e=this.el,n=this.options;ot=B(q),rt=B(q,n.draggable),z("drop",this,{evt:t}),V=q&&q.parentNode,ot=B(q),rt=B(q,n.draggable),Bt.eventCanceled||(Dt=St=yt=!1,clearInterval(this._loopId),clearTimeout(this._dragStartTimer),Kt(this.cloneId),Kt(this._dragStartId),this.nativeDraggable&&(f(document,"drop",this),f(e,"dragstart",this._onDragStart)),this._offMoveEvents(),this._offUpEvents(),u&&P(document.body,"user-select",""),P(q,"transform",""),t&&(pt&&(t.cancelable&&t.preventDefault(),n.dropBubble||t.stopPropagation()),Z&&Z.parentNode&&Z.parentNode.removeChild(Z),($===V||lt&&"clone"!==lt.lastPutMode)&&tt&&tt.parentNode&&tt.parentNode.removeChild(tt),q&&(this.nativeDraggable&&f(q,"dragend",this),jt(q),q.style["will-change"]="",pt&&!yt&&I(q,(lt||this).options.ghostClass,!1),I(q,this.options.chosenClass,!1),U({sortable:this,name:"unchoose",toEl:V,newIndex:null,newDraggableIndex:null,originalEvent:t}),$!==V?(0<=ot&&(U({rootEl:V,name:"add",toEl:V,fromEl:$,originalEvent:t}),U({sortable:this,name:"remove",toEl:V,originalEvent:t}),U({rootEl:V,name:"sort",toEl:V,fromEl:$,originalEvent:t}),U({sortable:this,name:"sort",toEl:V,originalEvent:t})),lt&&lt.save()):ot!==nt&&0<=ot&&(U({sortable:this,name:"update",toEl:V,originalEvent:t}),U({sortable:this,name:"sort",toEl:V,originalEvent:t})),Bt.active&&(null!=ot&&-1!==ot||(ot=nt,rt=it),U({sortable:this,name:"end",toEl:V,originalEvent:t}),this.save())))),this._nulling()},_nulling:function(){z("nulling",this),$=q=V=Z=Q=tt=J=et=st=ct=pt=ot=rt=nt=it=gt=mt=lt=at=Bt.dragged=Bt.ghost=Bt.clone=Bt.active=null,Tt.forEach(function(t){t.checked=!0}),Tt.length=ut=dt=0},handleEvent:function(t){switch(t.type){case"drop":case"dragend":this._onDrop(t);break;case"dragenter":case"dragover":q&&(this._onDragOver(t),function(t){t.dataTransfer&&(t.dataTransfer.dropEffect="move");t.cancelable&&t.preventDefault()}(t));break;case"selectstart":t.preventDefault()}},toArray:function(){for(var t,e=[],n=this.el.children,o=0,i=n.length,r=this.options;o<i;o++)N(t=n[o],r.draggable,this.el,!1)&&e.push(t.getAttribute(r.dataIdAttr)||function(t){var e=t.tagName+t.className+t.src+t.href+t.textContent,n=e.length,o=0;for(;n--;)o+=e.charCodeAt(n);return o.toString(36)}(t));return e},sort:function(t,e){var n={},o=this.el;this.toArray().forEach(function(t,e){e=o.children[e];N(e,this.options.draggable,o,!1)&&(n[t]=e)},this),e&&this.captureAnimationState(),t.forEach(function(t){n[t]&&(o.removeChild(n[t]),o.appendChild(n[t]))}),e&&this.animateAll()},save:function(){var t=this.options.store;t&&t.set&&t.set(this)},closest:function(t,e){return N(t,e||this.options.draggable,this.el,!1)},option:function(t,e){var n=this.options;if(void 0===e)return n[t];var o=K.modifyOption(this,t,e);n[t]=void 0!==o?o:e,"group"===t&&Pt(n)},destroy:function(){z("destroy",this);var t=this.el;t[j]=null,f(t,"mousedown",this._onTapStart),f(t,"touchstart",this._onTapStart),f(t,"pointerdown",this._onTapStart),this.nativeDraggable&&(f(t,"dragover",this),f(t,"dragenter",this)),Array.prototype.forEach.call(t.querySelectorAll("[draggable]"),function(t){t.removeAttribute("draggable")}),this._onDrop(),this._disableDelayedDragEvents(),Et.splice(Et.indexOf(this.el),1),this.el=t=null},_hideClone:function(){et||(z("hideClone",this),Bt.eventCanceled||(P(tt,"display","none"),this.options.removeCloneOnHide&&tt.parentNode&&tt.parentNode.removeChild(tt),et=!0))},_showClone:function(t){"clone"===t.lastPutMode?et&&(z("showClone",this),Bt.eventCanceled||(q.parentNode!=$||this.options.group.revertClone?Q?$.insertBefore(tt,Q):$.appendChild(tt):$.insertBefore(tt,q),this.options.group.revertClone&&this.animate(q,tt),P(tt,"display",""),et=!1)):this._hideClone()}},xt&&h(document,"touchmove",function(t){(Bt.active||yt)&&t.cancelable&&t.preventDefault()}),Bt.utils={on:h,off:f,css:P,find:b,is:function(t,e){return!!N(t,e,t,!1)},extend:function(t,e){if(t&&e)for(var n in e)e.hasOwnProperty(n)&&(t[n]=e[n]);return t},throttle:S,closest:N,toggleClass:I,clone:_,index:B,nextTick:Lt,cancelNextTick:Kt,detectDirection:It,getChild:X},Bt.get=function(t){return t[j]},Bt.mount=function(){for(var t=arguments.length,e=new Array(t),n=0;n<t;n++)e[n]=arguments[n];(e=e[0].constructor===Array?e[0]:e).forEach(function(t){if(!t.prototype||!t.prototype.constructor)throw"Sortable: Mounted plugin must be a constructor function, not ".concat({}.toString.call(t));t.utils&&(Bt.utils=M(M({},Bt.utils),t.utils)),K.mount(t)})},Bt.create=function(t,e){return new Bt(t,e)};var Wt,zt,Gt,Ut,qt,Vt,Zt=[],$t=!(Bt.version="1.15.0");function Qt(){Zt.forEach(function(t){clearInterval(t.pid)}),Zt=[]}function Jt(){clearInterval(Vt)}var te,ee=S(function(n,t,e,o){if(t.scroll){var i,r=(n.touches?n.touches[0]:n).clientX,a=(n.touches?n.touches[0]:n).clientY,l=t.scrollSensitivity,s=t.scrollSpeed,c=O(),u=!1;zt!==e&&(zt=e,Qt(),Wt=t.scroll,i=t.scrollFn,!0===Wt&&(Wt=A(e,!0)));var d=0,h=Wt;do{var f=h,p=k(f),g=p.top,m=p.bottom,v=p.left,b=p.right,y=p.width,w=p.height,E=void 0,D=void 0,S=f.scrollWidth,_=f.scrollHeight,C=P(f),T=f.scrollLeft,p=f.scrollTop,D=f===c?(E=y<S&&("auto"===C.overflowX||"scroll"===C.overflowX||"visible"===C.overflowX),w<_&&("auto"===C.overflowY||"scroll"===C.overflowY||"visible"===C.overflowY)):(E=y<S&&("auto"===C.overflowX||"scroll"===C.overflowX),w<_&&("auto"===C.overflowY||"scroll"===C.overflowY)),T=E&&(Math.abs(b-r)<=l&&T+y<S)-(Math.abs(v-r)<=l&&!!T),p=D&&(Math.abs(m-a)<=l&&p+w<_)-(Math.abs(g-a)<=l&&!!p);if(!Zt[d])for(var x=0;x<=d;x++)Zt[x]||(Zt[x]={});Zt[d].vx==T&&Zt[d].vy==p&&Zt[d].el===f||(Zt[d].el=f,Zt[d].vx=T,Zt[d].vy=p,clearInterval(Zt[d].pid),0==T&&0==p||(u=!0,Zt[d].pid=setInterval(function(){o&&0===this.layer&&Bt.active._onTouchMove(qt);var t=Zt[this.layer].vy?Zt[this.layer].vy*s:0,e=Zt[this.layer].vx?Zt[this.layer].vx*s:0;"function"==typeof i&&"continue"!==i.call(Bt.dragged.parentNode[j],e,t,n,qt,Zt[this.layer].el)||F(Zt[this.layer].el,e,t)}.bind({layer:d}),24))),d++}while(t.bubbleScroll&&h!==c&&(h=A(h,!1)));$t=u}},30),c=function(t){var e=t.originalEvent,n=t.putSortable,o=t.dragEl,i=t.activeSortable,r=t.dispatchSortableEvent,a=t.hideGhostForTarget,t=t.unhideGhostForTarget;e&&(i=n||i,a(),e=e.changedTouches&&e.changedTouches.length?e.changedTouches[0]:e,e=document.elementFromPoint(e.clientX,e.clientY),t(),i&&!i.el.contains(e)&&(r("spill"),this.onSpill({dragEl:o,putSortable:n})))};function ne(){}function oe(){}ne.prototype={startIndex:null,dragStart:function(t){t=t.oldDraggableIndex;this.startIndex=t},onSpill:function(t){var e=t.dragEl,n=t.putSortable;this.sortable.captureAnimationState(),n&&n.captureAnimationState();t=X(this.sortable.el,this.startIndex,this.options);t?this.sortable.el.insertBefore(e,t):this.sortable.el.appendChild(e),this.sortable.animateAll(),n&&n.animateAll()},drop:c},a(ne,{pluginName:"revertOnSpill"}),oe.prototype={onSpill:function(t){var e=t.dragEl,t=t.putSortable||this.sortable;t.captureAnimationState(),e.parentNode&&e.parentNode.removeChild(e),t.animateAll()},drop:c},a(oe,{pluginName:"removeOnSpill"});var ie,re,ae,le,se,ce=[],ue=[],de=!1,he=!1,fe=!1;function pe(n,o){ue.forEach(function(t,e){e=o.children[t.sortableIndex+(n?Number(e):0)];e?o.insertBefore(t,e):o.appendChild(t)})}function ge(){ce.forEach(function(t){t!==ae&&t.parentNode&&t.parentNode.removeChild(t)})}return Bt.mount(new function(){function t(){for(var t in this.defaults={scroll:!0,forceAutoScrollFallback:!1,scrollSensitivity:30,scrollSpeed:10,bubbleScroll:!0},this)"_"===t.charAt(0)&&"function"==typeof this[t]&&(this[t]=this[t].bind(this))}return t.prototype={dragStarted:function(t){t=t.originalEvent;this.sortable.nativeDraggable?h(document,"dragover",this._handleAutoScroll):this.options.supportPointer?h(document,"pointermove",this._handleFallbackAutoScroll):t.touches?h(document,"touchmove",this._handleFallbackAutoScroll):h(document,"mousemove",this._handleFallbackAutoScroll)},dragOverCompleted:function(t){t=t.originalEvent;this.options.dragOverBubble||t.rootEl||this._handleAutoScroll(t)},drop:function(){this.sortable.nativeDraggable?f(document,"dragover",this._handleAutoScroll):(f(document,"pointermove",this._handleFallbackAutoScroll),f(document,"touchmove",this._handleFallbackAutoScroll),f(document,"mousemove",this._handleFallbackAutoScroll)),Jt(),Qt(),clearTimeout(g),g=void 0},nulling:function(){qt=zt=Wt=$t=Vt=Gt=Ut=null,Zt.length=0},_handleFallbackAutoScroll:function(t){this._handleAutoScroll(t,!0)},_handleAutoScroll:function(e,n){var o,i=this,r=(e.touches?e.touches[0]:e).clientX,a=(e.touches?e.touches[0]:e).clientY,t=document.elementFromPoint(r,a);qt=e,n||this.options.forceAutoScrollFallback||w||y||u?(ee(e,this.options,t,n),o=A(t,!0),!$t||Vt&&r===Gt&&a===Ut||(Vt&&Jt(),Vt=setInterval(function(){var t=A(document.elementFromPoint(r,a),!0);t!==o&&(o=t,Qt()),ee(e,i.options,t,n)},10),Gt=r,Ut=a)):this.options.bubbleScroll&&A(t,!0)!==O()?ee(e,this.options,A(t,!1),!1):Qt()}},a(t,{pluginName:"scroll",initializeByDefault:!0})}),Bt.mount(oe,ne),Bt.mount(new function(){function t(){this.defaults={swapClass:"sortable-swap-highlight"}}return t.prototype={dragStart:function(t){t=t.dragEl;te=t},dragOverValid:function(t){var e=t.completed,n=t.target,o=t.onMove,i=t.activeSortable,r=t.changed,a=t.cancel;i.options.swap&&(t=this.sortable.el,i=this.options,n&&n!==t&&(t=te,te=!1!==o(n)?(I(n,i.swapClass,!0),n):null,t&&t!==te&&I(t,i.swapClass,!1)),r(),e(!0),a())},drop:function(t){var e,n,o=t.activeSortable,i=t.putSortable,r=t.dragEl,a=i||this.sortable,l=this.options;te&&I(te,l.swapClass,!1),te&&(l.swap||i&&i.options.swap)&&r!==te&&(a.captureAnimationState(),a!==o&&o.captureAnimationState(),n=te,t=(e=r).parentNode,l=n.parentNode,t&&l&&!t.isEqualNode(n)&&!l.isEqualNode(e)&&(i=B(e),r=B(n),t.isEqualNode(l)&&i<r&&r++,t.insertBefore(n,t.children[i]),l.insertBefore(e,l.children[r])),a.animateAll(),a!==o&&o.animateAll())},nulling:function(){te=null}},a(t,{pluginName:"swap",eventProperties:function(){return{swapItem:te}}})}),Bt.mount(new function(){function t(o){for(var t in this)"_"===t.charAt(0)&&"function"==typeof this[t]&&(this[t]=this[t].bind(this));o.options.avoidImplicitDeselect||(o.options.supportPointer?h(document,"pointerup",this._deselectMultiDrag):(h(document,"mouseup",this._deselectMultiDrag),h(document,"touchend",this._deselectMultiDrag))),h(document,"keydown",this._checkKeyDown),h(document,"keyup",this._checkKeyUp),this.defaults={selectedClass:"sortable-selected",multiDragKey:null,avoidImplicitDeselect:!1,setData:function(t,e){var n="";ce.length&&re===o?ce.forEach(function(t,e){n+=(e?", ":"")+t.textContent}):n=e.textContent,t.setData("Text",n)}}}return t.prototype={multiDragKeyDown:!1,isMultiDrag:!1,delayStartGlobal:function(t){t=t.dragEl;ae=t},delayEnded:function(){this.isMultiDrag=~ce.indexOf(ae)},setupClone:function(t){var e=t.sortable,t=t.cancel;if(this.isMultiDrag){for(var n=0;n<ce.length;n++)ue.push(_(ce[n])),ue[n].sortableIndex=ce[n].sortableIndex,ue[n].draggable=!1,ue[n].style["will-change"]="",I(ue[n],this.options.selectedClass,!1),ce[n]===ae&&I(ue[n],this.options.chosenClass,!1);e._hideClone(),t()}},clone:function(t){var e=t.sortable,n=t.rootEl,o=t.dispatchSortableEvent,t=t.cancel;this.isMultiDrag&&(this.options.removeCloneOnHide||ce.length&&re===e&&(pe(!0,n),o("clone"),t()))},showClone:function(t){var e=t.cloneNowShown,n=t.rootEl,t=t.cancel;this.isMultiDrag&&(pe(!1,n),ue.forEach(function(t){P(t,"display","")}),e(),se=!1,t())},hideClone:function(t){var e=this,n=(t.sortable,t.cloneNowHidden),t=t.cancel;this.isMultiDrag&&(ue.forEach(function(t){P(t,"display","none"),e.options.removeCloneOnHide&&t.parentNode&&t.parentNode.removeChild(t)}),n(),se=!0,t())},dragStartGlobal:function(t){t.sortable;!this.isMultiDrag&&re&&re.multiDrag._deselectMultiDrag(),ce.forEach(function(t){t.sortableIndex=B(t)}),ce=ce.sort(function(t,e){return t.sortableIndex-e.sortableIndex}),fe=!0},dragStarted:function(t){var e,n=this,t=t.sortable;this.isMultiDrag&&(this.options.sort&&(t.captureAnimationState(),this.options.animation&&(ce.forEach(function(t){t!==ae&&P(t,"position","absolute")}),e=k(ae,!1,!0,!0),ce.forEach(function(t){t!==ae&&C(t,e)}),de=he=!0)),t.animateAll(function(){de=he=!1,n.options.animation&&ce.forEach(function(t){T(t)}),n.options.sort&&ge()}))},dragOver:function(t){var e=t.target,n=t.completed,t=t.cancel;he&&~ce.indexOf(e)&&(n(!1),t())},revert:function(t){var n,o,e=t.fromSortable,i=t.rootEl,r=t.sortable,a=t.dragRect;1<ce.length&&(ce.forEach(function(t){r.addAnimationState({target:t,rect:he?k(t):a}),T(t),t.fromRect=a,e.removeAnimationState(t)}),he=!1,n=!this.options.removeCloneOnHide,o=i,ce.forEach(function(t,e){e=o.children[t.sortableIndex+(n?Number(e):0)];e?o.insertBefore(t,e):o.appendChild(t)}))},dragOverCompleted:function(t){var e,n=t.sortable,o=t.isOwner,i=t.insertion,r=t.activeSortable,a=t.parentEl,l=t.putSortable,t=this.options;i&&(o&&r._hideClone(),de=!1,t.animation&&1<ce.length&&(he||!o&&!r.options.sort&&!l)&&(e=k(ae,!1,!0,!0),ce.forEach(function(t){t!==ae&&(C(t,e),a.appendChild(t))}),he=!0),o||(he||ge(),1<ce.length?(o=se,r._showClone(n),r.options.animation&&!se&&o&&ue.forEach(function(t){r.addAnimationState({target:t,rect:le}),t.fromRect=le,t.thisAnimationDuration=null})):r._showClone(n)))},dragOverAnimationCapture:function(t){var e=t.dragRect,n=t.isOwner,t=t.activeSortable;ce.forEach(function(t){t.thisAnimationDuration=null}),t.options.animation&&!n&&t.multiDrag.isMultiDrag&&(le=a({},e),e=v(ae,!0),le.top-=e.f,le.left-=e.e)},dragOverAnimationComplete:function(){he&&(he=!1,ge())},drop:function(t){var e=t.originalEvent,n=t.rootEl,o=t.parentEl,i=t.sortable,r=t.dispatchSortableEvent,a=t.oldIndex,l=t.putSortable,s=l||this.sortable;if(e){var c,u,d,h=this.options,f=o.children;if(!fe)if(h.multiDragKey&&!this.multiDragKeyDown&&this._deselectMultiDrag(),I(ae,h.selectedClass,!~ce.indexOf(ae)),~ce.indexOf(ae))ce.splice(ce.indexOf(ae),1),ie=null,W({sortable:i,rootEl:n,name:"deselect",targetEl:ae,originalEvent:e});else{if(ce.push(ae),W({sortable:i,rootEl:n,name:"select",targetEl:ae,originalEvent:e}),e.shiftKey&&ie&&i.el.contains(ie)){var p=B(ie),t=B(ae);if(~p&&~t&&p!==t)for(var g,m=p<t?(g=p,t):(g=t,p+1);g<m;g++)~ce.indexOf(f[g])||(I(f[g],h.selectedClass,!0),ce.push(f[g]),W({sortable:i,rootEl:n,name:"select",targetEl:f[g],originalEvent:e}))}else ie=ae;re=s}fe&&this.isMultiDrag&&(he=!1,(o[j].options.sort||o!==n)&&1<ce.length&&(c=k(ae),u=B(ae,":not(."+this.options.selectedClass+")"),!de&&h.animation&&(ae.thisAnimationDuration=null),s.captureAnimationState(),de||(h.animation&&(ae.fromRect=c,ce.forEach(function(t){var e;t.thisAnimationDuration=null,t!==ae&&(e=he?k(t):c,t.fromRect=e,s.addAnimationState({target:t,rect:e}))})),ge(),ce.forEach(function(t){f[u]?o.insertBefore(t,f[u]):o.appendChild(t),u++}),a===B(ae)&&(d=!1,ce.forEach(function(t){t.sortableIndex!==B(t)&&(d=!0)}),d&&r("update"))),ce.forEach(function(t){T(t)}),s.animateAll()),re=s),(n===o||l&&"clone"!==l.lastPutMode)&&ue.forEach(function(t){t.parentNode&&t.parentNode.removeChild(t)})}},nullingGlobal:function(){this.isMultiDrag=fe=!1,ue.length=0},destroyGlobal:function(){this._deselectMultiDrag(),f(document,"pointerup",this._deselectMultiDrag),f(document,"mouseup",this._deselectMultiDrag),f(document,"touchend",this._deselectMultiDrag),f(document,"keydown",this._checkKeyDown),f(document,"keyup",this._checkKeyUp)},_deselectMultiDrag:function(t){if(!(void 0!==fe&&fe||re!==this.sortable||t&&N(t.target,this.options.draggable,this.sortable.el,!1)||t&&0!==t.button))for(;ce.length;){var e=ce[0];I(e,this.options.selectedClass,!1),ce.shift(),W({sortable:this.sortable,rootEl:this.sortable.el,name:"deselect",targetEl:e,originalEvent:t})}},_checkKeyDown:function(t){t.key===this.options.multiDragKey&&(this.multiDragKeyDown=!0)},_checkKeyUp:function(t){t.key===this.options.multiDragKey&&(this.multiDragKeyDown=!1)}},a(t,{pluginName:"multiDrag",utils:{select:function(t){var e=t.parentNode[j];e&&e.options.multiDrag&&!~ce.indexOf(t)&&(re&&re!==e&&(re.multiDrag._deselectMultiDrag(),re=e),I(t,e.options.selectedClass,!0),ce.push(t))},deselect:function(t){var e=t.parentNode[j],n=ce.indexOf(t);e&&e.options.multiDrag&&~n&&(I(t,e.options.selectedClass,!1),ce.splice(n,1))}},eventProperties:function(){var n=this,o=[],i=[];return ce.forEach(function(t){var e;o.push({multiDragElement:t,index:t.sortableIndex}),e=he&&t!==ae?-1:he?B(t,":not(."+n.options.selectedClass+")"):B(t),i.push({multiDragElement:t,index:e})}),{items:r(ce),clones:[].concat(ue),oldIndicies:o,newIndicies:i}},optionListeners:{multiDragKey:function(t){return"ctrl"===(t=t.toLowerCase())?t="Control":1<t.length&&(t=t.charAt(0).toUpperCase()+t.substr(1)),t}}})}),Bt});</script>
+  <style>
+:root {
+  --bg-base: #000000;
+  --bg-elev: rgba(28,28,30,0.72);
+  --bg-elev-2: rgba(44,44,46,0.66);
+  --stroke: rgba(255,255,255,0.10);
+  --text: #f2f2f7;
+  --text-2: #98989f;
+  --ios-blue: #0a84ff;
+  --ios-green: #30d158;
+  --ios-red: #ff453a;
+  --ios-orange: #ff9f0a;
+  --ios-purple: #bf5af2;
+  --glass-blur: blur(20px) saturate(180%);
+  --radius: 14px;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--bg-base);
+  background-image: radial-gradient(ellipse at top, rgba(10,132,255,0.08), transparent 60%),
+                    radial-gradient(ellipse at bottom, rgba(191,90,242,0.06), transparent 60%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-size: 15px;
+  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+}
+/* iOS/Safari 自定义滚动条 */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.25); }
+.glass {
+  background: var(--bg-elev);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--stroke);
+}
+.conn-status {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  background: rgba(28,28,30,0.72);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--stroke);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size:13px;
+  z-index:999;
+  display:flex;
+  align-items:center;
+}
+.conn-status > * + * { margin-left:6px; }
+.conn-dot {
+  width:8px;height:8px;border-radius:50%;
+  background:#ff4d4f;
+}
+.conn-status.connected .conn-dot {
+  background:#52c41a;
+}
+.hidden {display:none !important;}
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 20px;
+  padding-top: calc(14px + env(safe-area-inset-top));
+  padding-left: calc(20px + env(safe-area-inset-left));
+  padding-right: calc(20px + env(safe-area-inset-right));
+  background: rgba(28,28,30,0.72);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--stroke);
+  margin: -8px;
+  flex-wrap:wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header > * { margin: 8px; }
+.header-left {display:flex;align-items:center;}
+.header-left > * + * { margin-left:10px; }
+.header-center {display:flex;align-items:center;}
+.header-right {display:flex;align-items:center;}
+.header-right > * + * { margin-left:8px; }
+.show-name {font-size:20px;font-weight:600;}
+.icon-btn {
+  background: rgba(44,44,46,0.66);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--stroke);
+  color:#fff;
+  width:44px;height:44px;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:18px;
+  -webkit-user-select:none;
+  user-select:none;
+  transition: transform 0.12s ease, background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.icon-btn:hover { background: rgba(58,58,60,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.icon-btn:active { transform: scale(0.88); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.mode-toggle-btn {
+  padding:11px 18px;
+  border-radius:12px;
+  border: 1px solid var(--stroke);
+  font-size:15px;
+  font-weight:500;
+  cursor:pointer;
+  background: rgba(44,44,46,0.66);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color:#fff;
+  transition: transform 0.12s ease, background 0.2s ease, box-shadow 0.2s ease;
+  min-height:44px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.mode-toggle-btn:hover { background: rgba(58,58,60,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.mode-toggle-btn:active { transform: scale(0.96); }
+.mode-toggle-btn.performance {
+  background: var(--ios-blue);
+  border-color: rgba(10,132,255,0.5);
+  box-shadow: 0 2px 12px rgba(10,132,255,0.3);
+}
+.mode-toggle-btn.performance:hover { background: #3b9bff; box-shadow: 0 4px 16px rgba(10,132,255,0.4); }
+.main-layout {
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  min-height: calc(100vh - 72px);
+}
+.panel {padding:16px;}
+.panel-list {background:#161920;border-right:1px solid #272c36;}
+.panel-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;margin:-4px;}
+.panel-header > * { margin:4px; }
+.program-list {display:flex;flex-direction:column;min-height:100px;}
+.program-item {
+  background: rgba(28,28,30,0.72);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--stroke);
+  cursor:grab;
+  margin-bottom:8px;
+  transition: border-color 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
+}
+.program-item:last-child { margin-bottom:0; }
+.program-item:hover { border-color: rgba(255,255,255,0.2); box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+.program-item:active {cursor:grabbing;transform:scale(0.98);}
+.program-item.active {border-color:var(--ios-blue);box-shadow: 0 2px 12px rgba(10,132,255,0.15);}
+.program-item.completed {opacity:0.5;}
+.performance-view {
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  animation: viewFadeIn 0.3s ease;
+  padding-bottom:140px;
+}
+@keyframes viewFadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+.performance-view > * { margin-bottom:20px; }
+.performance-view > *:last-child { margin-bottom:0; }
+.stage-cards {display:grid;grid-template-columns:1.4fr 1fr;gap:20px;flex:1 1 auto;}
+.stage-card {
+  background: rgba(28,28,30,0.72);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  padding:24px;
+  border-radius:var(--radius);
+  border: 1px solid var(--stroke);
+  transition: box-shadow 0.25s ease, border-color 0.2s ease;
+  display:flex;
+  flex-direction:column;
+}
+.stage-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
+.current-card {border:2px solid var(--ios-blue);}
+.card-label {font-size:16px;color:var(--text-2);margin-bottom:10px;font-weight:600;}
+.current-card .card-label {color:var(--ios-green);}
+.stage-program-name {font-size:32px;font-weight:bold;line-height:1.3;}
+.stage-program-name.small {font-size:24px;}
+.stage-mics {
+  display:flex;
+  flex-wrap:wrap;
+  margin:12px 0;
+  margin:-3px;
+}
+.mic-tag {
+  padding:8px 14px;
+  border-radius:10px;
+  font-size:15px;
+  background: rgba(10,132,255,0.22);
+  color:#7dbcff;
+  border:1px solid rgba(10,132,255,0.35);
+  margin:3px;
+  min-height:38px;
+  display:inline-flex;
+  align-items:center;
+}
+.music-cue-display {
+  margin-top:12px;
+  color:#ffc857;
+  font-size:16px;
+  background: rgba(255,200,87,0.08);
+  border-left: 4px solid #ffc857;
+  padding: 12px 16px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.stage-notes {
+  font-size:16px;
+  color:var(--text-2);
+  background: rgba(148,163,184,0.08);
+  padding: 8px 12px;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+.stage-total {
+  font-size:13px;
+  color:var(--text-2);
+  margin-top:6px;
+}
+.timer-section {
+  text-align:center;
+  margin-top:20px;
+}
+.timer-display {
+  font-size:72px;
+  font-weight:bold;
+  font-variant-numeric:tabular-nums;
+  margin:16px 0;
+  text-shadow: 0 0 24px currentColor;
+}
+.timer-display.running {color:var(--ios-green);}
+.timer-display.finished {color:var(--ios-red);}
+.timer-controls {display:flex;justify-content:center;}
+.timer-controls > * + * { margin-left:10px; }
+.btn-timer {
+  padding:11px 22px;
+  font-size:16px;
+  font-weight:500;
+  border-radius:12px;
+  border: 1px solid var(--stroke);
+  cursor:pointer;
+  background: rgba(44,44,46,0.66);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color:#fff;
+  min-height:44px;
+  transition: transform 0.12s ease, background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.btn-timer:hover { background: rgba(58,58,60,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.btn-timer:active { transform: scale(0.94); }
+.timer-finished {
+  font-size:20px;
+  color:var(--ios-red);
+  font-weight:bold;
+  margin-top:12px;
+}
+.advance-section {
+  text-align:center;
+  margin-top:16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+.btn-advance {
+  padding:12px 24px;
+  font-size:16px;
+  min-height:44px;
+}
+.setup-view {
+  animation: viewFadeIn 0.3s ease;
+}
+.setup-placeholder {
+  text-align:center;
+  padding:60px 20px;
+  color:var(--text-2);
+  font-size:15px;
+  line-height:2;
+}
+.setup-placeholder p { margin:4px 0; }
+.setup-placeholder p:first-child { font-size:17px; color:var(--text); }
+.edit-panel {
+  background: rgba(28,28,30,0.72);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius:16px;
+  border: 1px solid var(--stroke);
+  padding:20px;
+  animation: viewFadeIn 0.25s ease;
+}
+.edit-panel-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+.form-group {margin-bottom:14px;}
+.form-group label {display:block;margin-bottom:6px;color:#cbd5e1;}
+.text-input {
+  width:100%;
+  background: rgba(0,0,0,0.3);
+  border:1px solid var(--stroke);
+  border-radius:10px;
+  padding:11px;
+  color:#fff;
+  font-size:15px;
+  -webkit-appearance:none;
+  appearance:none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.text-input:focus {
+  outline:none;
+  border-color: var(--ios-blue);
+  box-shadow: 0 0 0 3px rgba(10,132,255,0.15);
+}
+.text-input::placeholder { color: rgba(255,255,255,0.3); }
+.textarea {min-height:80px;resize:vertical;line-height:1.6;}
+.modal {
+  position:fixed;
+  top:0; right:0; bottom:0; left:0;
+  background:rgba(0,0,0,0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  animation: modalFadeIn 0.2s ease;
+}
+@keyframes modalFadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes modalSlideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+.modal-box {
+  background: rgba(28,28,30,0.92);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  padding:24px;
+  border-radius:18px;
+  border: 1px solid var(--stroke);
+  width:min(92%,580px);
+  max-height:90vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling: touch;
+  margin-left: env(safe-area-inset-left);
+  margin-right: env(safe-area-inset-right);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  animation: modalSlideUp 0.25s ease;
+}
+.modal-wide {
+  width:min(96%,680px);
+}
+.modal-header-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+.modal-actions {display:flex;justify-content:flex-end;flex-wrap:wrap;margin:-5px;}
+.modal-actions > * { margin:5px; }
+.btn {
+  padding:11px 18px;
+  border-radius:12px;
+  border: 1px solid var(--stroke);
+  cursor:pointer;
+  font-size:14px;
+  font-weight:500;
+  min-height:44px;
+  -webkit-user-select:none;
+  user-select:none;
+  transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.btn:active { transform: scale(0.96); box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+.btn-sm {padding:9px 14px;font-size:13px;min-height:44px;}
+.btn-primary {background:var(--ios-blue);color:#fff;border-color:rgba(10,132,255,0.5);box-shadow: 0 2px 8px rgba(10,132,255,0.25);}
+.btn-primary:hover {background:#3b9bff;box-shadow: 0 4px 16px rgba(10,132,255,0.35);}
+.btn-secondary {background: rgba(44,44,46,0.66);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;}
+.btn-secondary:hover {background: rgba(58,58,60,0.8);}
+.btn-danger {background:var(--ios-red);color:#fff;border-color:rgba(255,69,58,0.5);box-shadow: 0 2px 8px rgba(255,69,58,0.25);}
+.btn-danger:hover {background:#ff6359;box-shadow: 0 4px 16px rgba(255,69,58,0.35);}
+.qr-container {text-align:center;padding:12px;}
+.qr-url {
+  text-align:center;
+  font-size:13px;
+  color:#94a3b8;
+  word-break:break-all;
+}
+/* 全局通道 Tab 样式 */
+.tab-bar {
+  display:flex;
+  margin-bottom:14px;
+}
+.tab-btn {
+  padding:8px 14px;
+  background: rgba(44,44,46,0.66);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--stroke);
+  color:#ccc;
+  border-radius:10px;
+  cursor:pointer;
+  margin-right:8px;
+  min-height:44px;
+  font-weight:500;
+  transition: transform 0.12s ease, background 0.2s ease;
+}
+.tab-btn:last-child { margin-right:0; }
+.tab-btn:hover { background: rgba(58,58,60,0.8); }
+.tab-btn:active { transform: scale(0.96); }
+.tab-btn.active {
+  background:var(--ios-blue);
+  color:#fff;
+  border-color:rgba(10,132,255,0.5);
+}
+.tab-content {margin-bottom:16px;}
+/* 批量生成通道栏 */
+.batch-create-bar {
+  display:flex;
+  align-items:center;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+  margin:-5px;
+}
+.batch-create-bar > * { margin:5px; }
+.batch-num-input {
+  width:70px;
+  padding:6px;
+  background: rgba(0,0,0,0.3);
+  border:1px solid var(--stroke);
+  color:#fff;
+  border-radius:6px;
+}
+.channel-list-wrap {
+  display:flex;
+  flex-direction:column;
+  margin-bottom:12px;
+  max-height:320px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right:4px;
+}
+.channel-list-wrap > * { margin-bottom:8px; }
+.channel-list-wrap > *:last-child { margin-bottom:0; }
+.channel-row {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  margin:-4px;
+}
+.channel-row > * { margin:4px; }
+.channel-name-input {
+  flex:1;
+  min-width:100px;
+  padding:6px 8px;
+  background: rgba(0,0,0,0.3);
+  border:1px solid var(--stroke);
+  border-radius:6px;
+  color:white;
+}
+.channel-type-select {
+  padding:6px;
+  background: rgba(0,0,0,0.3);
+  color:#fff;
+  border:1px solid var(--stroke);
+  border-radius:6px;
+}
+.channel-custom-input {
+  width:110px;
+  padding:6px 8px;
+  background: rgba(0,0,0,0.3);
+  border:1px solid rgba(255,159,10,0.4);
+  border-radius:6px;
+  color:#ffbf6b;
+}
+.channel-custom-input::placeholder { color: rgba(255,159,10,0.4); }
+.channel-notes-input {
+  width:140px;
+  padding:6px;
+  background: rgba(0,0,0,0.3);
+  border:1px solid var(--stroke);
+  color:#fff;
+  border-radius:6px;
+}
+.channel-del-btn {
+  padding:5px 8px;
+  background: rgba(255,69,58,0.2);
+  border: 1px solid rgba(255,69,58,0.3);
+  border-radius:6px;
+  color:#ff6b6b;
+  cursor:pointer;
+  min-height:44px;
+}
+.channel-check-wrap {
+  display:flex;
+  flex-wrap:wrap;
+  margin:-4px;
+}
+.channel-check-wrap > * { margin:4px; }
+.channel-check-btn {
+  padding:8px 12px;
+  border-radius:10px;
+  border: 1px solid var(--stroke);
+  color:#fff;
+  background: rgba(44,44,46,0.66);
+  cursor:pointer;
+  min-height:44px;
+  font-weight:500;
+  transition: background 0.15s ease, transform 0.12s ease, border-color 0.2s ease;
+}
+.channel-check-btn:hover { background: rgba(58,58,60,0.8); }
+.channel-check-btn:active { transform: scale(0.94); }
+.channel-check-btn.active {
+  background:var(--ios-blue);
+  border-color:rgba(10,132,255,0.5);
+}
+.channel-check-btn .check-type {
+  display:block; font-size:11px; opacity:0.7; margin-top:2px; font-weight:normal;
+}
+/* 节目序号徽章 */
+.prog-no {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background: rgba(44,44,46,0.66);
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:600;
+  flex-shrink:0;
+}
+.program-item.active .prog-no {
+  background:var(--ios-blue);
+  color:#fff;
+}
+/* 客户端连接数 */
+.client-count {
+  font-size:13px;
+  color:var(--text-2);
+}
+/* 编辑演出名称输入框 */
+#modal-show-name .text-input {
+  width:100%;
+}
+.edit-actions {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:16px;
+  flex-wrap:wrap;
+  margin:-4px;
+}
+.edit-actions > * { margin:4px; }
+.drag-handle {
+  color:#64748b;
+  font-size:12px;
+  cursor:grab;
+}
+/* 节目详情弹窗 */
+.detail-row { display:flex; flex-direction:column; margin-bottom:14px; }
+.detail-row .card-label { margin-bottom:4px; }
+.detail-section-value { font-size:15px; color:#eee; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+.detail-empty { color:#64748b; }
+.detail-channels { display:flex; flex-wrap:wrap; margin:-3px; }
+.detail-channels > * { margin:3px; }
+.detail-duration { font-size:18px; font-weight:600; color:var(--ios-green); }
+/* 通道标签内嵌类型名 */
+.mic-tag .tag-type {
+  font-size:11px; opacity:0.75;
+  padding-left:6px; margin-left:4px;
+  border-left:1px solid rgba(255,255,255,0.25);
+}
+.detail-set-btn:disabled { cursor:default; }
+/* 节目卡片详情按钮 */
+.prog-action-row { display:flex; margin-top:8px; justify-content:flex-end; }
+.prog-action-row > * + * { margin-left:6px; }
+.prog-detail-btn { padding:5px 12px; font-size:12px;
+  background: rgba(44,44,46,0.66); color:#cbd5e1; border:1px solid var(--stroke);
+  border-radius:8px; cursor:pointer; min-height:32px; transition: background 0.15s; }
+.prog-detail-btn:active { transform: scale(0.96); }
+/* 通道类型彩色标签 */
+.ch-tag-mic { background: rgba(10,132,255,0.22); color:#7dbcff; border:1px solid rgba(10,132,255,0.45); }
+.ch-tag-line { background: rgba(48,209,88,0.20); color:#7fe0a0; border:1px solid rgba(48,209,88,0.42); }
+.ch-tag-custom { background: rgba(255,159,10,0.20); color:#ffbf6b; border:1px solid rgba(255,159,10,0.45); }
+/* 节目列表头部 */
+.prog-head { display:flex; align-items:center; }
+.prog-head > * + * { margin-left:8px; }
+/* 响应式：iPad 横屏 / 大平板 */
+@media (max-width:1024px) {
+  .main-layout { grid-template-columns: 300px 1fr; }
+  .stage-program-name {font-size:22px;}
+}
+/* 响应式：iPad 竖屏 / 小平板 */
+@media (max-width:900px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .stage-cards { grid-template-columns: 1fr 1fr; }
+  .panel-list { border-right:none; border-bottom:1px solid var(--stroke); max-height:40vh; overflow-y:auto; }
+}
+/* 响应式：iPhone 横屏 / 大手机 */
+@media (max-width:768px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .stage-cards { grid-template-columns: 1fr 1fr; }
+  .header {
+    padding:10px 12px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+    padding-left: calc(12px + env(safe-area-inset-left));
+    padding-right: calc(12px + env(safe-area-inset-right));
+  }
+  .show-name {font-size:17px;}
+  .timer-display {font-size:52px;}
+  .channel-row {flex-wrap:wrap;}
+  .channel-notes-input {width:100%;}
+  .conn-status { top:calc(8px + env(safe-area-inset-top)); right:calc(8px + env(safe-area-inset-right)); font-size:11px; padding:5px 8px; }
+  .icon-btn { width:40px; height:40px; font-size:16px; }
+  .mode-toggle-btn { padding:9px 14px; font-size:14px; }
+  .header-right > * + * { margin-left:6px; }
+  .stage-program-name {font-size:20px;}
+  .stage-program-name.small {font-size:16px;}
+}
+/* 响应式：iPhone 竖屏 */
+@media (max-width:480px) {
+  .header { flex-direction:column; align-items:stretch; }
+  .header > * { margin:4px 0; width:100%; }
+  .header-left { justify-content:space-between; }
+  .header-center { justify-content:center; }
+  .header-right { justify-content:center; flex-wrap:wrap; }
+  .header-right > * { margin:4px; }
+  .show-name {font-size:18px; flex:1; text-align:center;}
+  .timer-display {font-size:44px; margin:10px 0;}
+  .stage-program-name {font-size:18px;}
+  .stage-cards { grid-template-columns: 1fr; }
+  .stage-card { padding:14px; }
+  .timer-controls { flex-wrap:wrap; }
+  .timer-controls > * { margin:4px; }
+  .modal-box {
+    width:min(96%,420px);
+    padding:20px;
+    border-radius:16px;
+    max-height:88vh;
+  }
+  .modal-wide { width:min(96%,440px); }
+  .btn { padding:10px 14px; font-size:13px; }
+  .btn-timer { padding:10px 16px; font-size:14px; }
+  .program-item { padding:12px; }
+  .panel { padding:12px; }
+  .channel-name-input { min-width:80px; }
+  .channel-type-select { font-size:13px; }
+  .channel-notes-input { width:100%; margin-top:4px; }
+  .channel-del-btn { font-size:12px; }
+  .stage-mics { margin:-2px; }
+  .mic-tag { margin:2px; padding:5px 8px; font-size:12px; }
+}
+/* 响应式：极小屏 */
+@media (max-width:360px) {
+  .show-name {font-size:16px;}
+  .timer-display {font-size:38px;}
+  .icon-btn { width:36px; height:36px; font-size:14px; border-radius:10px; }
+  .mode-toggle-btn { padding:8px 12px; font-size:13px; min-height:40px; }
+  .btn { padding:9px 12px; font-size:12px; min-height:40px; }
+  .stage-program-name {font-size:16px;}
+}
+/* 响应式：横屏低高度（手机横屏） */
+@media (orientation:landscape) and (max-height:500px) {
+  .timer-display {font-size:36px; margin:6px 0;}
+  .header { padding:6px 12px; }
+  .panel-list { max-height:none; overflow-y:auto; }
+  .stage-cards { grid-template-columns: 1fr 1fr; }
+  .timer-section { margin-top:8px; }
+  .advance-section { margin-top:8px; }
+}
+/* 三按钮导航 - 固定底部 */
+.nav-controls { position:fixed; bottom:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:center; gap:12px; padding:16px 24px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); background:rgba(20,20,22,0.92); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.08); box-shadow:0 -4px 20px rgba(0,0,0,0.3); }
+.nav-btn { border-radius:14px; border:1px solid var(--stroke); cursor:pointer; background:rgba(44,44,46,0.66); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); color:#fff; transition: transform .12s ease, background .2s ease, box-shadow .2s ease; }
+.nav-small { padding:14px 18px; font-size:15px; min-height:56px; min-width:120px; }
+.nav-go { flex:1 1 auto; padding:0 80px; font-size:30px; font-weight:700; min-height:120px; min-width:300px; background:var(--ios-green); border-color:rgba(48,209,88,0.5); box-shadow:0 4px 24px rgba(48,209,88,0.35); letter-spacing:4px; }
+.nav-go:active { transform:scale(0.96); }
+.reset-bar { text-align:center; margin-top:10px; }
+/* 节目状态三态 */
+.program-item.is-completed .prog-name, .program-item.is-completed .prog-meta { text-decoration:none; }
+.program-item.is-active { border-color:var(--ios-green) !important; background:rgba(48,209,88,0.10) !important; box-shadow:0 2px 16px rgba(48,209,88,0.20) !important; }
+/* 卡片内时长 */
+.card-duration { font-size:16px; font-weight:600; color:var(--ios-green); margin-top:6px; }
+/* 角色徽章 */
+.role-badge { font-size:12px; padding:4px 10px; border-radius:8px; margin-left:8px; font-weight:600; cursor:pointer; user-select:none; transition: background .2s ease; }
+.role-badge:hover { opacity:0.85; }
+.role-badge.control { background:rgba(10,132,255,.2); color:#7dbcff; }
+.role-badge.assistant { background:rgba(255,159,10,.2); color:#ffbf6b; }
+.role-badge.backstage { background:rgba(148,163,184,.2); color:#cbd5e1; }
+.role-switch-list { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+.role-switch-btn { display:flex; align-items:center; gap:10px; padding:14px 16px; border-radius:12px; border:1px solid var(--stroke); background:rgba(44,44,46,0.66); color:#fff; cursor:pointer; transition: transform .12s ease, background .2s ease; text-align:left; }
+.role-switch-btn:hover { background:rgba(58,58,60,0.8); }
+.role-switch-btn:active { transform:scale(0.98); }
+.role-switch-btn .role-icon { font-size:24px; }
+.role-switch-btn .role-name { font-size:16px; font-weight:600; }
+.role-switch-btn .role-desc { font-size:12px; color:#98989f; margin-left:auto; }
+.role-switch-btn.control { border-left:3px solid var(--ios-blue); }
+.role-switch-btn.assistant { border-left:3px solid var(--ios-orange); }
+.role-switch-btn.backstage { border-left:3px solid #94a3b8; }
+/* Toast 提示 */
+.toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); color:#fff; padding:16px 24px; border-radius:12px; z-index:9999; font-size:15px; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border:1px solid var(--stroke); }
+/* 导入弹窗 */
+.import-drop-zone { border:2px dashed rgba(255,255,255,0.2); border-radius:12px; padding:32px; text-align:center; color:var(--text-2); margin:12px 0; cursor:pointer; transition:border-color .2s; }
+.import-drop-zone:hover, .import-drop-zone.dragover { border-color:var(--ios-blue); }
+.import-preview-list { max-height:300px; overflow-y:auto; margin:12px 0; }
+.import-preview-item { display:flex; align-items:center; padding:8px 12px; border-radius:8px; background:rgba(44,44,46,0.5); margin-bottom:4px; }
+.import-preview-item input { margin-right:8px; }
+.import-preview-item .ip-name { flex:1; }
+.import-preview-item .ip-dur { width:60px; margin-left:8px; }
+/* 演出模式：隐藏节目列表，舞台全宽 */
+.main-layout.mode-performance { grid-template-columns: 1fr !important; }
+.main-layout.mode-performance .panel-list { display:none !important; }
+.main-layout.mode-perf-list { grid-template-columns: 340px 1fr !important; }
+/* 节目进度条 */
+.perf-progress-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.perf-progress-text { font-size:14px; color:var(--text-2); }
+.perf-progress-count { font-size:18px; font-weight:700; color:var(--ios-green); }
+.list-toggle-btn { font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid var(--stroke); background:rgba(44,44,46,0.66); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); color:#fff; cursor:pointer; transition: background .2s ease; }
+.list-toggle-btn:hover { background:rgba(58,58,60,0.8); }
+/* 舞台卡片可点击 */
+.stage-card { cursor:pointer; transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease; position:relative; }
+.stage-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.3); }
+.stage-card.is-done { border-color: rgba(48,209,88,0.6) !important; background:rgba(48,209,88,0.08) !important; box-shadow:0 0 20px rgba(48,209,88,0.15); }
+/* 更明显的完成标志 */
+.program-item.is-completed { opacity:0.95; border-left:6px solid var(--ios-green) !important; border-color: rgba(48,209,88,0.5) !important; position:relative; background:rgba(48,209,88,0.08) !important; box-shadow:0 0 0 1px rgba(48,209,88,0.2), 0 2px 12px rgba(48,209,88,0.1); padding-right:64px; }
+.program-item.is-completed .prog-no { background:var(--ios-green) !important; color:#fff !important; box-shadow:0 2px 8px rgba(48,209,88,0.4); }
+.program-item.is-active .prog-no { background:var(--ios-blue); color:#fff; }
+.program-item.is-completed strong { color:#5fe08a; }
+.completed-badge { display:inline-flex; align-items:center; gap:3px; background:var(--ios-green); color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; margin-left:8px; }
+.completed-badge-lg { display:inline-flex; align-items:center; gap:4px; background:var(--ios-green); color:#fff; font-size:14px; font-weight:700; padding:6px 18px; border-radius:20px; white-space:nowrap; margin-left:8px; box-shadow:0 3px 12px rgba(48,209,88,0.4); animation:badgePulse 2s ease-in-out infinite; }
+.completed-check-icon { position:absolute; top:50%; right:14px; transform:translateY(-50%); width:44px; height:44px; border-radius:50%; background:var(--ios-green); color:#fff; font-size:24px; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 16px rgba(48,209,88,0.5); pointer-events:none; animation:checkPulse 2s ease-in-out infinite; }
+.stage-done-badge { position:absolute; top:12px; right:12px; background:var(--ios-green); color:#fff; font-size:15px; font-weight:700; padding:8px 20px; border-radius:20px; box-shadow:0 3px 16px rgba(48,209,88,0.5); animation:badgePulse 2s ease-in-out infinite; }
+@keyframes checkPulse { 0%,100% { transform:translateY(-50%) scale(1); } 50% { transform:translateY(-50%) scale(1.1); } }
+@keyframes badgePulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.06); } }
+.stage-progress-info { display:inline-block; font-size:14px; font-weight:600; color:var(--text-2); background:rgba(44,44,46,0.5); padding:4px 12px; border-radius:8px; }
+/* 顶部重置图标 */
+.icon-btn.header-reset { color:#ff9f0a; font-size:18px; }
+.icon-btn.header-reset:hover { background:rgba(255,159,10,0.15); }
+/* 详情弹窗可编辑 */
+.detail-edit-area { width:100%; background:rgba(44,44,46,0.5); border:1px solid var(--stroke); border-radius:8px; color:#fff; padding:10px 12px; font-size:14px; resize:vertical; min-height:56px; font-family:inherit; line-height:1.5; box-sizing:border-box; -webkit-appearance:none; }
+.detail-edit-area:focus { outline:none; border-color:var(--ios-blue); box-shadow:0 0 0 3px rgba(10,132,255,0.15); }
+.detail-edit-area:disabled { opacity:0.55; cursor:not-allowed; }
+.detail-edit-area::placeholder { color:#64748b; }
+.detail-status-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+.status-pill { font-size:12px; font-weight:700; padding:4px 14px; border-radius:20px; }
+.status-pill.is-done { background:rgba(48,209,88,0.2); color:#7fe0a0; border:1px solid rgba(48,209,88,0.3); }
+.status-pill.is-now { background:rgba(10,132,255,0.2); color:#7dbcff; border:1px solid rgba(10,132,255,0.3); }
+.status-pill.is-wait { background:rgba(148,163,184,0.12); color:#cbd5e1; border:1px solid rgba(148,163,184,0.2); }
+/* 服务器IP显示 */
+.server-ip-display { font-size:13px; padding:4px 12px; border-radius:8px; background:rgba(48,209,88,0.15); color:#7fe0a0; border:1px solid rgba(48,209,88,0.3); margin-left:8px; font-family:monospace; font-weight:600; }
+/* 角色齿轮图标 */
+.role-badge { font-size:18px; padding:4px 8px; border-radius:8px; margin-left:8px; cursor:pointer; user-select:none; transition: background .2s ease; }
+.role-badge:hover { opacity:0.85; }
+/* 下载客户端弹窗 */
+.download-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+.download-card { display:flex; flex-direction:column; align-items:center; gap:8px; padding:24px 16px; border-radius:14px; border:1px solid var(--stroke); background:rgba(44,44,46,0.66); color:#fff; text-decoration:none; cursor:pointer; transition: transform .12s ease, background .2s ease, border-color .2s ease; }
+.download-card:hover { background:rgba(58,58,60,0.8); transform:translateY(-2px); border-color:rgba(10,132,255,0.4); }
+.download-card:active { transform:scale(0.98); }
+.dl-icon { font-size:40px; }
+.dl-name { font-size:16px; font-weight:700; }
+.dl-sub { font-size:12px; color:var(--text-2); }
+/* 节目项重置按钮 */
+.prog-reset-btn { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; border:1px solid rgba(255,159,10,0.3); background:rgba(255,159,10,0.12); color:#ff9f0a; cursor:pointer; font-size:15px; margin-right:6px; transition: background .2s ease; }
+.prog-reset-btn:hover { background:rgba(255,159,10,0.25); }
+.prog-action-row { display:flex; align-items:center; gap:6px; margin-top:8px; }
+/* 完成打勾可点击 */
+.completed-check-icon { cursor:pointer; pointer-events:auto; }
+/* 重置确认弹窗 */
+.reset-confirm-box { text-align:center; padding:8px 0; }
+.reset-confirm-box p { font-size:16px; margin-bottom:16px; color:#fff; }
+/* 响应式 */
+@media (max-width: 768px) {
+  .nav-go { min-height:96px; font-size:26px; min-width:200px; padding:0 50px; }
+  .nav-small { min-width:90px; padding:12px 14px; font-size:14px; }
+}
+@media (max-width: 480px) {
+  .nav-go { min-height:80px; font-size:22px; min-width:150px; padding:0 32px; }
+  .nav-small { min-width:70px; padding:10px 10px; font-size:13px; }
+}
+  </style>
+</head>
+<body>
+  <!-- 连接状态 -->
+  <div id="conn-status" class="conn-status disconnected">
+    <span class="conn-dot"></span>
+    <span class="conn-text">连接中...</span>
+  </div>
+
+  <!-- 顶部栏 -->
+  <header class="header">
+    <div class="header-left">
+      <h1 id="show-name-display" class="show-name">舞台流程表</h1>
+      <span id="role-badge" class="role-badge control" onclick="openRoleSwitcher()" title="点击切换角色">⚙️</span>
+      <button class="icon-btn edit-show-name-btn" id="edit-show-name-btn" title="编辑演出名称">✏️</button>
+      <span id="server-ip-display" class="server-ip-display" style="display:none"></span>
+    </div>
+    <div class="header-center">
+      <button class="mode-toggle-btn" id="mode-toggle-btn" onclick="toggleMode()">⚙️ 设置模式</button>
+    </div>
+    <div class="header-right">
+      <span id="client-count" class="client-count"></span>
+      <button class="icon-btn" id="perf-list-toggle-btn" onclick="togglePerfList()" title="节目列表" style="display:none">📋</button>
+      <button class="icon-btn" onclick="openGlobalSetting()" title="全局通道设置">🎛️</button>
+      <button class="icon-btn" onclick="exportChannelList()" title="导出通道清单">📄</button>
+      <button class="icon-btn" id="import-btn" onclick="openImport()" title="导入PDF/Word" style="display:none">📥</button>
+      <button class="icon-btn" id="qr-btn" onclick="showQR()" title="显示二维码">📱</button>
+      <button class="icon-btn" id="download-btn" onclick="openDownloadModal()" title="下载客户端">⬇️</button>
+      <button class="icon-btn header-reset" id="header-reset-btn" onclick="resetProgram('all')" title="重置全部节目状态" style="display:none">↺</button>
+    </div>
+  </header>
+
+  <!-- 编辑演出名称弹窗 -->
+  <div id="modal-show-name" class="modal hidden">
+    <div class="modal-box">
+      <h3>编辑演出名称</h3>
+      <input type="text" id="input-show-name" class="text-input" placeholder="输入演出名称">
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-show-name')">取消</button>
+        <button class="btn btn-primary" onclick="saveShowName()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 全局通道设置弹窗 -->
+  <div id="modal-global-setting" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header-row">
+        <h3>全局通道配置</h3>
+        <button class="icon-btn" onclick="closeModal('modal-global-setting')">✕</button>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="mic-tab">🎤 话筒通道</button>
+        <button class="tab-btn" data-tab="line-tab">🔊 线路输入</button>
+      </div>
+
+      <!-- 批量生成通道区域 -->
+      <div class="batch-create-bar">
+        <input type="number" class="batch-num-input" id="batch-num" min="1" value="4" placeholder="输入数量">
+        <button class="btn btn-secondary batch-mic-btn" data-ctype="mics">批量生成话筒通道</button>
+        <button class="btn btn-secondary batch-line-btn" data-ctype="lines">批量生成线路通道</button>
+      </div>
+
+      <div class="tab-content" id="mic-tab">
+        <div class="channel-list-wrap" id="global-mic-channel-list"></div>
+        <button class="btn btn-secondary add-channel-btn" data-ctype="mics">＋ 新增单条话筒通道</button>
+      </div>
+
+      <div class="tab-content hidden" id="line-tab">
+        <div class="channel-list-wrap" id="global-line-channel-list"></div>
+        <button class="btn btn-secondary add-channel-btn" data-ctype="lines">＋ 新增单条线路通道</button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-global-setting')">取消</button>
+        <button class="btn btn-primary" onclick="saveGlobalChannel()">保存全局通道配置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出格式选择弹窗 -->
+  <div id="modal-export" class="modal hidden">
+    <div class="modal-box">
+      <h3>导出通道清单</h3>
+      <p style="color:#94a3b8;margin:10px 0;">可导出全部话筒+线路通道信息（名称、类型、备注）</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-export')">取消</button>
+        <button class="btn btn-primary" onclick="exportPdf()">导出PDF</button>
+        <button class="btn btn-primary" onclick="exportCSV()">导出CSV表格</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR 弹窗 -->
+  <div id="modal-qr" class="modal hidden">
+    <div class="modal-box">
+      <h3>手机扫码访问</h3>
+      <div id="qr-container" class="qr-container"></div>
+      <p id="qr-url" class="qr-url"></p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-qr')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 角色切换弹窗 -->
+  <div id="modal-role-switch" class="modal hidden">
+    <div class="modal-box">
+      <h3>切换角色</h3>
+      <div class="role-switch-list">
+        <button class="role-switch-btn control" onclick="switchRole('control')">
+          <span class="role-icon">⚙️</span>
+          <span class="role-name">控制端</span>
+          <span class="role-desc">全权限：节目/通道/导入/导航/重置</span>
+        </button>
+        <button class="role-switch-btn assistant" onclick="switchRole('assistant')">
+          <span class="role-icon">🎭</span>
+          <span class="role-name">舞台助理端</span>
+          <span class="role-desc">备注/音乐节点/通道选择</span>
+        </button>
+        <button class="role-switch-btn backstage" onclick="switchRole('backstage')">
+          <span class="role-icon">🎬</span>
+          <span class="role-name">幕后端</span>
+          <span class="role-desc">仅可修改备注</span>
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-role-switch')">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主体布局 -->
+  <main class="main-layout">
+    <!-- 左侧：节目列表 -->
+    <section class="panel panel-list">
+      <div class="panel-header">
+        <h2>节目列表</h2>
+        <button class="btn btn-sm btn-primary" id="add-program-btn" onclick="openAddProgram()">＋ 添加节目</button>
+      </div>
+      <!-- 拖拽排序容器 -->
+      <div id="program-list" class="program-list"></div>
+    </section>
+
+    <!-- 右侧：演出详情 -->
+    <section class="panel panel-stage">
+      <!-- 演出模式：当前节目 + 计时 -->
+      <div id="performance-view" class="performance-view hidden">
+        <div class="perf-progress-bar" id="perf-progress-bar">
+          <span class="perf-progress-text" id="perf-progress-text">—</span>
+          <button class="list-toggle-btn" id="list-toggle-btn" onclick="togglePerfList()">📋 节目列表</button>
+        </div>
+        <div class="stage-cards">
+          <!-- 当前节目卡 -->
+          <div class="stage-card current-card">
+            <div class="card-label" id="current-card-label">🎤 正在进行</div>
+            <div id="current-name" class="stage-program-name">—</div>
+            <div id="current-channels" class="stage-mics"></div>
+            <div id="current-music" class="music-cue-display"></div>
+            <div id="current-notes" class="stage-notes"></div>
+            <div id="current-total" class="stage-total"></div>
+            <div id="current-duration" class="card-duration"></div>
+          </div>
+          <!-- 下一节目卡 -->
+          <div class="stage-card next-card">
+            <div class="card-label">⏭ 下一节目</div>
+            <div id="next-name" class="stage-program-name small">—</div>
+            <div id="next-channels" class="stage-mics"></div>
+            <div id="next-music" class="music-cue-display"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 设置模式：添加/编辑节目 -->
+      <div id="setup-view" class="setup-view">
+        <div class="setup-placeholder" id="setup-placeholder">
+          <p>👆 点击节目列表中的节目进行编辑</p>
+          <p>节目可上下拖拽调整顺序</p>
+          <p>或点击右上角「添加节目」</p>
+        </div>
+
+        <!-- 编辑面板 -->
+        <div id="edit-panel" class="edit-panel hidden">
+          <div class="edit-panel-header">
+            <h3 id="edit-panel-title">编辑节目</h3>
+            <button class="icon-btn" onclick="closeEditPanel()">✕</button>
+          </div>
+
+          <div class="form-group">
+            <label>节目名称 *</label>
+            <input type="text" id="edit-name" class="text-input" placeholder="输入节目名称">
+          </div>
+
+          <div class="form-group">
+            <label>节目时长（秒，0 = 不计时）</label>
+            <input type="number" id="edit-duration" class="text-input" placeholder="例如 300 = 5分钟" min="0">
+          </div>
+
+          <div class="form-group">
+            <label>启用通道（点击勾选本节目需要的话筒/线路）</label>
+            <div id="program-channel-select" class="channel-check-wrap"></div>
+          </div>
+
+          <div class="form-group">
+            <label>🎵 音乐播放节点 / 提示 Cue（含切入点位）</label>
+            <textarea id="edit-musiccue" class="text-input textarea" placeholder="如：前奏8小节后进人声；副歌第2段起灯光；末尾淡出"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>通用舞台/灯光备注</label>
+            <textarea id="edit-notes" class="text-input textarea" placeholder="舞台、灯光、演员提示"></textarea>
+          </div>
+
+          <div class="edit-actions">
+            <button class="btn btn-danger" id="delete-program-btn" onclick="deleteProgram()">🗑 删除节目</button>
+            <div>
+              <button class="btn btn-secondary" onclick="closeEditPanel()">取消</button>
+              <button class="btn btn-primary" onclick="saveProgram()">💾 保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 全局底部导航栏（演出模式固定底部） -->
+  <div class="nav-controls" id="nav-controls" style="display:none">
+    <button class="nav-btn nav-small" id="btn-prev" onclick="navProgram('prev')">◀ 上一个</button>
+    <button class="nav-btn nav-go" id="btn-go" onclick="navProgram('go')">GO</button>
+    <button class="nav-btn nav-small" id="btn-next" onclick="navProgram('next')">下一个 ▶</button>
+  </div>
+
+  <!-- 下载客户端弹窗 -->
+  <div id="modal-download" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header-row">
+        <h3>下载桌面客户端</h3>
+        <button class="icon-btn" onclick="closeModal('modal-download')">✕</button>
+      </div>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:12px">下载后运行，客户端自动作为服务器并显示局域网 IP。其他设备通过浏览器或扫码访问该 IP 即可使用。</p>
+      <div class="download-grid">
+        <a class="download-card" id="dl-win" href="/download/stage-manager-win.bat" download>
+          <div class="dl-icon">🪟</div>
+          <div class="dl-name">Windows</div>
+          <div class="dl-sub">双击运行 .bat</div>
+        </a>
+        <a class="download-card" id="dl-mac-intel" href="/download/stage-manager-macos-intel.command" download>
+          <div class="dl-icon">💻</div>
+          <div class="dl-name">macOS Intel</div>
+          <div class="dl-sub">双击 .command (10.14+)</div>
+        </a>
+        <a class="download-card" id="dl-mac-arm" href="/download/stage-manager-macos-arm64.command" download>
+          <div class="dl-icon">🍎</div>
+          <div class="dl-name">macOS M芯片</div>
+          <div class="dl-sub">双击 .command (Apple Silicon)</div>
+        </a>
+      </div>
+      <div style="margin-top:12px;padding:12px 16px;background:rgba(10,132,255,0.08);border-radius:10px;border:1px solid rgba(10,132,255,0.2)">
+        <p style="font-size:12px;color:var(--text-2);line-height:1.6">
+          <strong style="color:#0a84ff">使用说明：</strong><br>
+          1. 下载对应系统的文件到电脑<br>
+          2. Windows 双击 .bat 文件运行<br>
+          3. macOS 双击 .command 文件运行（首次需右键→打开）<br>
+          4. 运行后会自动下载 Node.js（如未安装）并启动服务器<br>
+          5. 终端会显示 IP 地址，其他设备浏览器访问即可
+        </p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-download')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 重置确认弹窗 -->
+  <div id="modal-reset-confirm" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header-row">
+        <h3>重置节目状态</h3>
+        <button class="icon-btn" onclick="closeModal('modal-reset-confirm')">✕</button>
+      </div>
+      <div class="reset-confirm-box">
+        <p id="reset-confirm-text">确定要重置此节目的完成状态吗？</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-reset-confirm')">取消</button>
+        <button class="btn btn-primary" id="reset-confirm-btn" style="background:var(--ios-orange);border-color:rgba(255,159,10,0.5)">↺ 确认重置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加节目弹窗 -->
+  <div id="modal-add" class="modal hidden">
+    <div class="modal-box">
+      <h3>添加节目</h3>
+      <div class="form-group">
+        <label>节目名称 *</label>
+        <input type="text" id="add-name" class="text-input" placeholder="输入节目名称">
+      </div>
+      <div class="form-group">
+        <label>节目时长（秒，0 = 不计时）</label>
+        <input type="number" id="add-duration" class="text-input" placeholder="0" min="0" value="0">
+      </div>
+      <div class="form-group">
+        <label>🎵 音乐播放节点 / 提示 Cue</label>
+        <textarea id="add-musiccue" class="text-input textarea" placeholder="如：前奏8小节后进人声；副歌第2段起灯光；末尾淡出"></textarea>
+      </div>
+      <div class="form-group">
+        <label>通用备注</label>
+        <textarea id="add-notes" class="text-input textarea" placeholder="舞台、灯光、演员提示"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add')">取消</button>
+        <button class="btn btn-primary" onclick="confirmAddProgram()">创建节目</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 节目详情弹窗（演出模式点击节目查看） -->
+  <div id="modal-program-detail" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header-row">
+        <h3 id="detail-title">节目详情</h3>
+        <button class="icon-btn" onclick="closeModal('modal-program-detail')">✕</button>
+      </div>
+      <div id="detail-body"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-program-detail')">关闭</button>
+        <button class="btn btn-secondary" id="detail-reset-btn" style="display:none" onclick="detailResetOne()">↺ 重置此节目</button>
+        <button class="btn btn-primary" id="detail-set-current-btn">▶ 设为当前节目</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导入节目单弹窗 -->
+  <div id="modal-import" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header-row">
+        <h3>导入节目单</h3>
+        <button class="icon-btn" onclick="closeModal('modal-import')">✕</button>
+      </div>
+      <div class="import-drop-zone" id="import-drop-zone" onclick="document.getElementById('import-file-input').click()">
+        <p>点击选择或拖拽文件到此处</p>
+        <p style="font-size:12px;color:var(--text-2)">支持 PDF 和 Word(.docx) 格式</p>
+        <input type="file" id="import-file-input" accept=".pdf,.docx" style="display:none">
+      </div>
+      <div id="import-preview" class="import-preview-list" style="display:none"></div>
+      <div id="import-mode-row" style="display:none;margin:12px 0">
+        <label style="margin-right:16px"><input type="radio" name="import-mode" value="append" checked> 追加到末尾</label>
+        <label><input type="radio" name="import-mode" value="replace"> 替换全部</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-import')">取消</button>
+        <button class="btn btn-primary" id="import-confirm-btn" onclick="confirmImport()" style="display:none">确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出数据临时容器（隐藏） -->
+  <div id="export-data-wrap" style="display:none;"></div>
+
+<!-- ===== QRCode 库 (内联) ===== -->
+<script>var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this.parsedData=[];for(var b=[],d=0,e=this.data.length;e>d;d++){var f=this.data.charCodeAt(d);f>65536?(b[0]=240|(1835008&f)>>>18,b[1]=128|(258048&f)>>>12,b[2]=128|(4032&f)>>>6,b[3]=128|63&f):f>2048?(b[0]=224|(61440&f)>>>12,b[1]=128|(4032&f)>>>6,b[2]=128|63&f):f>128?(b[0]=192|(1984&f)>>>6,b[1]=128|63&f):b[0]=f,this.parsedData=this.parsedData.concat(b)}this.parsedData.length!=this.data.length&&(this.parsedData.unshift(191),this.parsedData.unshift(187),this.parsedData.unshift(239))}function b(a,b){this.typeNumber=a,this.errorCorrectLevel=b,this.modules=null,this.moduleCount=0,this.dataCache=null,this.dataList=[]}function i(a,b){if(void 0==a.length)throw new Error(a.length+"/"+b);for(var c=0;c<a.length&&0==a[c];)c++;this.num=new Array(a.length-c+b);for(var d=0;d<a.length-c;d++)this.num[d]=a[d+c]}function j(a,b){this.totalCount=a,this.dataCount=b}function k(){this.buffer=[],this.length=0}function m(){return"undefined"!=typeof CanvasRenderingContext2D}function n(){var a=!1,b=navigator.userAgent;return/android/i.test(b)&&(a=!0,aMat=b.toString().match(/android ([0-9]\.[0-9])/i),aMat&&aMat[1]&&(a=parseFloat(aMat[1]))),a}function r(a,b){for(var c=1,e=s(a),f=0,g=l.length;g>=f;f++){var h=0;switch(b){case d.L:h=l[f][0];break;case d.M:h=l[f][1];break;case d.Q:h=l[f][2];break;case d.H:h=l[f][3]}if(h>=e)break;c++}if(c>l.length)throw new Error("Too long data");return c}function s(a){var b=encodeURI(a).toString().replace(/\%[0-9a-fA-F]{2}/g,"a");return b.length+(b.length!=a?3:0)}a.prototype={getLength:function(){return this.parsedData.length},write:function(a){for(var b=0,c=this.parsedData.length;c>b;b++)a.put(this.parsedData[b],8)}},b.prototype={addData:function(b){var c=new a(b);this.dataList.push(c),this.dataCache=null},isDark:function(a,b){if(0>a||this.moduleCount<=a||0>b||this.moduleCount<=b)throw new Error(a+","+b);return this.modules[a][b]},getModuleCount:function(){return this.moduleCount},make:function(){this.makeImpl(!1,this.getBestMaskPattern())},makeImpl:function(a,c){this.moduleCount=4*this.typeNumber+17,this.modules=new Array(this.moduleCount);for(var d=0;d<this.moduleCount;d++){this.modules[d]=new Array(this.moduleCount);for(var e=0;e<this.moduleCount;e++)this.modules[d][e]=null}this.setupPositionProbePattern(0,0),this.setupPositionProbePattern(this.moduleCount-7,0),this.setupPositionProbePattern(0,this.moduleCount-7),this.setupPositionAdjustPattern(),this.setupTimingPattern(),this.setupTypeInfo(a,c),this.typeNumber>=7&&this.setupTypeNumber(a),null==this.dataCache&&(this.dataCache=b.createData(this.typeNumber,this.errorCorrectLevel,this.dataList)),this.mapData(this.dataCache,c)},setupPositionProbePattern:function(a,b){for(var c=-1;7>=c;c++)if(!(-1>=a+c||this.moduleCount<=a+c))for(var d=-1;7>=d;d++)-1>=b+d||this.moduleCount<=b+d||(this.modules[a+c][b+d]=c>=0&&6>=c&&(0==d||6==d)||d>=0&&6>=d&&(0==c||6==c)||c>=2&&4>=c&&d>=2&&4>=d?!0:!1)},getBestMaskPattern:function(){for(var a=0,b=0,c=0;8>c;c++){this.makeImpl(!0,c);var d=f.getLostPoint(this);(0==c||a>d)&&(a=d,b=c)}return b},createMovieClip:function(a,b,c){var d=a.createEmptyMovieClip(b,c),e=1;this.make();for(var f=0;f<this.modules.length;f++)for(var g=f*e,h=0;h<this.modules[f].length;h++){var i=h*e,j=this.modules[f][h];j&&(d.beginFill(0,100),d.moveTo(i,g),d.lineTo(i+e,g),d.lineTo(i+e,g+e),d.lineTo(i,g+e),d.endFill())}return d},setupTimingPattern:function(){for(var a=8;a<this.moduleCount-8;a++)null==this.modules[a][6]&&(this.modules[a][6]=0==a%2);for(var b=8;b<this.moduleCount-8;b++)null==this.modules[6][b]&&(this.modules[6][b]=0==b%2)},setupPositionAdjustPattern:function(){for(var a=f.getPatternPosition(this.typeNumber),b=0;b<a.length;b++)for(var c=0;c<a.length;c++){var d=a[b],e=a[c];if(null==this.modules[d][e])for(var g=-2;2>=g;g++)for(var h=-2;2>=h;h++)this.modules[d+g][e+h]=-2==g||2==g||-2==h||2==h||0==g&&0==h?!0:!1}},setupTypeNumber:function(a){for(var b=f.getBCHTypeNumber(this.typeNumber),c=0;18>c;c++){var d=!a&&1==(1&b>>c);this.modules[Math.floor(c/3)][c%3+this.moduleCount-8-3]=d}for(var c=0;18>c;c++){var d=!a&&1==(1&b>>c);this.modules[c%3+this.moduleCount-8-3][Math.floor(c/3)]=d}},setupTypeInfo:function(a,b){for(var c=this.errorCorrectLevel<<3|b,d=f.getBCHTypeInfo(c),e=0;15>e;e++){var g=!a&&1==(1&d>>e);6>e?this.modules[e][8]=g:8>e?this.modules[e+1][8]=g:this.modules[this.moduleCount-15+e][8]=g}for(var e=0;15>e;e++){var g=!a&&1==(1&d>>e);8>e?this.modules[8][this.moduleCount-e-1]=g:9>e?this.modules[8][15-e-1+1]=g:this.modules[8][15-e-1]=g}this.modules[this.moduleCount-8][8]=!a},mapData:function(a,b){for(var c=-1,d=this.moduleCount-1,e=7,g=0,h=this.moduleCount-1;h>0;h-=2)for(6==h&&h--;;){for(var i=0;2>i;i++)if(null==this.modules[d][h-i]){var j=!1;g<a.length&&(j=1==(1&a[g]>>>e));var k=f.getMask(b,d,h-i);k&&(j=!j),this.modules[d][h-i]=j,e--,-1==e&&(g++,e=7)}if(d+=c,0>d||this.moduleCount<=d){d-=c,c=-c;break}}}},b.PAD0=236,b.PAD1=17,b.createData=function(a,c,d){for(var e=j.getRSBlocks(a,c),g=new k,h=0;h<d.length;h++){var i=d[h];g.put(i.mode,4),g.put(i.getLength(),f.getLengthInBits(i.mode,a)),i.write(g)}for(var l=0,h=0;h<e.length;h++)l+=e[h].dataCount;if(g.getLengthInBits()>8*l)throw new Error("code length overflow. ("+g.getLengthInBits()+">"+8*l+")");for(g.getLengthInBits()+4<=8*l&&g.put(0,4);0!=g.getLengthInBits()%8;)g.putBit(!1);for(;;){if(g.getLengthInBits()>=8*l)break;if(g.put(b.PAD0,8),g.getLengthInBits()>=8*l)break;g.put(b.PAD1,8)}return b.createBytes(g,e)},b.createBytes=function(a,b){for(var c=0,d=0,e=0,g=new Array(b.length),h=new Array(b.length),j=0;j<b.length;j++){var k=b[j].dataCount,l=b[j].totalCount-k;d=Math.max(d,k),e=Math.max(e,l),g[j]=new Array(k);for(var m=0;m<g[j].length;m++)g[j][m]=255&a.buffer[m+c];c+=k;var n=f.getErrorCorrectPolynomial(l),o=new i(g[j],n.getLength()-1),p=o.mod(n);h[j]=new Array(n.getLength()-1);for(var m=0;m<h[j].length;m++){var q=m+p.getLength()-h[j].length;h[j][m]=q>=0?p.get(q):0}}for(var r=0,m=0;m<b.length;m++)r+=b[m].totalCount;for(var s=new Array(r),t=0,m=0;d>m;m++)for(var j=0;j<b.length;j++)m<g[j].length&&(s[t++]=g[j][m]);for(var m=0;e>m;m++)for(var j=0;j<b.length;j++)m<h[j].length&&(s[t++]=h[j][m]);return s};for(var c={MODE_NUMBER:1,MODE_ALPHA_NUM:2,MODE_8BIT_BYTE:4,MODE_KANJI:8},d={L:1,M:0,Q:3,H:2},e={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7},f={PATTERN_POSITION_TABLE:[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],G15:1335,G18:7973,G15_MASK:21522,getBCHTypeInfo:function(a){for(var b=a<<10;f.getBCHDigit(b)-f.getBCHDigit(f.G15)>=0;)b^=f.G15<<f.getBCHDigit(b)-f.getBCHDigit(f.G15);return(a<<10|b)^f.G15_MASK},getBCHTypeNumber:function(a){for(var b=a<<12;f.getBCHDigit(b)-f.getBCHDigit(f.G18)>=0;)b^=f.G18<<f.getBCHDigit(b)-f.getBCHDigit(f.G18);return a<<12|b},getBCHDigit:function(a){for(var b=0;0!=a;)b++,a>>>=1;return b},getPatternPosition:function(a){return f.PATTERN_POSITION_TABLE[a-1]},getMask:function(a,b,c){switch(a){case e.PATTERN000:return 0==(b+c)%2;case e.PATTERN001:return 0==b%2;case e.PATTERN010:return 0==c%3;case e.PATTERN011:return 0==(b+c)%3;case e.PATTERN100:return 0==(Math.floor(b/2)+Math.floor(c/3))%2;case e.PATTERN101:return 0==b*c%2+b*c%3;case e.PATTERN110:return 0==(b*c%2+b*c%3)%2;case e.PATTERN111:return 0==(b*c%3+(b+c)%2)%2;default:throw new Error("bad maskPattern:"+a)}},getErrorCorrectPolynomial:function(a){for(var b=new i([1],0),c=0;a>c;c++)b=b.multiply(new i([1,g.gexp(c)],0));return b},getLengthInBits:function(a,b){if(b>=1&&10>b)switch(a){case c.MODE_NUMBER:return 10;case c.MODE_ALPHA_NUM:return 9;case c.MODE_8BIT_BYTE:return 8;case c.MODE_KANJI:return 8;default:throw new Error("mode:"+a)}else if(27>b)switch(a){case c.MODE_NUMBER:return 12;case c.MODE_ALPHA_NUM:return 11;case c.MODE_8BIT_BYTE:return 16;case c.MODE_KANJI:return 10;default:throw new Error("mode:"+a)}else{if(!(41>b))throw new Error("type:"+b);switch(a){case c.MODE_NUMBER:return 14;case c.MODE_ALPHA_NUM:return 13;case c.MODE_8BIT_BYTE:return 16;case c.MODE_KANJI:return 12;default:throw new Error("mode:"+a)}}},getLostPoint:function(a){for(var b=a.getModuleCount(),c=0,d=0;b>d;d++)for(var e=0;b>e;e++){for(var f=0,g=a.isDark(d,e),h=-1;1>=h;h++)if(!(0>d+h||d+h>=b))for(var i=-1;1>=i;i++)0>e+i||e+i>=b||(0!=h||0!=i)&&g==a.isDark(d+h,e+i)&&f++;f>5&&(c+=3+f-5)}for(var d=0;b-1>d;d++)for(var e=0;b-1>e;e++){var j=0;a.isDark(d,e)&&j++,a.isDark(d+1,e)&&j++,a.isDark(d,e+1)&&j++,a.isDark(d+1,e+1)&&j++,(0==j||4==j)&&(c+=3)}for(var d=0;b>d;d++)for(var e=0;b-6>e;e++)a.isDark(d,e)&&!a.isDark(d,e+1)&&a.isDark(d,e+2)&&a.isDark(d,e+3)&&a.isDark(d,e+4)&&!a.isDark(d,e+5)&&a.isDark(d,e+6)&&(c+=40);for(var e=0;b>e;e++)for(var d=0;b-6>d;d++)a.isDark(d,e)&&!a.isDark(d+1,e)&&a.isDark(d+2,e)&&a.isDark(d+3,e)&&a.isDark(d+4,e)&&!a.isDark(d+5,e)&&a.isDark(d+6,e)&&(c+=40);for(var k=0,e=0;b>e;e++)for(var d=0;b>d;d++)a.isDark(d,e)&&k++;var l=Math.abs(100*k/b/b-50)/5;return c+=10*l}},g={glog:function(a){if(1>a)throw new Error("glog("+a+")");return g.LOG_TABLE[a]},gexp:function(a){for(;0>a;)a+=255;for(;a>=256;)a-=255;return g.EXP_TABLE[a]},EXP_TABLE:new Array(256),LOG_TABLE:new Array(256)},h=0;8>h;h++)g.EXP_TABLE[h]=1<<h;for(var h=8;256>h;h++)g.EXP_TABLE[h]=g.EXP_TABLE[h-4]^g.EXP_TABLE[h-5]^g.EXP_TABLE[h-6]^g.EXP_TABLE[h-8];for(var h=0;255>h;h++)g.LOG_TABLE[g.EXP_TABLE[h]]=h;i.prototype={get:function(a){return this.num[a]},getLength:function(){return this.num.length},multiply:function(a){for(var b=new Array(this.getLength()+a.getLength()-1),c=0;c<this.getLength();c++)for(var d=0;d<a.getLength();d++)b[c+d]^=g.gexp(g.glog(this.get(c))+g.glog(a.get(d)));return new i(b,0)},mod:function(a){if(this.getLength()-a.getLength()<0)return this;for(var b=g.glog(this.get(0))-g.glog(a.get(0)),c=new Array(this.getLength()),d=0;d<this.getLength();d++)c[d]=this.get(d);for(var d=0;d<a.getLength();d++)c[d]^=g.gexp(g.glog(a.get(d))+b);return new i(c,0).mod(a)}},j.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],j.getRSBlocks=function(a,b){var c=j.getRsBlockTable(a,b);if(void 0==c)throw new Error("bad rs block @ typeNumber:"+a+"/errorCorrectLevel:"+b);for(var d=c.length/3,e=[],f=0;d>f;f++)for(var g=c[3*f+0],h=c[3*f+1],i=c[3*f+2],k=0;g>k;k++)e.push(new j(h,i));return e},j.getRsBlockTable=function(a,b){switch(b){case d.L:return j.RS_BLOCK_TABLE[4*(a-1)+0];case d.M:return j.RS_BLOCK_TABLE[4*(a-1)+1];case d.Q:return j.RS_BLOCK_TABLE[4*(a-1)+2];case d.H:return j.RS_BLOCK_TABLE[4*(a-1)+3];default:return void 0}},k.prototype={get:function(a){var b=Math.floor(a/8);return 1==(1&this.buffer[b]>>>7-a%8)},put:function(a,b){for(var c=0;b>c;c++)this.putBit(1==(1&a>>>b-c-1))},getLengthInBits:function(){return this.length},putBit:function(a){var b=Math.floor(this.length/8);this.buffer.length<=b&&this.buffer.push(0),a&&(this.buffer[b]|=128>>>this.length%8),this.length++}};var l=[[17,14,11,7],[32,26,20,14],[53,42,32,24],[78,62,46,34],[106,84,60,44],[134,106,74,58],[154,122,86,64],[192,152,108,84],[230,180,130,98],[271,213,151,119],[321,251,177,137],[367,287,203,155],[425,331,241,177],[458,362,258,194],[520,412,292,220],[586,450,322,250],[644,504,364,280],[718,560,394,310],[792,624,442,338],[858,666,482,382],[929,711,509,403],[1003,779,565,439],[1091,857,611,461],[1171,911,661,511],[1273,997,715,535],[1367,1059,751,593],[1465,1125,805,625],[1528,1190,868,658],[1628,1264,908,698],[1732,1370,982,742],[1840,1452,1030,790],[1952,1538,1112,842],[2068,1628,1168,898],[2188,1722,1228,958],[2303,1809,1283,983],[2431,1911,1351,1051],[2563,1989,1423,1093],[2699,2099,1499,1139],[2809,2213,1579,1219],[2953,2331,1663,1273]],o=function(){var a=function(a,b){this._el=a,this._htOption=b};return a.prototype.draw=function(a){function g(a,b){var c=document.createElementNS("http://www.w3.org/2000/svg",a);for(var d in b)b.hasOwnProperty(d)&&c.setAttribute(d,b[d]);return c}var b=this._htOption,c=this._el,d=a.getModuleCount();Math.floor(b.width/d),Math.floor(b.height/d),this.clear();var h=g("svg",{viewBox:"0 0 "+String(d)+" "+String(d),width:"100%",height:"100%",fill:b.colorLight});h.setAttributeNS("http://www.w3.org/2000/xmlns/","xmlns:xlink","http://www.w3.org/1999/xlink"),c.appendChild(h),h.appendChild(g("rect",{fill:b.colorDark,width:"1",height:"1",id:"template"}));for(var i=0;d>i;i++)for(var j=0;d>j;j++)if(a.isDark(i,j)){var k=g("use",{x:String(i),y:String(j)});k.setAttributeNS("http://www.w3.org/1999/xlink","href","#template"),h.appendChild(k)}},a.prototype.clear=function(){for(;this._el.hasChildNodes();)this._el.removeChild(this._el.lastChild)},a}(),p="svg"===document.documentElement.tagName.toLowerCase(),q=p?o:m()?function(){function a(){this._elImage.src=this._elCanvas.toDataURL("image/png"),this._elImage.style.display="block",this._elCanvas.style.display="none"}function d(a,b){var c=this;if(c._fFail=b,c._fSuccess=a,null===c._bSupportDataURI){var d=document.createElement("img"),e=function(){c._bSupportDataURI=!1,c._fFail&&_fFail.call(c)},f=function(){c._bSupportDataURI=!0,c._fSuccess&&c._fSuccess.call(c)};return d.onabort=e,d.onerror=e,d.onload=f,d.src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",void 0}c._bSupportDataURI===!0&&c._fSuccess?c._fSuccess.call(c):c._bSupportDataURI===!1&&c._fFail&&c._fFail.call(c)}if(this._android&&this._android<=2.1){var b=1/window.devicePixelRatio,c=CanvasRenderingContext2D.prototype.drawImage;CanvasRenderingContext2D.prototype.drawImage=function(a,d,e,f,g,h,i,j){if("nodeName"in a&&/img/i.test(a.nodeName))for(var l=arguments.length-1;l>=1;l--)arguments[l]=arguments[l]*b;else"undefined"==typeof j&&(arguments[1]*=b,arguments[2]*=b,arguments[3]*=b,arguments[4]*=b);c.apply(this,arguments)}}var e=function(a,b){this._bIsPainted=!1,this._android=n(),this._htOption=b,this._elCanvas=document.createElement("canvas"),this._elCanvas.width=b.width,this._elCanvas.height=b.height,a.appendChild(this._elCanvas),this._el=a,this._oContext=this._elCanvas.getContext("2d"),this._bIsPainted=!1,this._elImage=document.createElement("img"),this._elImage.style.display="none",this._el.appendChild(this._elImage),this._bSupportDataURI=null};return e.prototype.draw=function(a){var b=this._elImage,c=this._oContext,d=this._htOption,e=a.getModuleCount(),f=d.width/e,g=d.height/e,h=Math.round(f),i=Math.round(g);b.style.display="none",this.clear();for(var j=0;e>j;j++)for(var k=0;e>k;k++){var l=a.isDark(j,k),m=k*f,n=j*g;c.strokeStyle=l?d.colorDark:d.colorLight,c.lineWidth=1,c.fillStyle=l?d.colorDark:d.colorLight,c.fillRect(m,n,f,g),c.strokeRect(Math.floor(m)+.5,Math.floor(n)+.5,h,i),c.strokeRect(Math.ceil(m)-.5,Math.ceil(n)-.5,h,i)}this._bIsPainted=!0},e.prototype.makeImage=function(){this._bIsPainted&&d.call(this,a)},e.prototype.isPainted=function(){return this._bIsPainted},e.prototype.clear=function(){this._oContext.clearRect(0,0,this._elCanvas.width,this._elCanvas.height),this._bIsPainted=!1},e.prototype.round=function(a){return a?Math.floor(1e3*a)/1e3:a},e}():function(){var a=function(a,b){this._el=a,this._htOption=b};return a.prototype.draw=function(a){for(var b=this._htOption,c=this._el,d=a.getModuleCount(),e=Math.floor(b.width/d),f=Math.floor(b.height/d),g=['<table style="border:0;border-collapse:collapse;">'],h=0;d>h;h++){g.push("<tr>");for(var i=0;d>i;i++)g.push('<td style="border:0;border-collapse:collapse;padding:0;margin:0;width:'+e+"px;height:"+f+"px;background-color:"+(a.isDark(h,i)?b.colorDark:b.colorLight)+';"></td>');g.push("</tr>")}g.push("</table>"),c.innerHTML=g.join("");var j=c.childNodes[0],k=(b.width-j.offsetWidth)/2,l=(b.height-j.offsetHeight)/2;k>0&&l>0&&(j.style.margin=l+"px "+k+"px")},a.prototype.clear=function(){this._el.innerHTML=""},a}();QRCode=function(a,b){if(this._htOption={width:256,height:256,typeNumber:4,colorDark:"#000000",colorLight:"#ffffff",correctLevel:d.H},"string"==typeof b&&(b={text:b}),b)for(var c in b)this._htOption[c]=b[c];"string"==typeof a&&(a=document.getElementById(a)),this._android=n(),this._el=a,this._oQRCode=null,this._oDrawing=new q(this._el,this._htOption),this._htOption.text&&this.makeCode(this._htOption.text)},QRCode.prototype.makeCode=function(a){this._oQRCode=new b(r(a,this._htOption.correctLevel),this._htOption.correctLevel),this._oQRCode.addData(a),this._oQRCode.make(),this._el.title=a,this._oDrawing.draw(this._oQRCode),this.makeImage()},QRCode.prototype.makeImage=function(){"function"==typeof this._oDrawing.makeImage&&(!this._android||this._android>=3)&&this._oDrawing.makeImage()},QRCode.prototype.clear=function(){this._oDrawing.clear()},QRCode.CorrectLevel=d}();</script>
+
+<!-- ===== 应用逻辑 (内联) ===== -->
+<script>
+// 舞台流程表前端逻辑（单文件增强版 - 支持WebSocket服务器或localStorage独立运行）
+const STORAGE_KEY = 'stage-manager-state-v2';
+let wsMode = false;
+
+// 扩展数据结构：新增全局通道库
+let localState = {
+  showName: "舞台流程表",
+  mode: "setup",
+  currentProgramIndex: 0,
+  globalChannels: {
+    mics: [],
+    lines: []
+  },
+  programs: []
+};
+// ---------- 角色权限系统 ----------
+function getRole(){
+  var p = new URLSearchParams(location.search);
+  var r = p.get('role');
+  return ['control','assistant','backstage'].indexOf(r)>=0 ? r : 'control';
+}
+var ROLE = getRole();
+var PERM = {
+  control:    { mode:true, addDel:true, drag:true, editName:true, editDuration:true, editMusic:true, editChannel:true, editNotes:true, channelAdmin:true, importIt:true, nav:true, reset:true, exportIt:true, rename:true },
+  assistant:  { editMusic:true, editChannel:true, editNotes:true },
+  backstage:  { editNotes:true }
+};
+function can(k){ return !!(PERM[ROLE] && PERM[ROLE][k]); }
+function showToast(msg){ var t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(function(){ t.remove(); },2500); }
+
+let editingIndex = null;
+let programSortable = null;
+var perfListVisible = true;
+
+// ---------- 尝试连接 WebSocket ----------
+let ws = null;
+function tryConnectWS(backgroundOnly) {
+  const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  try {
+    ws = new WebSocket(`${wsProtocol}//${location.host}`);
+    ws.onopen = () => {
+      wsMode = true;
+      connStatus.classList.add('connected');
+      connStatus.querySelector('.conn-text').textContent = "已连接";
+      sendMsg({ type: "get_state" });
+    };
+    ws.onclose = () => {
+      if (wsMode) {
+        wsMode = false;
+        connStatus.classList.remove('connected');
+        connStatus.querySelector('.conn-text').textContent = "本地模式";
+      }
+    };
+    ws.onerror = () => {
+      if (!wsMode) { /* 连接失败，静默降级到localStorage */ }
+    };
+    ws.onmessage = (ev) => {
+      const data = JSON.parse(ev.data);
+      switch (data.type) {
+        case "full_state":
+          // backgroundOnly 模式下仅当本地无数据时接受 full_state
+          if (backgroundOnly && localState.programs && localState.programs.length > 0) {
+            // 只接受 timer 和 client_count，不覆盖本地数据
+          } else {
+            localState = mergeState(data.state || localState);
+            renderAll();
+          }
+          if (data.clientCount !== undefined) updateClientCount(data.clientCount);
+          break;
+        case "client_count":
+          updateClientCount(data.count);
+          break;
+        case "error":
+          if (data.code === 'forbidden') showToast('无权限：' + (data.action || ''));
+          break;
+      }
+    };
+  } catch(e) {
+    // 静默失败，已在本地模式
+  }
+}
+
+// 合并旧音乐字段：musicNode + musicCue → 单一 musicCue
+function mergeMusicField(p) {
+  const cue = (p.musicCue || '').trim();
+  const node = (p.musicNode || '').trim();
+  if (!node) return cue;
+  return cue ? '\u3010\u8282\u70b9\u3011' + node + '\n' + cue : node;
+}
+
+// 确保通道对象含 customType 字段
+function ensureChannel(ch) {
+  return {
+    id: ch.id,
+    name: ch.name || '',
+    type: ch.type || '',
+    notes: ch.notes || '',
+    customType: ch.customType || ''
+  };
+}
+
+// 状态合并（兼容旧数据，确保新字段存在）
+function mergeState(s) {
+  var oldVersion = s.version || 1;
+  var merged = {
+    showName: s.showName || "舞台流程表",
+    mode: s.mode || "setup",
+    currentProgramIndex: s.currentProgramIndex || 0,
+    version: 3,
+    globalChannels: s.globalChannels || { mics: [], lines: [] },
+    programs: (s.programs || []).map(function(p) {
+      var status = p.status;
+      if (!status) { status = p.completed ? 'completed' : 'pending'; }
+      var duration = p.duration || 0;
+      if (oldVersion < 3 && duration >= 60) { duration = Math.round(duration / 60); }
+      return {
+        name: p.name || "",
+        duration: duration,
+        notes: p.notes || "",
+        musicCue: mergeMusicField(p),
+        status: status,
+        useChannels: p.useChannels || (p.mics ? p.mics.filter(function(m){return m.active;}).map(function(m){return m.name;}) : [])
+      };
+    })
+  };
+  if (!merged.globalChannels.mics) merged.globalChannels.mics = [];
+  if (!merged.globalChannels.lines) merged.globalChannels.lines = [];
+  merged.globalChannels.mics = merged.globalChannels.mics.map(ensureChannel);
+  merged.globalChannels.lines = merged.globalChannels.lines.map(ensureChannel);
+  return merged;
+}
+
+// ---------- localStorage 降级模式 ----------
+function initLocalMode() {
+  wsMode = false;
+  connStatus.classList.add('connected');
+  connStatus.querySelector('.conn-text').textContent = "本地模式";
+  loadFromStorage();
+  renderAll();
+}
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      localState = mergeState(JSON.parse(saved));
+      // 迁移后立即落盘，避免重复迁移
+      saveToStorage();
+    }
+  } catch(e) {}
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
+  } catch(e) {}
+}
+
+// ---------- 消息发送 ----------
+function sendMsg(obj) {
+  if (wsMode && ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(obj));
+  } else {
+    handleLocalMessage(obj);
+  }
+}
+
+function handleLocalMessage(msg) {
+  switch (msg.type) {
+    case "get_state":
+      renderAll();
+      break;
+    case "update_state":
+      if (msg.data && typeof msg.data === 'object') {
+        localState = { ...localState, ...msg.data };
+        if (localState.programs.length > 0 && localState.currentProgramIndex > localState.programs.length - 1) {
+          localState.currentProgramIndex = Math.max(0, localState.programs.length - 1);
+        }
+        saveToStorage();
+        renderAll();
+      }
+      break;
+    case "set_current":
+      if (typeof msg.index === 'number' && msg.index >= 0 && msg.index <= localState.programs.length - 1) {
+        localState.currentProgramIndex = msg.index;
+        saveToStorage();
+        renderAll();
+      }
+      break;
+    case "advance":
+      var aIdx = localState.currentProgramIndex;
+      if (aIdx >= 0 && aIdx < localState.programs.length) localState.programs[aIdx].status = 'completed';
+      localState.currentProgramIndex = Math.min(aIdx + 1, Math.max(0, localState.programs.length - 1));
+      var aNew = localState.programs[localState.currentProgramIndex];
+      if (aNew && aNew.status !== 'completed') aNew.status = 'active';
+      saveToStorage(); renderAll(); break;
+    case "prev":
+      localState.currentProgramIndex = Math.max(0, localState.currentProgramIndex - 1);
+      var pNew = localState.programs[localState.currentProgramIndex];
+      if (pNew && pNew.status !== 'completed') pNew.status = 'active';
+      saveToStorage(); renderAll(); break;
+    case "next":
+      localState.currentProgramIndex = Math.min(localState.currentProgramIndex + 1, Math.max(0, localState.programs.length - 1));
+      var nNew = localState.programs[localState.currentProgramIndex];
+      if (nNew && nNew.status !== 'completed') nNew.status = 'active';
+      saveToStorage(); renderAll(); break;
+    case "reset_all":
+      localState.programs.forEach(function(p){ p.status = 'pending'; });
+      localState.currentProgramIndex = 0;
+      if (localState.programs[0]) localState.programs[0].status = 'active';
+      saveToStorage(); renderAll(); break;
+    case "reset_one":
+      if (typeof msg.idx === 'number' && localState.programs[msg.idx]) localState.programs[msg.idx].status = 'pending';
+      saveToStorage(); renderAll(); break;
+    case "update_program_field":
+      if (typeof msg.idx === 'number' && localState.programs[msg.idx]) localState.programs[msg.idx][msg.field] = msg.value;
+      saveToStorage(); renderAll(); break;
+    case "import_programs":
+      var imProgs = (msg.programs || []).map(function(p){ return { name:p.name||"", duration:p.duration||0, notes:p.notes||"", musicCue:p.musicCue||"", status:p.status||'pending', useChannels:p.useChannels||[] }; });
+      if (msg.mode === 'replace') { localState.programs = imProgs; localState.currentProgramIndex = 0; }
+      else { localState.programs = localState.programs.concat(imProgs); }
+      saveToStorage(); renderAll(); break;
+  }
+}
+
+// ---------- 连接状态 ----------
+const connStatus = document.getElementById('conn-status');
+
+function updateClientCount(n) {
+  const el = document.getElementById('client-count');
+  if (el) el.textContent = n ? `👥 ${n} 个连接` : '';
+}
+
+// ---------- 模式切换 ----------
+window.toggleMode = function () {
+  const newMode = localState.mode === 'setup' ? 'performance' : 'setup';
+  localState.mode = newMode;
+  perfListVisible = true;
+  var btn = document.getElementById('list-toggle-btn');
+  if (btn) btn.textContent = '✕ 隐藏列表';
+  sendMsg({ type: "update_state", data: { mode: newMode } });
+};
+
+// ---------- 全局通道设置弹窗 ----------
+window.openGlobalSetting = function() {
+  document.getElementById('modal-global-setting').classList.remove('hidden');
+  renderGlobalChannelEditor();
+  bindBatchCreate();
+  // Tab切换事件绑定
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = function() {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const targetTab = this.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.getElementById(targetTab).classList.remove('hidden');
+    };
+  });
+  // 新增单条通道按钮
+  document.querySelectorAll('.add-channel-btn').forEach(btn => {
+    btn.onclick = function() {
+      const ctype = this.dataset.ctype;
+      const pool = localState.globalChannels[ctype];
+      const prefix = ctype === "mics" ? "mic" : "line";
+      const id = `${prefix}_${Date.now()}_${pool.length}`;
+      const typeDefault = ctype === "mics" ? "wireless_headset" : "stereo_line";
+      const baseName = ctype === "mics" ? "话筒" : "线路";
+      pool.push({ id, name: `${baseName}${pool.length + 1}`, type: typeDefault, notes: "", customType: "" });
+      renderGlobalChannelEditor();
+    };
+  });
+};
+
+// 批量生成通道
+function bindBatchCreate() {
+  document.querySelectorAll('.batch-mic-btn, .batch-line-btn').forEach(btn => {
+    btn.onclick = function() {
+      const ctype = this.dataset.ctype;
+      const num = Number(document.getElementById('batch-num').value) || 4;
+      const pool = localState.globalChannels[ctype];
+      const baseName = ctype === "mics" ? "话筒" : "线路";
+      const prefix = ctype === "mics" ? "mic" : "line";
+      const typeOpt = ctype === "mics" ? "wireless_headset" : "stereo_line";
+      for (let i = 1; i <= num; i++) {
+        const id = `${prefix}_${Date.now()}_${pool.length}`;
+        pool.push({
+          id,
+          name: `${baseName}${pool.length + 1}`,
+          type: typeOpt,
+          notes: "",
+          customType: ""
+        });
+      }
+      renderGlobalChannelEditor();
+    };
+  });
+}
+
+// 渲染全局通道编辑器（支持名称/类型/备注修改）
+function renderGlobalChannelEditor() {
+  const micWrap = document.getElementById("global-mic-channel-list");
+  const lineWrap = document.getElementById("global-line-channel-list");
+  micWrap.innerHTML = "";
+  lineWrap.innerHTML = "";
+
+  // 话筒类型预设
+  const micTypeOpt = [
+    { v: "wireless_headset", t: "头戴无线麦" },
+    { v: "wireless_hand", t: "无线手持麦" },
+    { v: "podium", t: "讲台麦" },
+    { v: "wired", t: "有线话筒" },
+    { v: "host", t: "主持人话筒" },
+    { v: "guest", t: "嘉宾话筒" },
+    { v: "custom", t: "自定义" }
+  ];
+  // 线路类型预设
+  const lineTypeOpt = [
+    { v: "stereo_line", t: "立体声线路" },
+    { v: "mono_line", t: "单声道线路" },
+    { v: "drum", t: "电子鼓" },
+    { v: "keyboard", t: "键盘" },
+    { v: "guitar", t: "吉他" },
+    { v: "custom", t: "自定义" }
+  ];
+
+  // 渲染话筒通道
+  localState.globalChannels.mics.forEach((ch, idx) => {
+    const div = document.createElement("div");
+    div.className = "channel-row";
+    const customInput = ch.type === 'custom'
+      ? `<input class="channel-custom-input" placeholder="自定义类型名" value="${escapeAttr(ch.customType||'')}" data-idx="${idx}" data-ctype="mics">`
+      : '';
+    div.innerHTML = `
+      <input class="channel-name-input" value="${escapeAttr(ch.name)}" data-idx="${idx}" data-ctype="mics">
+      <select class="channel-type-select" data-idx="${idx}" data-ctype="mics">
+        ${micTypeOpt.map(o => `<option value="${o.v}" ${ch.type === o.v ? "selected" : ""}>${o.t}</option>`).join("")}
+      </select>
+      ${customInput}
+      <input class="channel-notes-input" placeholder="通道备注" value="${escapeAttr(ch.notes || "")}" data-idx="${idx}" data-ctype="mics">
+      <button class="channel-del-btn" data-idx="${idx}" data-ctype="mics">删除</button>
+    `;
+    micWrap.appendChild(div);
+  });
+
+  // 渲染线路通道
+  localState.globalChannels.lines.forEach((ch, idx) => {
+    const div = document.createElement("div");
+    div.className = "channel-row";
+    const customInput = ch.type === 'custom'
+      ? `<input class="channel-custom-input" placeholder="自定义类型名" value="${escapeAttr(ch.customType||'')}" data-idx="${idx}" data-ctype="lines">`
+      : '';
+    div.innerHTML = `
+      <input class="channel-name-input" value="${escapeAttr(ch.name)}" data-idx="${idx}" data-ctype="lines">
+      <select class="channel-type-select" data-idx="${idx}" data-ctype="lines">
+        ${lineTypeOpt.map(o => `<option value="${o.v}" ${ch.type === o.v ? "selected" : ""}>${o.t}</option>`).join("")}
+      </select>
+      ${customInput}
+      <input class="channel-notes-input" placeholder="通道备注" value="${escapeAttr(ch.notes || "")}" data-idx="${idx}" data-ctype="lines">
+      <button class="channel-del-btn" data-idx="${idx}" data-ctype="lines">删除</button>
+    `;
+    lineWrap.appendChild(div);
+  });
+
+  // 删除通道事件
+  document.querySelectorAll('.channel-del-btn').forEach(btn => {
+    btn.onclick = function() {
+      const ctype = this.dataset.ctype;
+      const idx = Number(this.dataset.idx);
+      const channelId = localState.globalChannels[ctype][idx].id;
+      localState.globalChannels[ctype].splice(idx, 1);
+      localState.programs.forEach(prog => {
+        if (prog.useChannels) {
+          prog.useChannels = prog.useChannels.filter(cid => cid !== channelId);
+        }
+      });
+      renderGlobalChannelEditor();
+    };
+  });
+
+  // 类型下拉变更：更新 type，显隐自定义输入框
+  document.querySelectorAll('.channel-type-select').forEach(sel => {
+    sel.onchange = function() {
+      const ctype = this.dataset.ctype;
+      const idx = Number(this.dataset.idx);
+      const ch = localState.globalChannels[ctype][idx];
+      if (ch) {
+        ch.type = this.value;
+        if (this.value !== 'custom') ch.customType = '';
+      }
+      renderGlobalChannelEditor();
+    };
+  });
+
+  // 名称/备注/自定义类型名实时修改（不重渲染，避免失焦）
+  document.querySelectorAll('.channel-name-input, .channel-notes-input, .channel-custom-input').forEach(el => {
+    el.oninput = function() {
+      const ctype = this.dataset.ctype;
+      const idx = Number(this.dataset.idx);
+      const key = this.classList.contains("channel-name-input") ? "name" :
+                  this.classList.contains("channel-notes-input") ? "notes" : "customType";
+      if (localState.globalChannels[ctype][idx]) {
+        localState.globalChannels[ctype][idx][key] = this.value;
+      }
+    };
+  });
+}
+
+window.saveGlobalChannel = function() {
+  sendMsg({ type: "update_state", data: { globalChannels: JSON.parse(JSON.stringify(localState.globalChannels)) } });
+  closeModal("modal-global-setting");
+  renderAll();
+};
+
+// ---------- 角色可见性控制 ----------
+var ROLE_LABELS = {
+  control: '控制端',
+  assistant: '助理端',
+  backstage: '幕后端'
+};
+function applyRoleVisibility() {
+  var badge = document.getElementById('role-badge');
+  if (badge) {
+    badge.className = 'role-badge ' + ROLE;
+    badge.textContent = '⚙️';
+    badge.title = '当前: ' + (ROLE_LABELS[ROLE] || '控制端') + ' - 点击切换角色';
+  }
+  // 按权限显隐按钮
+  var showMap = {
+    'mode-toggle-btn': can('mode'),
+    'add-program-btn': can('addDel'),
+    'edit-show-name-btn': can('rename'),
+    'import-btn': can('importIt'),
+    'header-reset-btn': can('reset')
+  };
+  for (var id in showMap) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = showMap[id] ? '' : 'none';
+  }
+  // 全局通道、导出按钮（按位置索引）
+  var headerBtns = document.querySelectorAll('.header-right .icon-btn');
+  // [0]=📋节目列表 [1]=🎛️全局通道 [2]=📄导出 [3]=📥导入(已单独处理) [4]=📱二维码 [5]=↺重置(已单独处理)
+  if (headerBtns.length >= 3) {
+    headerBtns[1].style.display = can('channelAdmin') ? '' : 'none'; // 全局通道
+    headerBtns[2].style.display = can('exportIt') ? '' : 'none';     // 导出
+  }
+  // 演出模式：显示顶部节目列表切换按钮
+  var listToggle = document.getElementById('perf-list-toggle-btn');
+  if (listToggle) {
+    listToggle.style.display = (localState.mode === 'performance') ? '' : 'none';
+    listToggle.textContent = perfListVisible ? '✕' : '📋';
+    listToggle.title = perfListVisible ? '隐藏列表' : '节目列表';
+  }
+  // 导航栏：演出模式且控制端才显示
+  var navCtrl = document.getElementById('nav-controls');
+  if (navCtrl) navCtrl.style.display = (localState.mode === 'performance' && can('nav')) ? 'flex' : 'none';
+  // 下载按钮：仅控制端显示
+  var dlBtn = document.getElementById('download-btn');
+  if (dlBtn) dlBtn.style.display = can('reset') ? '' : 'none';
+  // 演出模式：隐藏进度条（只显示舞台卡片）
+  var perfBar = document.getElementById('perf-progress-bar');
+  if (perfBar) perfBar.style.display = 'none';
+  // 非 control 强制 performance 模式
+  if (ROLE !== 'control') {
+    localState.mode = 'performance';
+    perfListVisible = true;
+    document.getElementById('setup-view').classList.add('hidden');
+    document.getElementById('performance-view').classList.remove('hidden');
+    var mt = document.getElementById('mode-toggle-btn');
+    if (mt) mt.style.display = 'none';
+  }
+}
+
+// ---------- 角色切换 ----------
+window.switchRole = function(newRole) {
+  if (['control', 'assistant', 'backstage'].indexOf(newRole) < 0) return;
+  var url = new URL(location.href);
+  url.searchParams.set('role', newRole);
+  location.href = url.toString();
+};
+window.openRoleSwitcher = function() {
+  document.getElementById('modal-role-switch').classList.remove('hidden');
+};
+
+// ---------- 全局渲染入口 ----------
+function renderAll() {
+  document.getElementById('show-name-display').innerText = localState.showName || "舞台流程表";
+  const toggleBtn = document.getElementById('mode-toggle-btn');
+  if (localState.mode === 'setup') {
+    toggleBtn.textContent = "⚙️ 设置模式";
+    toggleBtn.classList.remove('performance');
+  } else {
+    toggleBtn.textContent = "🎬 演出模式";
+    toggleBtn.classList.add('performance');
+  }
+  document.getElementById('setup-view').classList.toggle('hidden', localState.mode !== 'setup');
+  document.getElementById('performance-view').classList.toggle('hidden', localState.mode !== 'performance');
+
+  // 演出模式布局：默认隐藏节目列表，舞台全宽
+  var mainLayout = document.querySelector('.main-layout');
+  if (mainLayout) {
+    if (localState.mode === 'performance' && !perfListVisible) {
+      mainLayout.classList.add('mode-performance');
+      mainLayout.classList.remove('mode-perf-list');
+    } else if (localState.mode === 'performance' && perfListVisible) {
+      mainLayout.classList.remove('mode-performance');
+      mainLayout.classList.add('mode-perf-list');
+    } else {
+      mainLayout.classList.remove('mode-performance');
+      mainLayout.classList.remove('mode-perf-list');
+    }
+  }
+
+  renderProgramList();
+  initProgramDragSort();
+  renderStageView();
+  renderProgramChannelSelector();
+  applyRoleVisibility();
+}
+
+// ---------- 节目列表拖拽排序 ----------
+function initProgramDragSort() {
+  if(!can('drag')) return;
+  const wrap = document.getElementById('program-list');
+  if (typeof Sortable === 'undefined') return;
+  if (programSortable) programSortable.destroy();
+  programSortable = new Sortable(wrap, {
+    animation: 120,
+    onEnd: function(evt) {
+      const oldIndex = evt.oldIndex;
+      const newIndex = evt.newIndex;
+      if (oldIndex === newIndex) return;
+      const arr = [...localState.programs];
+      const item = arr.splice(oldIndex, 1)[0];
+      arr.splice(newIndex, 0, item);
+      // 调整 currentProgramIndex
+      let newCurrent = localState.currentProgramIndex;
+      if (oldIndex === newCurrent) {
+        newCurrent = newIndex;
+      } else if (oldIndex < newCurrent && newIndex >= newCurrent) {
+        newCurrent--;
+      } else if (oldIndex > newCurrent && newIndex <= newCurrent) {
+        newCurrent++;
+      }
+      localState.programs = arr;
+      localState.currentProgramIndex = newCurrent;
+      sendMsg({ type: "update_state", data: { programs: arr, currentProgramIndex: newCurrent } });
+    }
+  });
+}
+
+// ---------- 节目列表渲染 ----------
+function renderProgramList() {
+  var wrap = document.getElementById('program-list');
+  wrap.innerHTML = "";
+  var programs = localState.programs || [];
+  var allChannels = getAllChannels();
+  var canReset = typeof can === 'function' ? can('reset') : true;
+
+  programs.forEach(function(prog, idx) {
+    var div = document.createElement('div');
+    div.className = 'program-item ' + deriveStatus(prog, idx);
+    var used = allChannels.filter(function(c){ return prog.useChannels && prog.useChannels.indexOf(c.id) !== -1; });
+    var usedNames = used.map(function(x){ return x.name; }).join(" / ");
+    var musicLine = prog.musicCue ? '<div style="font-size:12px;color:#ffdd88;margin-top:4px;">🎵 ' + escapeHtml(prog.musicCue) + '</div>' : '';
+    var isCompleted = prog.status === 'completed';
+    var completedBadge = isCompleted ? '<span class="completed-badge-lg">✓ 已完成</span>' : '';
+    var completedIcon = isCompleted ? '<div class="completed-check-icon" data-reset-idx="' + idx + '">✓</div>' : '';
+    // 重置按钮：已完成节目且控制端
+    var resetBtn = (isCompleted && canReset)
+      ? '<button class="prog-reset-btn" data-reset-idx="' + idx + '" title="重置此节目">↺</button>'
+      : '';
+    var detailBtn = localState.mode === 'performance'
+      ? '<div class="prog-action-row">' + resetBtn + '<button class="prog-detail-btn" data-pidx="' + idx + '">📋 查看详情</button></div>'
+      : (resetBtn ? '<div class="prog-action-row">' + resetBtn + '</div>' : '');
+    div.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div style="display:flex;align-items:center;flex-wrap:wrap;">' +
+          '<span class="prog-no" style="margin-right:8px;">' + (idx + 1) + '</span>' +
+          '<strong>' + escapeHtml(prog.name) + '</strong>' + completedBadge +
+        '</div>' +
+        '<span>' + (prog.duration > 0 ? formatDuration(prog.duration) : "无时长") + '</span>' +
+      '</div>' +
+      completedIcon +
+      (prog.notes ? '<div style="font-size:13px;color:#999;margin-top:4px;">' + escapeHtml(prog.notes) + '</div>' : '') +
+      (usedNames ? '<div style="font-size:12px;color:#77aaff;margin-top:4px;">🎛 ' + escapeHtml(usedNames) + '</div>' : '') +
+      musicLine + detailBtn;
+    // 演出模式：点击卡片打开详情弹窗；设置模式：打开编辑
+    if (localState.mode === 'performance') {
+      div.onclick = function() { openProgramDetail(idx); };
+    } else {
+      div.onclick = function() { openEditProgram(idx); };
+    }
+    var dbtn = div.querySelector('.prog-detail-btn');
+    if (dbtn) {
+      dbtn.onclick = function(e){ if(e) e.stopPropagation(); openProgramDetail(idx); };
+    }
+    // 重置按钮事件
+    var rbtns = div.querySelectorAll('[data-reset-idx]');
+    for (var ri = 0; ri < rbtns.length; ri++) {
+      rbtns[ri].onclick = function(e) {
+        if(e) e.stopPropagation();
+        var rIdx = Number(this.getAttribute('data-reset-idx'));
+        showResetConfirm(rIdx);
+      };
+    }
+    wrap.appendChild(div);
+  });
+}
+
+// ---------- 演出视图 ----------
+function renderStageView() {
+  var idx = localState.currentProgramIndex;
+  var progs = localState.programs || [];
+  var current = progs[idx];
+  var next = progs[idx + 1];
+  var allChannels = getAllChannels();
+
+  document.getElementById('current-name').innerText = current ? current.name : "—";
+  var curMusic = document.getElementById('current-music');
+  if (curMusic) {
+    curMusic.innerText = (current && current.musicCue) ? current.musicCue : "";
+    curMusic.style.display = (current && current.musicCue) ? '' : 'none';
+  }
+  document.getElementById('current-notes').innerText = current ? (current.notes || "") : "";
+  document.getElementById('next-name').innerText = next ? next.name : "无";
+  var nextMusic = document.getElementById('next-music');
+  if (nextMusic) {
+    nextMusic.innerText = (next && next.musicCue) ? next.musicCue : "";
+    nextMusic.style.display = (next && next.musicCue) ? '' : 'none';
+  }
+
+  var durEl = document.getElementById('current-duration');
+  if (durEl) durEl.innerText = (current && current.duration > 0) ? formatDuration(current.duration) : "";
+
+  // 当前节目通道标签（带类型颜色）
+  var currWrap = document.getElementById("current-channels");
+  if (currWrap) {
+    currWrap.innerHTML = "";
+    if (current && current.useChannels) {
+      allChannels.filter(function(ch){ return current.useChannels.indexOf(ch.id) !== -1; }).forEach(function(ch){
+        currWrap.insertAdjacentHTML('beforeend', buildChannelTag(ch));
+      });
+    }
+  }
+  // 下一节目通道标签（带类型颜色）
+  var nextWrap = document.getElementById("next-channels");
+  if (nextWrap) {
+    nextWrap.innerHTML = "";
+    if (next && next.useChannels) {
+      allChannels.filter(function(ch){ return next.useChannels.indexOf(ch.id) !== -1; }).forEach(function(ch){
+        nextWrap.insertAdjacentHTML('beforeend', buildChannelTag(ch));
+      });
+    }
+  }
+
+  // 进度统计（显示在舞台卡片区域，进度条已隐藏）
+  var total = progs.length;
+  var doneCount = 0;
+  progs.forEach(function(p) { if (p.status === 'completed') doneCount++; });
+  var progText = document.getElementById('perf-progress-text');
+  if (progText) {
+    progText.innerHTML = '演出进度：<span class="perf-progress-count">' + doneCount + ' / ' + total + '</span> 已完成';
+  }
+  var totalEl = document.getElementById('current-total');
+  if (totalEl) {
+    totalEl.innerHTML = '<span class="stage-progress-info">进度 ' + doneCount + ' / ' + total + '</span>';
+  }
+
+  // 卡片完成标志 + 点击打开详情
+  var currCard = document.querySelector('.current-card');
+  if (currCard) {
+    var curDone = current && current.status === 'completed';
+    currCard.classList.toggle('is-done', curDone);
+    ensureStageBadge(currCard, 'current-badge', curDone);
+    var curLabel = document.getElementById('current-card-label');
+    if (curLabel) {
+      curLabel.textContent = curDone ? '✅ 已完成' : '🎤 正在进行';
+    }
+    currCard.onclick = function() { if (current) openProgramDetail(idx); };
+  }
+  var nextCard = document.querySelector('.next-card');
+  if (nextCard) {
+    var nxtDone = next && next.status === 'completed';
+    nextCard.classList.toggle('is-done', nxtDone);
+    ensureStageBadge(nextCard, 'next-badge', nxtDone);
+    nextCard.onclick = function() { if (next) openProgramDetail(idx + 1); };
+  }
+}
+
+function ensureStageBadge(card, badgeId, show) {
+  var badge = document.getElementById(badgeId);
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.id = badgeId;
+    badge.className = 'stage-done-badge';
+    badge.textContent = '✓ 已完成';
+    card.appendChild(badge);
+  }
+  badge.style.display = show ? '' : 'none';
+}
+
+// ---------- 编辑节目：通道勾选面板 ----------
+function renderProgramChannelSelector() {
+  var wrap = document.getElementById("program-channel-select");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  if (editingIndex === null) return;
+  var prog = localState.programs[editingIndex];
+  if (!prog) return;
+  var allChannels = getAllChannels();
+  var used = prog.useChannels || [];
+
+  if (allChannels.length === 0) {
+    wrap.innerHTML = '<p style="color:#94a3b8;font-size:13px;">暂无全局通道，请先点击顶部🎛️按钮配置通道</p>';
+    return;
+  }
+
+  allChannels.forEach(function(ch) {
+    var btn = document.createElement("button");
+    var isActive = used.indexOf(ch.id) !== -1;
+    btn.className = 'channel-check-btn' + (isActive ? ' active' : '');
+    var typeName = getTypeName(ch);
+    btn.innerHTML = escapeHtml(ch.name) + '<span class="check-type">' + escapeHtml(typeName) + '</span>';
+    btn.dataset.cid = ch.id;
+    btn.onclick = function() {
+      var cid = this.dataset.cid;
+      var pos = used.indexOf(cid);
+      if (pos !== -1) {
+        used.splice(pos, 1);
+      } else {
+        used.push(cid);
+      }
+      prog.useChannels = used;
+      renderProgramChannelSelector();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function formatSec(s) {
+  s = Math.max(0, Math.floor(Number(s) || 0));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+// ---------- 分钟时长格式化 ----------
+function formatDuration(min) {
+  min = Math.max(0, Math.floor(Number(min) || 0));
+  if (min <= 0) return "无时长";
+  var h = Math.floor(min / 60), m = min % 60;
+  if (h > 0 && m > 0) return h + "小时" + m + "分";
+  if (h > 0) return h + "小时";
+  return m + "分钟";
+}
+
+// ---------- 节目状态派生 ----------
+function deriveStatus(prog, idx) {
+  if (prog.status === 'completed') return 'is-completed';
+  if (idx === localState.currentProgramIndex && prog.status === 'active') return 'is-active';
+  return '';
+}
+
+// ---------- 三按钮导航 ----------
+window.navProgram = function(act) {
+  if (typeof can === 'function' && !can('nav')) return;
+  if (act === 'go') {
+    sendMsg({ type: 'advance', role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+  } else if (act === 'prev') {
+    sendMsg({ type: 'prev', role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+  } else if (act === 'next') {
+    sendMsg({ type: 'next', role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+  }
+};
+
+// ---------- 重置功能 ----------
+window.resetProgram = function(scope, idx) {
+  if (typeof can === 'function' && !can('reset')) return;
+  if (scope === 'all') {
+    sendMsg({ type: 'reset_all', role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+  } else {
+    sendMsg({ type: 'reset_one', idx: idx, role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+  }
+};
+
+// ---------- 重置确认弹窗 ----------
+var resetConfirmIdx = null;
+window.showResetConfirm = function(idx) {
+  resetConfirmIdx = idx;
+  var prog = localState.programs[idx];
+  var text = document.getElementById('reset-confirm-text');
+  if (text && prog) {
+    text.textContent = '确定要重置「' + prog.name + '」的完成状态吗？';
+  }
+  document.getElementById('modal-reset-confirm').classList.remove('hidden');
+};
+var resetConfirmActionBtn = document.getElementById('reset-confirm-btn');
+if (resetConfirmActionBtn) {
+  resetConfirmActionBtn.onclick = function() {
+    if (resetConfirmIdx !== null) {
+      if (typeof resetProgram === 'function') resetProgram('one', resetConfirmIdx);
+      closeModal('modal-reset-confirm');
+      resetConfirmIdx = null;
+    }
+  };
+}
+
+// ---------- 下载客户端弹窗 ----------
+window.openDownloadModal = function() {
+  document.getElementById('modal-download').classList.remove('hidden');
+  // 检测下载文件是否可用
+  var links = ['dl-win', 'dl-mac-intel', 'dl-mac-arm'];
+  links.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      fetch(el.getAttribute('href'), { method: 'HEAD' })
+        .then(function(r) { if (!r.ok) el.style.opacity = '0.4'; })
+        .catch(function() { el.style.opacity = '0.4'; });
+    }
+  });
+};
+
+// ---------- 服务器IP获取 ----------
+var cachedServerIP = '';
+var cachedServerPort = 3000;
+function fetchServerIP() {
+  fetch('/api/server-info')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ip) {
+        cachedServerIP = data.ip;
+        cachedServerPort = data.port || 3000;
+        var el = document.getElementById('server-ip-display');
+        if (el) {
+          el.textContent = '🌐 ' + data.ip + ':' + cachedServerPort;
+          el.style.display = '';
+        }
+      }
+    })
+    .catch(function() {});
+}
+
+// ---------- 弹窗 ----------
+window.closeModal = function (id) { document.getElementById(id).classList.add('hidden'); };
+
+window.openAddProgram = function () {
+  document.getElementById('add-name').value = "";
+  document.getElementById('add-duration').value = 0;
+  document.getElementById('add-notes').value = "";
+  document.getElementById('add-musiccue').value = "";
+  document.getElementById('modal-add').classList.remove('hidden');
+};
+
+window.saveShowName = function () {
+  const val = document.getElementById('input-show-name').value.trim();
+  if (val) sendMsg({ type: "update_state", data: { showName: val } });
+  closeModal('modal-show-name');
+};
+
+window.showQR = function () {
+  var container = document.getElementById('qr-container');
+  var roles = [
+    {key:'control', label:'控制端（全权限）'},
+    {key:'assistant', label:'助理端（备注/音乐/通道）'},
+    {key:'backstage', label:'幕后端（仅备注）'}
+  ];
+  function generateQRs(baseUrl) {
+    container.innerHTML = '';
+    roles.forEach(function(r){
+      var url = baseUrl + '?role=' + r.key;
+      var div = document.createElement('div');
+      div.style.cssText = 'text-align:center;margin-bottom:16px';
+      div.innerHTML = '<p style="margin-bottom:8px;color:#fff;font-weight:600">'+r.label+'</p><div class="qr-item" data-url="'+url+'"></div><p style="font-size:11px;color:#999;margin-top:4px;word-break:break-all">'+escapeHtml(url)+'</p>';
+      container.appendChild(div);
+    });
+    if (typeof QRCode !== 'undefined') {
+      container.querySelectorAll('.qr-item').forEach(function(item){
+        new QRCode(item, { text: item.getAttribute('data-url'), width: 160, height: 160, colorDark: '#000000', colorLight: '#ffffff' });
+      });
+    }
+    document.getElementById('modal-qr').classList.remove('hidden');
+  }
+  // 优先使用服务器API返回的局域网IP
+  if (cachedServerIP) {
+    generateQRs('http://' + cachedServerIP + ':' + cachedServerPort + '/');
+  } else {
+    fetch('/api/server-info')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ip && data.ip !== 'localhost') {
+          cachedServerIP = data.ip;
+          cachedServerPort = data.port || 3000;
+          generateQRs('http://' + data.ip + ':' + (data.port || 3000) + '/');
+        } else {
+          generateQRs(location.origin + location.pathname);
+        }
+      })
+      .catch(function() {
+        generateQRs(location.origin + location.pathname);
+      });
+  }
+};
+
+// 编辑演出名称按钮绑定
+var editShowNameBtn = document.getElementById('edit-show-name-btn');
+if (editShowNameBtn) {
+  editShowNameBtn.addEventListener('click', function() {
+    document.getElementById('input-show-name').value = localState.showName || "";
+    document.getElementById('modal-show-name').classList.remove('hidden');
+  });
+}
+
+// ---------- 节目编辑 ----------
+window.openEditProgram = function (idx) {
+  editingIndex = idx;
+  const p = localState.programs[idx];
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-duration').value = p.duration || 0;
+  document.getElementById('edit-notes').value = p.notes || "";
+  document.getElementById('edit-musiccue').value = p.musicCue || "";
+  document.getElementById('setup-placeholder').classList.add('hidden');
+  // 按角色禁用字段
+  document.getElementById('edit-name').disabled = !can('editName');
+  document.getElementById('edit-duration').disabled = !can('editDuration');
+  document.getElementById('edit-musiccue').disabled = !can('editMusic');
+  document.getElementById('edit-notes').disabled = !can('editNotes');
+  var channelWrap = document.getElementById('program-channel-select');
+  if (channelWrap) channelWrap.style.opacity = can('editChannel') ? '1' : '0.5';
+  document.getElementById('edit-panel').classList.remove('hidden');
+  renderProgramChannelSelector();
+};
+
+window.closeEditPanel = function () {
+  editingIndex = null;
+  document.getElementById('edit-panel').classList.add('hidden');
+  document.getElementById('setup-placeholder').classList.remove('hidden');
+};
+
+window.saveProgram = function () {
+  var name = document.getElementById('edit-name').value.trim();
+  var duration = Number(document.getElementById('edit-duration').value) || 0;
+  var notes = document.getElementById('edit-notes').value.trim();
+  var musicCue = document.getElementById('edit-musiccue').value.trim();
+  if (ROLE === 'control') {
+    if (!name) return alert("节目名称不能为空");
+    var arr = localState.programs.slice();
+    var oldProg = arr[editingIndex];
+    arr[editingIndex] = { name:name, duration:duration, notes:notes, musicCue:musicCue, status:oldProg.status||'pending', useChannels:oldProg.useChannels||[] };
+    sendMsg({ type: "update_state", data: { programs: arr }, role: 'control' });
+  } else {
+    if (can('editMusic')) updateProgramField(editingIndex, 'musicCue', musicCue);
+    if (can('editNotes')) updateProgramField(editingIndex, 'notes', notes);
+  }
+  closeEditPanel();
+};
+
+window.deleteProgram = function () {
+  if (!confirm("确定删除这个节目？")) return;
+  const arr = [...localState.programs];
+  arr.splice(editingIndex, 1);
+  let newIdx = localState.currentProgramIndex;
+  if (editingIndex < newIdx) newIdx--;
+  if (newIdx < 0) newIdx = 0;
+  if (newIdx > arr.length - 1) newIdx = Math.max(0, arr.length - 1);
+  sendMsg({ type: "update_state", data: { programs: arr, currentProgramIndex: newIdx } });
+  closeEditPanel();
+};
+
+// ---------- 新建节目 ----------
+window.confirmAddProgram = function () {
+  const name = document.getElementById('add-name').value.trim();
+  const dur = Number(document.getElementById('add-duration').value) || 0;
+  const notes = document.getElementById('add-notes').value.trim();
+  const musicCue = document.getElementById('add-musiccue').value.trim();
+  if (!name) return alert("节目名称不能为空");
+  const newProg = {
+    name, duration: dur, notes, musicCue,
+    completed: false,
+    useChannels: []
+  };
+  const arr = [...(localState.programs || []), newProg];
+  sendMsg({ type: "update_state", data: { programs: arr } });
+  closeModal('modal-add');
+};
+
+// ===================== 导出功能 =====================
+window.exportChannelList = function () {
+  document.getElementById('modal-export').classList.remove('hidden');
+};
+
+// 合并话筒+线路为带 category 标记的统一通道列表
+function getAllChannels() {
+  var mics = (localState.globalChannels && localState.globalChannels.mics || []).map(function(ch){ return Object.assign({}, ch, { category: 'mic' }); });
+  var lines = (localState.globalChannels && localState.globalChannels.lines || []).map(function(ch){ return Object.assign({}, ch, { category: 'line' }); });
+  return mics.concat(lines);
+}
+
+// 通道类型名（支持自定义类型）
+function getTypeName(ch) {
+  if (!ch) return '';
+  if (ch.type === 'custom') return ch.customType || '自定义';
+  var micMap = {
+    wireless_headset: "头戴无线麦",
+    wireless_hand: "无线手持麦",
+    podium: "讲台麦",
+    wired: "有线话筒",
+    host: "主持人话筒",
+    guest: "嘉宾话筒"
+  };
+  var lineMap = {
+    stereo_line: "立体声线路",
+    mono_line: "单声道线路",
+    drum: "电子鼓",
+    keyboard: "键盘",
+    guitar: "吉他"
+  };
+  return ch.category === 'line' ? (lineMap[ch.type] || ch.type) : (micMap[ch.type] || ch.type);
+}
+
+// 生成带类型信息的彩色通道标签
+function buildChannelTag(ch) {
+  var typeName = getTypeName(ch);
+  var tagClass = ch.type === 'custom' ? 'ch-tag-custom' : (ch.category === 'line' ? 'ch-tag-line' : 'ch-tag-mic');
+  return '<span class="mic-tag ' + tagClass + '">' + escapeHtml(ch.name) + '<span class="tag-type">' + escapeHtml(typeName) + '</span></span>';
+}
+
+// 演出模式：节目详情弹窗（可编辑）
+var detailIdx = null;
+window.openProgramDetail = function(idx) {
+  var prog = localState.programs[idx];
+  if (!prog) return;
+  detailIdx = idx;
+  var allChannels = getAllChannels();
+  var used = allChannels.filter(function(ch){ return prog.useChannels && prog.useChannels.indexOf(ch.id) !== -1; });
+  document.getElementById('detail-title').innerText = prog.name || ('节目 ' + (idx + 1));
+  var body = document.getElementById('detail-body');
+
+  // 状态标签
+  var statusClass = 'is-wait', statusText = '⏳ 待演出';
+  if (prog.status === 'completed') { statusClass = 'is-done'; statusText = '✓ 已完成'; }
+  else if (idx === localState.currentProgramIndex && prog.status === 'active') { statusClass = 'is-now'; statusText = '▶ 正在进行'; }
+
+  var canMusic = typeof can === 'function' ? can('editMusic') : true;
+  var canNotes = typeof can === 'function' ? can('editNotes') : true;
+
+  body.innerHTML =
+    '<div class="detail-status-row"><span class="status-pill ' + statusClass + '">' + statusText + '</span></div>' +
+    '<div class="detail-row"><div class="card-label">🎵 音乐播放提示</div>' +
+      '<textarea class="detail-edit-area" id="detail-edit-musiccue" placeholder="如：前奏8小节后进人声" ' + (canMusic ? '' : 'disabled') + '>' + escapeHtml(prog.musicCue || '') + '</textarea></div>' +
+    '<div class="detail-row"><div class="card-label">🎛 启用通道</div><div class="detail-channels">' + (used.length ? used.map(buildChannelTag).join('') : '<span style="color:#64748b;">未设置</span>') + '</div></div>' +
+    '<div class="detail-row"><div class="card-label">📝 备注</div>' +
+      '<textarea class="detail-edit-area" id="detail-edit-notes" placeholder="舞台、灯光、演员提示" ' + (canNotes ? '' : 'disabled') + '>' + escapeHtml(prog.notes || '') + '</textarea></div>' +
+    '<div class="detail-row"><div class="card-label">⏱ 时长</div><div class="detail-duration">' + (prog.duration > 0 ? formatDuration(prog.duration) : '不计时') + '</div></div>';
+
+  // 编辑事件：失焦时保存（完成后仍可修改）
+  var musicEl = document.getElementById('detail-edit-musiccue');
+  if (musicEl && canMusic) {
+    musicEl.onchange = function() {
+      sendMsg({ type: 'update_program_field', idx: idx, field: 'musicCue', value: this.value, role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+    };
+  }
+  var notesEl = document.getElementById('detail-edit-notes');
+  if (notesEl && canNotes) {
+    notesEl.onchange = function() {
+      sendMsg({ type: 'update_program_field', idx: idx, field: 'notes', value: this.value, role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+    };
+  }
+
+  var setBtn = document.getElementById('detail-set-current-btn');
+  var isCurrent = idx === localState.currentProgramIndex;
+  if (setBtn) {
+    setBtn.disabled = isCurrent;
+    setBtn.style.opacity = isCurrent ? '0.5' : '1';
+    setBtn.style.display = (typeof can === 'function' ? can('nav') : true) ? '' : 'none';
+    setBtn.onclick = function() {
+      sendMsg({ type: 'set_current', index: idx, role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+      closeModal('modal-program-detail');
+    };
+  }
+
+  // 重置此节目按钮：仅控制端且节目已完成时显示
+  var resetBtn = document.getElementById('detail-reset-btn');
+  if (resetBtn) {
+    resetBtn.dataset.idx = String(idx);
+    resetBtn.style.display = ((typeof can === 'function' ? can('reset') : true) && prog.status === 'completed') ? '' : 'none';
+  }
+
+  document.getElementById('modal-program-detail').classList.remove('hidden');
+};
+
+window.detailResetOne = function() {
+  var resetBtn = document.getElementById('detail-reset-btn');
+  if (resetBtn && resetBtn.dataset.idx !== undefined) {
+    var idx = Number(resetBtn.dataset.idx);
+    if (typeof resetProgram === 'function') resetProgram('one', idx);
+    closeModal('modal-program-detail');
+  }
+};
+
+// 演出模式：切换节目列表显示
+window.togglePerfList = function() {
+  perfListVisible = !perfListVisible;
+  var btn = document.getElementById('list-toggle-btn');
+  if (btn) btn.textContent = perfListVisible ? '✕ 隐藏列表' : '📋 节目列表';
+  // 同步顶部按钮
+  var hdrBtn = document.getElementById('perf-list-toggle-btn');
+  if (hdrBtn) {
+    hdrBtn.textContent = perfListVisible ? '✕' : '📋';
+    hdrBtn.title = perfListVisible ? '隐藏列表' : '节目列表';
+  }
+  var mainLayout = document.querySelector('.main-layout');
+  if (mainLayout) {
+    if (perfListVisible) {
+      mainLayout.classList.remove('mode-performance');
+      mainLayout.classList.add('mode-perf-list');
+    } else {
+      mainLayout.classList.add('mode-performance');
+      mainLayout.classList.remove('mode-perf-list');
+    }
+  }
+};
+
+function getExportHtml() {
+  var micList = (localState.globalChannels.mics || []).map(function(ch){ return Object.assign({category:'mic'}, ch); });
+  var lineList = (localState.globalChannels.lines || []).map(function(ch){ return Object.assign({category:'line'}, ch); });
+  var html = `<div style="font-family:sans-serif;padding:20px;">
+    <h1 style="text-align:center;">${escapeHtml(localState.showName || "舞台流程表")} - 通道清单</h1>
+    <h2 style="margin-top:20px;">🎤 话筒通道列表</h2>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th>通道名称</th><th>类型</th><th>备注</th></tr>`;
+  if (micList.length === 0) {
+    html += `<tr><td colspan="3" style="text-align:center;color:#999;">暂无话筒通道</td></tr>`;
+  } else {
+    micList.forEach(function(ch) {
+      html += `<tr><td>${escapeHtml(ch.name)}</td><td>${getTypeName(ch)}</td><td>${escapeHtml(ch.notes || "无")}</td></tr>`;
+    });
+  }
+  html += `</table>
+    <h2 style="margin-top:20px;">🔊 线路输入通道列表</h2>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th>通道名称</th><th>类型</th><th>备注</th></tr>`;
+  if (lineList.length === 0) {
+    html += `<tr><td colspan="3" style="text-align:center;color:#999;">暂无线路通道</td></tr>`;
+  } else {
+    lineList.forEach(function(ch) {
+      html += `<tr><td>${escapeHtml(ch.name)}</td><td>${getTypeName(ch)}</td><td>${escapeHtml(ch.notes || "无")}</td></tr>`;
+    });
+  }
+  html += `</table></div>`;
+  return html;
+}
+
+// 导出PDF
+window.exportPdf = function () {
+  const html = getExportHtml();
+  const wrap = document.getElementById("export-data-wrap");
+  wrap.innerHTML = html;
+  const opt = {
+    margin: 10,
+    filename: `通道清单_${localState.showName || "舞台流程表"}.pdf`,
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  if (typeof html2pdf !== 'undefined') {
+    html2pdf().set(opt).from(wrap).save();
+    closeModal('modal-export');
+  } else {
+    alert("PDF导出库未加载，请检查网络连接");
+  }
+};
+
+// 导出CSV表格（替代Word，兼容性更好）
+window.exportCSV = function () {
+  var micList = (localState.globalChannels.mics || []).map(function(ch){ return Object.assign({category:'mic'}, ch); });
+  var lineList = (localState.globalChannels.lines || []).map(function(ch){ return Object.assign({category:'line'}, ch); });
+  var csv = `\uFEFF${localState.showName || "舞台流程表"} - 通道清单\n\n`;
+  csv += "话筒通道列表\n";
+  csv += "通道名称,类型,备注\n";
+  if (micList.length === 0) {
+    csv += "（暂无话筒通道）,,\n";
+  } else {
+    micList.forEach(function(ch) {
+      csv += `"${ch.name}","${getTypeName(ch)}","${ch.notes || ""}"\n`;
+    });
+  }
+  csv += "\n线路输入通道列表\n";
+  csv += "通道名称,类型,备注\n";
+  if (lineList.length === 0) {
+    csv += "（暂无线路通道）,,\n";
+  } else {
+    lineList.forEach(function(ch) {
+      csv += `"${ch.name}","${getTypeName(ch)}","${ch.notes || ""}"\n`;
+    });
+  }
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  if (typeof saveAs !== 'undefined') {
+    saveAs(blob, `通道清单_${localState.showName || "舞台流程表"}.csv`);
+    closeModal('modal-export');
+  } else {
+    // 降级方案
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `通道清单_${localState.showName || "舞台流程表"}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    closeModal('modal-export');
+  }
+};
+
+// ---------- 导入节目单 ----------
+var importPreviewData = [];
+function openImport() {
+  var m = document.getElementById('modal-import');
+  if (!m) return;
+  m.classList.remove('hidden');
+  var pv = document.getElementById('import-preview');
+  if (pv) { pv.style.display = 'none'; pv.innerHTML = ''; }
+  var mr = document.getElementById('import-mode-row');
+  if (mr) mr.style.display = 'none';
+  var cb = document.getElementById('import-confirm-btn');
+  if (cb) cb.style.display = 'none';
+  var fi = document.getElementById('import-file-input');
+  if (fi) fi.value = '';
+  importPreviewData = [];
+}
+window.openImport = openImport;
+(function() {
+  var fi = document.getElementById('import-file-input');
+  if (fi) fi.onchange = function() { if (this.files && this.files[0]) parseImportFile(this.files[0]); };
+  var dz = document.getElementById('import-drop-zone');
+  if (dz) {
+    dz.ondragover = function(e) { if (e) e.preventDefault(); this.classList.add('dragover'); };
+    dz.ondragleave = function() { this.classList.remove('dragover'); };
+    dz.ondrop = function(e) {
+      if (e) e.preventDefault(); this.classList.remove('dragover');
+      if (e && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) parseImportFile(e.dataTransfer.files[0]);
+    };
+  }
+})();
+function parseImportFile(file) {
+  var ext = (file.name.split('.').pop() || '').toLowerCase();
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var buf = e.target.result;
+    if (ext === 'pdf') parsePdf(buf);
+    else if (ext === 'docx') parseDocx(buf);
+    else showToast('不支持的格式，请用 PDF 或 .docx');
+  };
+  reader.onerror = function() { showToast('文件读取失败'); };
+  reader.readAsArrayBuffer(file);
+}
+function parsePdf(buf) {
+  if (typeof pdfjsLib === 'undefined') { showToast('PDF 解析库未加载，请检查网络'); return; }
+  try { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js'; } catch (e) {}
+  pdfjsLib.getDocument({ data: buf }).promise.then(function(pdf) {
+    var parts = [];
+    var chain = Promise.resolve();
+    for (var i = 1; i <= pdf.numPages; i++) {
+      (function(pageNum) {
+        chain = chain.then(function() {
+          return pdf.getPage(pageNum).then(function(page) {
+            return page.getTextContent().then(function(tc) {
+              parts.push(tc.items.map(function(it) { return it.str; }).join(' '));
+            });
+          });
+        });
+      })(i);
+    }
+    return chain.then(function() { handleParsedText(parts.join('\n')); });
+  }).catch(function(err) { showToast('PDF 解析失败: ' + (err.message || err)); });
+}
+function parseDocx(buf) {
+  if (typeof mammoth === 'undefined') { showToast('Word 解析库未加载，请检查网络'); return; }
+  mammoth.extractRawText({ arrayBuffer: buf }).then(function(result) {
+    handleParsedText(result.value);
+  }).catch(function(err) { showToast('Word 解析失败: ' + (err.message || err)); });
+}
+function handleParsedText(text) {
+  importPreviewData = textToPrograms(text);
+  renderImportPreview();
+}
+function textToPrograms(text) {
+  var lines = text.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
+  var programs = [];
+  var cur = null;
+  lines.forEach(function(line) {
+    var m = line.match(/^(?:第?\s*(\d+)\s*[.、)）]\s*|[(（]\s*(\d+)\s*[)）]\s*)(.+)/);
+    if (m) {
+      if (cur) programs.push(cur);
+      cur = { name: (m[3] || '').trim(), duration: 0, notes: '', musicCue: '', status: 'pending', useChannels: [] };
+    } else if (cur) {
+      if (/音乐|music|cue|节点|切入|前奏|间奏|副歌/i.test(line)) {
+        cur.musicCue = cur.musicCue ? cur.musicCue + '\n' + line : line;
+      } else {
+        cur.notes = cur.notes ? cur.notes + '\n' + line : line;
+      }
+    } else {
+      cur = { name: line, duration: 0, notes: '', musicCue: '', status: 'pending', useChannels: [] };
+    }
+  });
+  if (cur) programs.push(cur);
+  return programs;
+}
+function renderImportPreview() {
+  var wrap = document.getElementById('import-preview');
+  if (!wrap) return;
+  if (importPreviewData.length === 0) {
+    wrap.style.display = 'none';
+    var mr = document.getElementById('import-mode-row'); if (mr) mr.style.display = 'none';
+    var cb = document.getElementById('import-confirm-btn'); if (cb) cb.style.display = 'none';
+    showToast('未识别到节目，请检查文件内容');
+    return;
+  }
+  wrap.style.display = '';
+  var mr2 = document.getElementById('import-mode-row'); if (mr2) mr2.style.display = '';
+  var cb2 = document.getElementById('import-confirm-btn'); if (cb2) cb2.style.display = '';
+  wrap.innerHTML = importPreviewData.map(function(p, i) {
+    return '<div class="import-preview-item"><span style="margin-right:8px;color:#94a3b8;">' + (i + 1) + '</span><span class="ip-name">' + escapeHtml(p.name) + '</span></div>';
+  }).join('');
+}
+window.confirmImport = function() {
+  if (importPreviewData.length === 0) return;
+  if (typeof can === 'function' && !can('importIt')) { showToast('无导入权限'); return; }
+  var mode = 'append';
+  var radios = document.getElementsByName('import-mode');
+  for (var i = 0; i < radios.length; i++) { if (radios[i].checked) { mode = radios[i].value; break; } }
+  sendMsg({ type: 'import_programs', programs: importPreviewData, mode: mode, role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+  closeModal('modal-import');
+  showToast('已导入 ' + importPreviewData.length + ' 个节目');
+  importPreviewData = [];
+};
+
+// ---------- 工具 ----------
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+// ---------- 启动 ----------
+initLocalMode();
+// 仅当由服务器托管时，连接 WS 做多端同步（file:// 双击场景不触发）
+if (location.protocol === 'http:' || location.protocol === 'https:') {
+  tryConnectWS(false);
+  fetchServerIP();
+}
+</script>
+</body>
+</html>

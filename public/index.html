@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>舞台流程表</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 连接状态 -->
+  <div id="conn-status" class="conn-status disconnected">
+    <span class="conn-dot"></span>
+    <span class="conn-text">连接中...</span>
+  </div>
+
+  <!-- 顶部栏 -->
+  <header class="header">
+    <div class="header-left">
+      <h1 id="show-name-display" class="show-name">舞台流程表</h1>
+      <button class="icon-btn edit-show-name-btn" id="edit-show-name-btn" title="编辑演出名称">✏️</button>
+    </div>
+    <div class="header-center">
+      <!-- 单一切换按钮 -->
+      <button class="mode-toggle-btn" id="mode-toggle-btn" onclick="toggleMode()">⚙️ 设置模式</button>
+    </div>
+    <div class="header-right">
+      <span id="client-count" class="client-count"></span>
+      <button class="icon-btn" id="qr-btn" onclick="showQR()" title="显示二维码">📱</button>
+    </div>
+  </header>
+
+  <!-- 编辑演出名称弹窗 -->
+  <div id="modal-show-name" class="modal hidden">
+    <div class="modal-box">
+      <h3>编辑演出名称</h3>
+      <input type="text" id="input-show-name" class="text-input" placeholder="输入演出名称">
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-show-name')">取消</button>
+        <button class="btn btn-primary" onclick="saveShowName()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR 弹窗 -->
+  <div id="modal-qr" class="modal hidden">
+    <div class="modal-box">
+      <h3>手机扫码访问</h3>
+      <div id="qr-container" class="qr-container"></div>
+      <p id="qr-url" class="qr-url"></p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-qr')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主体布局 -->
+  <main class="main-layout">
+
+    <!-- 左侧：节目列表 -->
+    <section class="panel panel-list">
+      <div class="panel-header">
+        <h2>节目列表</h2>
+        <button class="btn btn-sm btn-primary" id="add-program-btn" onclick="openAddProgram()">＋ 添加节目</button>
+      </div>
+      <div id="program-list" class="program-list">
+        <!-- 动态渲染 -->
+      </div>
+    </section>
+
+    <!-- 右侧：演出详情 -->
+    <section class="panel panel-stage">
+
+      <!-- 演出模式：当前节目 + 计时 -->
+      <div id="performance-view" class="performance-view hidden">
+
+        <div class="stage-cards">
+          <!-- 当前节目卡 -->
+          <div class="stage-card current-card">
+            <div class="card-label">🎤 正在进行</div>
+            <div id="current-name" class="stage-program-name">—</div>
+            <div id="current-mics" class="stage-mics"></div>
+            <div id="current-notes" class="stage-notes"></div>
+            <div id="current-total" class="stage-total"></div>
+          </div>
+
+          <!-- 下一节目卡 -->
+          <div class="stage-card next-card">
+            <div class="card-label">⏭ 下一节目</div>
+            <div id="next-name" class="stage-program-name small">—</div>
+            <div id="next-mics" class="stage-mics small"></div>
+          </div>
+        </div>
+
+        <!-- 计时器区域 -->
+        <div class="timer-section">
+          <div id="timer-display" class="timer-display">--:--</div>
+          <div class="timer-controls">
+            <button class="btn btn-timer" id="timer-start-btn" onclick="timerControl('start')">▶ 开始</button>
+            <button class="btn btn-timer" id="timer-stop-btn" onclick="timerControl('stop')">⏸ 暂停</button>
+            <button class="btn btn-timer" id="timer-reset-btn" onclick="timerControl('reset')">↺ 重置</button>
+          </div>
+          <div id="timer-finished" class="timer-finished hidden">⏰ 时间到！</div>
+        </div>
+
+        <!-- 标记完成并进入下一节目 -->
+        <div class="advance-section">
+          <button class="btn btn-primary btn-advance" onclick="advanceProgram()">✓ 标记完成并进入下一节目</button>
+        </div>
+
+      </div>
+
+      <!-- 设置模式：添加/编辑节目 -->
+      <div id="setup-view" class="setup-view">
+        <div class="setup-placeholder" id="setup-placeholder">
+          <p>👆 点击节目列表中的节目进行编辑</p>
+          <p>或点击右上角「添加节目」</p>
+        </div>
+
+        <!-- 编辑面板 -->
+        <div id="edit-panel" class="edit-panel hidden">
+          <div class="edit-panel-header">
+            <h3 id="edit-panel-title">编辑节目</h3>
+            <button class="icon-btn" onclick="closeEditPanel()">✕</button>
+          </div>
+
+          <input type="hidden" id="edit-program-id">
+
+          <div class="form-group">
+            <label>节目名称 *</label>
+            <input type="text" id="edit-name" class="text-input" placeholder="输入节目名称">
+          </div>
+
+          <div class="form-group">
+            <label>节目时长（秒，0 = 不计时）</label>
+            <input type="number" id="edit-duration" class="text-input" placeholder="例如 300 = 5分钟" min="0">
+          </div>
+
+          <div class="form-group">
+            <label>话筒配置（点击话筒切换启用/关闭）</label>
+            <div id="mic-list" class="mic-list"></div>
+            <button class="btn btn-sm btn-secondary" onclick="addMicRow()">＋ 添加话筒</button>
+          </div>
+
+          <div class="form-group">
+            <label>备注</label>
+            <textarea id="edit-notes" class="text-input textarea" placeholder="备注信息（音乐文件、提示等）" rows="3"></textarea>
+          </div>
+
+          <div class="edit-actions">
+            <button class="btn btn-danger" id="delete-program-btn" onclick="deleteProgram()">🗑 删除节目</button>
+            <div>
+              <button class="btn btn-secondary" onclick="closeEditPanel()">取消</button>
+              <button class="btn btn-primary" onclick="saveProgram()">💾 保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- 添加节目弹窗（快捷） -->
+  <div id="modal-add" class="modal hidden">
+    <div class="modal-box">
+      <h3>添加节目</h3>
+      <div class="form-group">
+        <label>节目名称 *</label>
+        <input type="text" id="add-name" class="text-input" placeholder="输入节目名称">
+      </div>
+      <div class="form-group">
+        <label>节目时长（秒，0 = 不计时）</label>
+        <input type="number" id="add-duration" class="text-input" placeholder="0" min="0" value="0">
+      </div>
+      <div class="form-group">
+        <label>话筒配置</label>
+        <div id="add-mic-list" class="mic-list"></div>
+        <button class="btn btn-sm btn-secondary" onclick="addMicRow('add')">＋ 添加话筒</button>
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea id="add-notes" class="text-input textarea" placeholder="备注信息"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add')">取消</button>
+        <button class="btn btn-primary" onclick="confirmAddProgram()">创建节目</button>
+      </div>
+    </div>
+  </div>
+
+<script src="qrcode.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

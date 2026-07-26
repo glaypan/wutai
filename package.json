@@ -1,0 +1,26 @@
+{
+  "name": "stage-manager",
+  "version": "1.0.0",
+  "description": "舞台流程表 Web 应用 - WebSocket 实时同步",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "node build-clients.js"
+  },
+  "dependencies": {
+    "ws": "^8.21.1"
+  },
+  "pkg": {
+    "scripts": "client.js",
+    "assets": "舞台流程表.html",
+    "targets": [
+      "node16-win-x64",
+      "node16-macos-x64",
+      "node16-macos-arm64"
+    ],
+    "outputPath": "downloads"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.21.0"
+  }
+}

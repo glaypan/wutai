@@ -1,0 +1,290 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+body {
+  background: #121419;
+  color: #eee;
+  font-size: 15px;
+}
+.conn-status {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  background: #222630;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size:13px;
+  z-index:999;
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+.conn-dot {
+  width:8px;height:8px;border-radius:50%;
+  background:#ff4d4f;
+}
+.conn-status.connected .conn-dot {
+  background:#52c41a;
+}
+.hidden {display:none !important;}
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 20px;
+  background:#1c2029;
+  gap:16px;
+}
+.header-left {display:flex;align-items:center;gap:10px;}
+.header-center {display:flex;align-items:center;}
+.header-right {display:flex;align-items:center;gap:8px;}
+.show-name {font-size:20px;font-weight:600;}
+.icon-btn {
+  background:#272c36;
+  border:none;
+  color:#fff;
+  width:32px;height:32px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:16px;
+}
+/* 单一模式切换按钮样式 */
+.mode-toggle-btn {
+  padding:9px 18px;
+  border-radius:8px;
+  border:none;
+  font-size:15px;
+  cursor:pointer;
+  background:#272c36;
+  color:#fff;
+  transition: 0.2s;
+}
+.mode-toggle-btn.performance {
+  background:#2563eb;
+}
+.main-layout {
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  min-height: calc(100vh - 72px);
+}
+.panel {padding:16px;}
+.panel-list {background:#161920;border-right:1px solid #272c36;}
+.panel-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.program-list {display:flex;flex-direction:column;gap:8px;}
+.program-item {
+  background:#1c2029;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid transparent;
+  cursor:pointer;
+}
+.program-item.active {border-color:#2563eb;}
+.program-item.completed {opacity:0.6;}
+.performance-view {
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+.stage-cards {display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.stage-card {
+  background:#1c2029;
+  padding:16px;
+  border-radius:10px;
+}
+.current-card {border:2px solid #2563eb;}
+.card-label {font-size:13px;color:#94a3b8;margin-bottom:8px;}
+.current-card .card-label {color:#22c55e;}
+.stage-program-name {font-size:24px;font-weight:bold;}
+.stage-program-name.small {font-size:18px;}
+.stage-mics {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:8px 0;
+}
+.mic-tag {
+  padding:3px 8px;
+  border-radius:4px;
+  font-size:13px;
+  background:#2563eb;
+}
+.stage-notes {
+  font-size:14px;
+  color:#94a3b8;
+}
+.stage-total {
+  font-size:13px;
+  color:#94a3b8;
+  margin-top:6px;
+}
+.timer-section {
+  text-align:center;
+  margin-top:20px;
+}
+.timer-display {
+  font-size:72px;
+  font-weight:bold;
+  font-variant-numeric:tabular-nums;
+  margin:16px 0;
+}
+.timer-display.running {color:#22c55e;}
+.timer-display.finished {color:#ef4444;}
+.timer-controls {display:flex;gap:10px;justify-content:center;}
+.btn-timer {
+  padding:10px 22px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  background:#272c36;
+  color:#fff;
+}
+.timer-finished {
+  font-size:20px;
+  color:#ef4444;
+  font-weight:bold;
+  margin-top:12px;
+}
+.advance-section {
+  text-align:center;
+  margin-top:16px;
+}
+.btn-advance {
+  padding:12px 24px;
+  font-size:16px;
+}
+.setup-placeholder {
+  text-align:center;
+  padding:60px 20px;
+  color:#94a3b8;
+}
+.edit-panel {
+  background:#1c2029;
+  border-radius:10px;
+  padding:16px;
+}
+.edit-panel-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+.form-group {margin-bottom:14px;}
+.form-group label {display:block;margin-bottom:6px;color:#cbd5e1;}
+.text-input {
+  width:100%;
+  background:#121419;
+  border:1px solid #363c48;
+  border-radius:6px;
+  padding:10px;
+  color:#fff;
+  font-size:15px;
+}
+.textarea {min-height:80px;resize:vertical;}
+.modal {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+.modal-box {
+  background:#1c2029;
+  padding:22px;
+  border-radius:10px;
+  width:min(92%,520px);
+}
+.modal-actions {display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+.btn {
+  padding:9px 16px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  font-size:14px;
+}
+.btn-sm {padding:6px 12px;font-size:13px;}
+.btn-primary {background:#2563eb;color:#fff;}
+.btn-secondary {background:#363c48;color:#fff;}
+.btn-danger {background:#dc2626;color:#fff;}
+.qr-container {text-align:center;padding:12px;}
+.qr-url {
+  text-align:center;
+  font-size:13px;
+  color:#94a3b8;
+  word-break:break-all;
+}
+
+/* 话筒列表按钮样式 */
+.mic-list {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.mic-row {
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.mic-name-input {
+  flex:1;
+  padding:6px 8px;
+  background:#121419;
+  border:1px solid #363c48;
+  border-radius:4px;
+  color:white;
+}
+.mic-toggle-btn {
+  padding:5px 10px;
+  border-radius:4px;
+  border:none;
+  color:#fff;
+  cursor:pointer;
+  background:#363c48;
+  min-width:60px;
+}
+.mic-toggle-btn.active {
+  background:#2563eb;
+}
+.mic-del-btn {
+  padding:5px 8px;
+  background:#442226;
+  border:none;
+  border-radius:4px;
+  color:#ff9999;
+  cursor:pointer;
+}
+
+/* 节目序号徽章 */
+.prog-no {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#272c36;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:600;
+}
+.program-item.active .prog-no {
+  background:#2563eb;
+  color:#fff;
+}
+
+/* 客户端连接数 */
+.client-count {
+  font-size:13px;
+  color:#94a3b8;
+}
+
+/* 编辑演出名称输入框 */
+#modal-show-name .text-input {
+  width:100%;
+}

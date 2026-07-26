@@ -1,0 +1,5 @@
+node_modules/
+.trae/
+.uploads/
+*.log
+show.json
