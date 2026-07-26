@@ -184,6 +184,12 @@ body {
 .conn-status.connected .conn-dot {
   background:#52c41a;
 }
+.conn-ip {
+  font-family: monospace;
+  font-size: 12px;
+  color: #7fe0a0;
+  font-weight: 600;
+}
 .hidden {display:none !important;}
 .header {
   display:flex;
@@ -286,65 +292,67 @@ body {
 @keyframes viewFadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
 .performance-view > * { margin-bottom:20px; }
 .performance-view > *:last-child { margin-bottom:0; }
-.stage-cards {display:grid;grid-template-columns:1.4fr 1fr;gap:20px;flex:1 1 auto;}
+.stage-cards {display:grid;grid-template-columns:1.4fr 1fr;gap:24px;flex:1 1 auto;min-height:0;}
 .stage-card {
   background: rgba(28,28,30,0.72);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
-  padding:24px;
+  padding:32px;
   border-radius:var(--radius);
   border: 1px solid var(--stroke);
   transition: box-shadow 0.25s ease, border-color 0.2s ease;
   display:flex;
   flex-direction:column;
+  overflow-y:auto;
 }
 .stage-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
 .current-card {border:2px solid var(--ios-blue);}
-.card-label {font-size:16px;color:var(--text-2);margin-bottom:10px;font-weight:600;}
+.card-label {font-size:20px;color:var(--text-2);margin-bottom:12px;font-weight:600;}
 .current-card .card-label {color:var(--ios-green);}
-.stage-program-name {font-size:32px;font-weight:bold;line-height:1.3;}
-.stage-program-name.small {font-size:24px;}
+.stage-program-name {font-size:42px;font-weight:bold;line-height:1.3;}
+.stage-program-name.small {font-size:32px;}
 .stage-mics {
   display:flex;
   flex-wrap:wrap;
-  margin:12px 0;
-  margin:-3px;
+  margin:14px 0;
+  margin:-4px;
 }
 .mic-tag {
-  padding:8px 14px;
+  padding:10px 18px;
   border-radius:10px;
-  font-size:15px;
+  font-size:18px;
   background: rgba(10,132,255,0.22);
   color:#7dbcff;
   border:1px solid rgba(10,132,255,0.35);
-  margin:3px;
-  min-height:38px;
+  margin:4px;
+  min-height:42px;
   display:inline-flex;
   align-items:center;
 }
 .music-cue-display {
-  margin-top:12px;
+  margin-top:14px;
   color:#ffc857;
-  font-size:16px;
+  font-size:18px;
   background: rgba(255,200,87,0.08);
   border-left: 4px solid #ffc857;
-  padding: 12px 16px;
+  padding: 14px 18px;
   border-radius: 6px;
   white-space: pre-wrap;
   line-height: 1.6;
 }
 .stage-notes {
-  font-size:16px;
+  font-size:18px;
   color:var(--text-2);
   background: rgba(148,163,184,0.08);
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 4px;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin-top:8px;
 }
 .stage-total {
-  font-size:13px;
+  font-size:15px;
   color:var(--text-2);
-  margin-top:6px;
+  margin-top:8px;
 }
 .timer-section {
   text-align:center;
@@ -642,6 +650,133 @@ body {
 .channel-check-btn .check-type {
   display:block; font-size:11px; opacity:0.7; margin-top:2px; font-weight:normal;
 }
+/* 批量类型选择器 */
+.batch-type-section {
+  margin-bottom:20px;
+}
+.batch-type-title {
+  font-size:15px;
+  font-weight:600;
+  color:#e2e8f0;
+  margin:0 0 10px 0;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--stroke);
+}
+.batch-type-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+  gap:8px;
+  margin-top:10px;
+  margin-bottom:12px;
+}
+.batch-type-item {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  background: rgba(44,44,46,0.66);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--stroke);
+  border-radius:10px;
+  cursor:pointer;
+  transition: background 0.15s ease, border-color 0.2s ease, transform 0.12s ease;
+  min-height:44px;
+}
+.batch-type-item:hover {
+  background: rgba(58,58,60,0.8);
+}
+.batch-type-item:active {
+  transform: scale(0.97);
+}
+.batch-type-item.checked {
+  background: rgba(10,132,255,0.2);
+  border-color: rgba(10,132,255,0.5);
+}
+.batch-type-item input[type="checkbox"] {
+  width:20px;
+  height:20px;
+  accent-color: var(--ios-blue);
+  cursor:pointer;
+  flex-shrink:0;
+}
+.batch-type-item .type-label {
+  flex:1;
+  color:#e2e8f0;
+  font-size:14px;
+  font-weight:500;
+  user-select:none;
+}
+.batch-type-item .type-count {
+  width:50px;
+  padding:4px 6px;
+  background: rgba(0,0,0,0.3);
+  border:1px solid var(--stroke);
+  border-radius:6px;
+  color:#fff;
+  text-align:center;
+  font-size:13px;
+  flex-shrink:0;
+}
+.batch-type-custom-row {
+  grid-column: 1 / -1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  background: rgba(255,159,10,0.08);
+  border:1px solid rgba(255,159,10,0.3);
+  border-radius:10px;
+  margin-top:4px;
+}
+.batch-type-custom-row.hidden { display:none; }
+.batch-type-custom-row label {
+  color:#ffbf6b;
+  font-size:13px;
+  white-space:nowrap;
+}
+.batch-type-custom-row input {
+  flex:1;
+  padding:6px 8px;
+  background: rgba(0,0,0,0.3);
+  border:1px solid rgba(255,159,10,0.4);
+  border-radius:6px;
+  color:#ffbf6b;
+}
+.batch-add-types-btn {
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  font-size:15px;
+  font-weight:600;
+}
+.batch-btn-badge {
+  display:inline-block;
+  background: rgba(10,132,255,0.3);
+  color:#7dd3fc;
+  border-radius:10px;
+  padding:1px 7px;
+  font-size:12px;
+  margin-left:6px;
+  font-weight:600;
+}
+.batch-btn-badge.hidden { display:none; }
+.batch-summary {
+  margin-top:12px;
+  padding:10px 14px;
+  background: rgba(10,132,255,0.1);
+  border:1px solid rgba(10,132,255,0.2);
+  border-radius:10px;
+  color:#7dd3fc;
+  font-size:13px;
+  line-height:1.6;
+}
+.batch-summary.hidden { display:none; }
+@media (max-width:600px) {
+  .batch-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
 /* 节目序号徽章 */
 .prog-no {
   display:inline-flex;
@@ -806,7 +941,7 @@ body {
 .program-item.is-completed .prog-name, .program-item.is-completed .prog-meta { text-decoration:none; }
 .program-item.is-active { border-color:var(--ios-green) !important; background:rgba(48,209,88,0.10) !important; box-shadow:0 2px 16px rgba(48,209,88,0.20) !important; }
 /* 卡片内时长 */
-.card-duration { font-size:16px; font-weight:600; color:var(--ios-green); margin-top:6px; }
+.card-duration { font-size:20px; font-weight:600; color:var(--ios-green); margin-top:8px; }
 /* 角色徽章 */
 .role-badge { font-size:12px; padding:4px 10px; border-radius:8px; margin-left:8px; font-weight:600; cursor:pointer; user-select:none; transition: background .2s ease; }
 .role-badge:hover { opacity:0.85; }
@@ -958,7 +1093,7 @@ body {
     <div class="header-right">
       <span id="client-count" class="client-count"></span>
       <button class="icon-btn" id="perf-list-toggle-btn" onclick="togglePerfList()" title="节目列表" style="display:none">📋</button>
-      <button class="icon-btn" onclick="openGlobalSetting()" title="全局通道设置">🎛️</button>
+      <button class="icon-btn" onclick="openGlobalSetting()" title="全局通道设置">⚙️</button>
       <button class="icon-btn" onclick="exportChannelList()" title="导出通道清单">📄</button>
       <button class="icon-btn" id="import-btn" onclick="openImport()" title="导入PDF/Word" style="display:none">📥</button>
       <button class="icon-btn" id="qr-btn" onclick="showQR()" title="显示二维码">📱</button>
@@ -991,19 +1126,30 @@ body {
         <button class="tab-btn" data-tab="line-tab">🔊 线路输入</button>
       </div>
 
-      <!-- 批量生成通道区域 -->
-      <div class="batch-create-bar">
-        <input type="number" class="batch-num-input" id="batch-num" min="1" value="4" placeholder="输入数量">
-        <button class="btn btn-secondary batch-mic-btn" data-ctype="mics">批量生成话筒通道</button>
-        <button class="btn btn-secondary batch-line-btn" data-ctype="lines">批量生成线路通道</button>
-      </div>
-
       <div class="tab-content" id="mic-tab">
+        <!-- 批量生成区域 -->
+        <div class="batch-create-bar">
+          <input type="number" class="batch-num-input" id="batch-num" min="1" value="4" placeholder="输入数量">
+          <button class="btn btn-secondary batch-mic-btn" data-ctype="mics">批量生成话筒通道</button>
+        </div>
+        <!-- 话筒类型选择 -->
+        <div class="batch-type-grid" id="batch-mic-type-grid"></div>
+        <div class="batch-summary hidden" id="batch-mic-summary"></div>
+        <!-- 通道列表 -->
         <div class="channel-list-wrap" id="global-mic-channel-list"></div>
         <button class="btn btn-secondary add-channel-btn" data-ctype="mics">＋ 新增单条话筒通道</button>
       </div>
 
       <div class="tab-content hidden" id="line-tab">
+        <!-- 批量生成区域 -->
+        <div class="batch-create-bar">
+          <input type="number" class="batch-num-input" id="batch-num-line" min="1" value="4" placeholder="输入数量">
+          <button class="btn btn-secondary batch-line-btn" data-ctype="lines">批量生成线路通道</button>
+        </div>
+        <!-- 线路类型选择 -->
+        <div class="batch-type-grid" id="batch-line-type-grid"></div>
+        <div class="batch-summary hidden" id="batch-line-summary"></div>
+        <!-- 通道列表 -->
         <div class="channel-list-wrap" id="global-line-channel-list"></div>
         <button class="btn btn-secondary add-channel-btn" data-ctype="lines">＋ 新增单条线路通道</button>
       </div>
@@ -1398,6 +1544,8 @@ function tryConnectWS(backgroundOnly) {
       wsMode = true;
       setConnConnected(true);
       setConnText("已连接");
+      var connIpEl = document.getElementById('conn-ip');
+      if (connIpEl) connIpEl.textContent = location.host;
       sendMsg({ type: "get_state" });
     };
     ws.onclose = () => {
@@ -1405,6 +1553,8 @@ function tryConnectWS(backgroundOnly) {
         wsMode = false;
         setConnConnected(false);
         setConnText("本地模式");
+        var connIpEl = document.getElementById('conn-ip');
+        if (connIpEl) connIpEl.textContent = '';
       }
     };
     ws.onerror = () => {
@@ -1529,7 +1679,14 @@ function tryConnectManualServer(host) {
       wsMode = true;
       manualServerConnected = true;
       setConnConnected(true);
-      setConnText("已连接 · " + host.split(':')[0]);
+      setConnText("已连接");
+      var connIpEl = document.getElementById('conn-ip');
+      if (connIpEl) connIpEl.textContent = host;
+      var sipEl = document.getElementById('server-ip-display');
+      if (sipEl) {
+        sipEl.textContent = '🌐 ' + host;
+        sipEl.style.display = '';
+      }
       sendMsg({ type: "get_state" });
       showToast('已连接到服务器 ' + host);
     };
@@ -1540,6 +1697,10 @@ function tryConnectManualServer(host) {
         wsMode = false;
         setConnConnected(false);
         setConnText("已断开 · 点击重连");
+        var connIpEl = document.getElementById('conn-ip');
+        if (connIpEl) connIpEl.textContent = '';
+        var sipEl = document.getElementById('server-ip-display');
+        if (sipEl) sipEl.style.display = 'none';
       } else {
         setConnText("连接失败 · 点击重连");
       }
@@ -1749,6 +1910,8 @@ window.toggleMode = function () {
 window.openGlobalSetting = function() {
   document.getElementById('modal-global-setting').classList.remove('hidden');
   renderGlobalChannelEditor();
+  renderBatchTypeGrid('mics');
+  renderBatchTypeGrid('lines');
   bindBatchCreate();
   // Tab切换事件绑定
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1775,29 +1938,205 @@ window.openGlobalSetting = function() {
   });
 };
 
-// 批量生成通道
+// 批量生成通道（集成类型选择）
 function bindBatchCreate() {
   document.querySelectorAll('.batch-mic-btn, .batch-line-btn').forEach(btn => {
     btn.onclick = function() {
       const ctype = this.dataset.ctype;
-      const num = Number(document.getElementById('batch-num').value) || 4;
-      const pool = localState.globalChannels[ctype];
-      const baseName = ctype === "mics" ? "话筒" : "线路";
-      const prefix = ctype === "mics" ? "mic" : "line";
-      const typeOpt = ctype === "mics" ? "wireless_headset" : "stereo_line";
-      for (let i = 1; i <= num; i++) {
-        const id = `${prefix}_${Date.now()}_${pool.length}`;
-        pool.push({
-          id,
-          name: `${baseName}${pool.length + 1}`,
-          type: typeOpt,
-          notes: "",
-          customType: ""
+      var selections = getBatchTypeSelections(ctype);
+      var pool = localState.globalChannels[ctype];
+      var prefix = ctype === "mics" ? "mic" : "line";
+
+      if (selections.length > 0) {
+        // 有勾选类型 → 按类型批量添加
+        var totalAdded = 0;
+        selections.forEach(function(sel) {
+          for (var i = 0; i < sel.count; i++) {
+            var id = prefix + '_' + Date.now() + '_' + pool.length + '_' + i;
+            var name = sel.customType
+              ? sel.customType + (pool.length + 1)
+              : (sel.label + (pool.length + 1));
+            pool.push({
+              id: id,
+              name: name,
+              type: sel.type,
+              notes: '',
+              customType: sel.customType || ''
+            });
+            totalAdded++;
+          }
         });
+        // 清除选中状态
+        clearBatchTypeSelection(ctype);
+        renderGlobalChannelEditor();
+        alert('已成功添加 ' + totalAdded + ' 条通道');
+      } else {
+        // 无勾选 → 走原逻辑（按数量输入添加默认类型）
+        var numInput = ctype === "mics" ? document.getElementById('batch-num') : document.getElementById('batch-num-line');
+        const num = Number(numInput.value) || 4;
+        const baseName = ctype === "mics" ? "话筒" : "线路";
+        const typeOpt = ctype === "mics" ? "wireless_headset" : "stereo_line";
+        for (let i = 1; i <= num; i++) {
+          const id = `${prefix}_${Date.now()}_${pool.length}`;
+          pool.push({
+            id,
+            name: `${baseName}${pool.length + 1}`,
+            type: typeOpt,
+            notes: "",
+            customType: ""
+          });
+        }
+        renderGlobalChannelEditor();
       }
-      renderGlobalChannelEditor();
     };
   });
+}
+
+// ---------- 批量类型选择器 ----------
+// 话筒类型预设
+var BATCH_MIC_TYPES = [
+  { v: "wireless_headset", t: "头戴无线麦" },
+  { v: "wireless_hand", t: "无线手持麦" },
+  { v: "podium", t: "讲台麦" },
+  { v: "wired", t: "有线话筒" },
+  { v: "host", t: "主持人话筒" },
+  { v: "guest", t: "嘉宾话筒" },
+  { v: "custom", t: "自定义" }
+];
+// 线路类型预设
+var BATCH_LINE_TYPES = [
+  { v: "stereo_line", t: "立体声线路" },
+  { v: "mono_line", t: "单声道线路" },
+  { v: "drum", t: "电子鼓" },
+  { v: "keyboard", t: "键盘" },
+  { v: "guitar", t: "吉他" },
+  { v: "custom", t: "自定义" }
+];
+
+function renderBatchTypeGrid(ctype) {
+  var gridId = ctype === 'mics' ? 'batch-mic-type-grid' : 'batch-line-type-grid';
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  var types = ctype === 'mics' ? BATCH_MIC_TYPES : BATCH_LINE_TYPES;
+
+  grid.innerHTML = types.map(function(item) {
+    return renderBatchTypeItem(item, ctype);
+  }).join('') + renderCustomRow(ctype);
+
+  // 绑定复选框事件
+  grid.querySelectorAll('.type-checkbox').forEach(function(cb) {
+    cb.onchange = function() {
+      var item = this.closest('.batch-type-item');
+      if (this.checked) item.classList.add('checked');
+      else item.classList.remove('checked');
+      toggleCustomRow(ctype, this.value, this.checked);
+      updateBatchTypeSummary(ctype);
+    };
+  });
+
+  // 数量输入变化时更新摘要
+  grid.querySelectorAll('.type-count').forEach(function(inp) {
+    inp.oninput = function() { updateBatchTypeSummary(ctype); };
+  });
+
+  // 自定义名称输入变化时更新摘要
+  var customRow = grid.querySelector('.batch-type-custom-row');
+  if (customRow) {
+    customRow.querySelectorAll('input').forEach(function(inp) {
+      inp.oninput = function() { updateBatchTypeSummary(ctype); };
+    });
+  }
+}
+
+function renderBatchTypeItem(item, ctype) {
+  return '<label class="batch-type-item">' +
+    '<input type="checkbox" class="type-checkbox" value="' + item.v + '" data-ctype="' + ctype + '">' +
+    '<span class="type-label">' + escapeHtml(item.t) + '</span>' +
+    '<input type="number" class="type-count" min="1" max="99" value="1" data-ctype="' + ctype + '" data-type="' + item.v + '">' +
+    '</label>';
+}
+
+function renderCustomRow(ctype) {
+  return '<div class="batch-type-custom-row hidden" data-ctype="' + ctype + '">' +
+    '<label>自定义类型名：</label>' +
+    '<input type="text" class="custom-type-name" placeholder="例如：无线领夹麦、贝斯等" data-ctype="' + ctype + '">' +
+    '<input type="number" class="type-count custom-count" min="1" max="99" value="1" data-ctype="' + ctype + '" data-type="custom">' +
+    '<span style="color:#94a3b8;font-size:12px;white-space:nowrap;">数量</span>' +
+    '</div>';
+}
+
+function toggleCustomRow(ctype, typeVal, checked) {
+  var gridId = ctype === 'mics' ? 'batch-mic-type-grid' : 'batch-line-type-grid';
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  var row = grid.querySelector('.batch-type-custom-row[data-ctype="' + ctype + '"]');
+  if (!row) return;
+  if (typeVal === 'custom' && checked) row.classList.remove('hidden');
+  else if (typeVal === 'custom' && !checked) row.classList.add('hidden');
+}
+
+function updateBatchTypeSummary(ctype) {
+  var summaryId = ctype === 'mics' ? 'batch-mic-summary' : 'batch-line-summary';
+  var summary = document.getElementById(summaryId);
+  if (!summary) return;
+  var selections = getBatchTypeSelections(ctype);
+  if (selections.length === 0) {
+    summary.classList.add('hidden');
+    return;
+  }
+  summary.classList.remove('hidden');
+  var lines = selections.map(function(s) {
+    return '• ' + s.label + ' × ' + s.count;
+  });
+  var total = selections.reduce(function(sum, s) { return sum + s.count; }, 0);
+  summary.innerHTML = lines.join('<br>') + '<br><strong>共 ' + total + ' 条</strong>';
+}
+
+function getBatchTypeSelections(ctype) {
+  var gridId = ctype === 'mics' ? 'batch-mic-type-grid' : 'batch-line-type-grid';
+  var grid = document.getElementById(gridId);
+  if (!grid) return [];
+  var types = ctype === 'mics' ? BATCH_MIC_TYPES : BATCH_LINE_TYPES;
+  var selections = [];
+  grid.querySelectorAll('.type-checkbox:checked').forEach(function(cb) {
+    var item = cb.closest('.batch-type-item');
+    var countInput = item.querySelector('.type-count');
+    var count = Math.max(1, Number(countInput.value) || 1);
+    var typeVal = cb.value;
+    var label = '';
+    var customType = '';
+    if (typeVal === 'custom') {
+      var customRow = grid.querySelector('.batch-type-custom-row[data-ctype="' + ctype + '"]');
+      var nameInput = customRow ? customRow.querySelector('.custom-type-name') : null;
+      customType = nameInput ? nameInput.value.trim() : '';
+      label = customType ? '自定义：' + customType : (ctype === 'mics' ? '自定义话筒' : '自定义线路');
+      var customCountInput = customRow ? customRow.querySelector('.custom-count') : null;
+      if (customCountInput) count = Math.max(1, Number(customCountInput.value) || 1);
+    } else {
+      var found = types.find(function(t) { return t.v === typeVal; });
+      label = found ? found.t : typeVal;
+    }
+    selections.push({ type: typeVal, label: label, count: count, customType: customType });
+  });
+  return selections;
+}
+
+function clearBatchTypeSelection(ctype) {
+  var gridId = ctype === 'mics' ? 'batch-mic-type-grid' : 'batch-line-type-grid';
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.querySelectorAll('.type-checkbox').forEach(function(cb) {
+    cb.checked = false;
+    var item = cb.closest('.batch-type-item');
+    if (item) item.classList.remove('checked');
+  });
+  var row = grid.querySelector('.batch-type-custom-row');
+  if (row) {
+    row.classList.add('hidden');
+    var inp = row.querySelector('.custom-type-name');
+    if (inp) inp.value = '';
+  }
+  updateBatchTypeSummary(ctype);
 }
 
 // 渲染全局通道编辑器（支持名称/类型/备注修改）
@@ -2069,8 +2408,8 @@ function renderProgramList() {
     var isCompleted = prog.status === 'completed';
     var completedBadge = isCompleted ? '<span class="completed-badge-lg">✓ 已完成</span>' : '';
     var completedIcon = isCompleted ? '<div class="completed-check-icon" data-reset-idx="' + idx + '">✓</div>' : '';
-    // 重置按钮：已完成节目且控制端
-    var resetBtn = (isCompleted && canReset)
+    // 重置按钮：控制端始终显示（每个节目都有，已完成可重置，未完成提示）
+    var resetBtn = canReset
       ? '<button class="prog-reset-btn" data-reset-idx="' + idx + '" title="重置此节目">↺</button>'
       : '';
     var detailBtn = localState.mode === 'performance'
@@ -2098,13 +2437,18 @@ function renderProgramList() {
     if (dbtn) {
       dbtn.onclick = function(e){ if(e) e.stopPropagation(); openProgramDetail(idx); };
     }
-    // 重置按钮事件
+    // 重置按钮 & 完成打勾事件
     var rbtns = div.querySelectorAll('[data-reset-idx]');
     for (var ri = 0; ri < rbtns.length; ri++) {
       rbtns[ri].onclick = function(e) {
         if(e) e.stopPropagation();
         var rIdx = Number(this.getAttribute('data-reset-idx'));
-        showResetConfirm(rIdx);
+        var rProg = localState.programs[rIdx];
+        if (rProg && rProg.status === 'completed') {
+          showResetConfirm(rIdx);
+        } else {
+          showToast('此节目尚未完成，无需重置');
+        }
       };
     }
     wrap.appendChild(div);
