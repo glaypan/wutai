@@ -955,6 +955,7 @@ body {
 .role-badge { font-size:12px; padding:4px 10px; border-radius:8px; margin-left:8px; font-weight:600; cursor:pointer; user-select:none; transition: background .2s ease; }
 .role-badge:hover { opacity:0.85; }
 .role-badge.control { background:rgba(10,132,255,.2); color:#7dbcff; }
+.role-badge.director { background:rgba(168,85,247,.2); color:#c084fc; }
 .role-badge.assistant { background:rgba(255,159,10,.2); color:#ffbf6b; }
 .role-badge.backstage { background:rgba(148,163,184,.2); color:#cbd5e1; }
 .role-switch-list { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
@@ -965,6 +966,7 @@ body {
 .role-switch-btn .role-name { font-size:16px; font-weight:600; }
 .role-switch-btn .role-desc { font-size:12px; color:#98989f; margin-left:auto; }
 .role-switch-btn.control { border-left:3px solid var(--ios-blue); }
+.role-switch-btn.director { border-left:3px solid #a855f7; }
 .role-switch-btn.assistant { border-left:3px solid var(--ios-orange); }
 .role-switch-btn.backstage { border-left:3px solid #94a3b8; }
 /* Toast 提示 */
@@ -1209,13 +1211,18 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
           <span class="role-name">控制端</span>
           <span class="role-desc">全权限：节目/通道/导入/导航/重置</span>
         </button>
+        <button class="role-switch-btn director" onclick="switchRole('director')">
+          <span class="role-icon">🎬</span>
+          <span class="role-name">导演端</span>
+          <span class="role-desc">导航：上一个/下一个/GO</span>
+        </button>
         <button class="role-switch-btn assistant" onclick="switchRole('assistant')">
           <span class="role-icon">🎭</span>
           <span class="role-name">舞台助理端</span>
           <span class="role-desc">备注/音乐节点/通道选择</span>
         </button>
         <button class="role-switch-btn backstage" onclick="switchRole('backstage')">
-          <span class="role-icon">🎬</span>
+          <span class="role-icon">📋</span>
           <span class="role-name">幕后端</span>
           <span class="role-desc">仅可修改备注</span>
         </button>
@@ -1532,11 +1539,12 @@ let localState = {
 function getRole(){
   var p = new URLSearchParams(location.search);
   var r = p.get('role');
-  return ['control','assistant','backstage'].indexOf(r)>=0 ? r : 'control';
+  return ['control','assistant','backstage','director'].indexOf(r)>=0 ? r : 'control';
 }
 var ROLE = getRole();
 var PERM = {
   control:    { mode:true, addDel:true, drag:true, editName:true, editDuration:true, editMusic:true, editChannel:true, editNotes:true, channelAdmin:true, importIt:true, nav:true, reset:true, exportIt:true, rename:true },
+  director:   { nav:true },
   assistant:  { editMusic:true, editChannel:true, editNotes:true },
   backstage:  { editNotes:true }
 };
@@ -2286,14 +2294,21 @@ window.saveGlobalChannel = function() {
 // ---------- 角色可见性控制 ----------
 var ROLE_LABELS = {
   control: '控制端',
+  director: '导演端',
   assistant: '助理端',
   backstage: '幕后端'
+};
+var ROLE_ICONS = {
+  control: '⚙️',
+  director: '🎬',
+  assistant: '🎭',
+  backstage: '📋'
 };
 function applyRoleVisibility() {
   var badge = document.getElementById('role-badge');
   if (badge) {
     badge.className = 'role-badge ' + ROLE;
-    badge.textContent = '⚙️';
+    badge.textContent = ROLE_ICONS[ROLE] || '⚙️';
     badge.title = '当前: ' + (ROLE_LABELS[ROLE] || '控制端') + ' - 点击切换角色';
   }
   // 按权限显隐按钮
@@ -2348,7 +2363,7 @@ function applyRoleVisibility() {
 
 // ---------- 角色切换 ----------
 window.switchRole = function(newRole) {
-  if (['control', 'assistant', 'backstage'].indexOf(newRole) < 0) return;
+  if (['control', 'director', 'assistant', 'backstage'].indexOf(newRole) < 0) return;
   var url = new URL(location.href);
   url.searchParams.set('role', newRole);
   location.href = url.toString();

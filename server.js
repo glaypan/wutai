@@ -149,7 +149,7 @@ function handleMessage(ws, msg) {
       break;
 
     case 'set_current':
-      if (role !== 'control') return sendError(ws, 'forbidden', 'set_current');
+      if (role !== 'control' && role !== 'director') return sendError(ws, 'forbidden', 'set_current');
       if (typeof msg.index === 'number' && msg.index >= 0 && msg.index <= state.programs.length - 1) {
         state.currentProgramIndex = msg.index;
         // 设置新当前节目为 active
@@ -162,17 +162,17 @@ function handleMessage(ws, msg) {
       break;
 
     case 'advance':
-      if (role !== 'control') return sendError(ws, 'forbidden', 'advance');
+      if (role !== 'control' && role !== 'director') return sendError(ws, 'forbidden', 'advance');
       doAdvance();
       break;
 
     case 'prev':
-      if (role !== 'control') return sendError(ws, 'forbidden', 'prev');
+      if (role !== 'control' && role !== 'director') return sendError(ws, 'forbidden', 'prev');
       doNav(-1);
       break;
 
     case 'next':
-      if (role !== 'control') return sendError(ws, 'forbidden', 'next');
+      if (role !== 'control' && role !== 'director') return sendError(ws, 'forbidden', 'next');
       doNav(1);
       break;
 
@@ -518,6 +518,7 @@ function printStartupInfo() {
   }
   console.log('╠══════════════════════════════════════════════════╣');
   console.log('║  控制端:   /?role=control                          ║');
+  console.log('║  导演端:   /?role=director                          ║');
   console.log('║  助理端:   /?role=assistant                        ║');
   console.log('║  幕后端:   /?role=backstage                        ║');
   console.log('╚══════════════════════════════════════════════════╝');
