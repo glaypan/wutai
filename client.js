@@ -6,7 +6,7 @@ var path = require('path');
 var os = require('os');
 var { WebSocketServer, WebSocket } = require('ws');
 
-var PORT = process.env.PORT || 3000;
+var PORT = parseInt(process.env.PORT) || 3000;
 
 // ---------- 获取局域网IP ----------
 function getLocalIPs() {
@@ -248,7 +248,7 @@ function serveStatic(req, res) {
 
   if (urlPath === '/api/server-info') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ ip: primaryIP, port: PORT, ips: localIPs }));
+    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs }));
     return;
   }
 
@@ -263,7 +263,84 @@ function serveStatic(req, res) {
 }
 
 // ---------- 启动 ----------
-server.listen(PORT, function() {
+var actualPort = PORT;
+var tryingPort = PORT;
+var retryCount = 0;
+var MAX_RETRIES = 5;
+
+function killProcessOnPort(port, callback) {
+  var exec = require('child_process').exec;
+  var platform = process.platform;
+  var myPid = String(process.pid);
+  if (platform === 'win32') {
+    // Windows: 两步查找并杀掉占用端口的进程
+    exec('netstat -ano | findstr :' + port, function(err, stdout) {
+      if (err || !stdout) { callback(); return; }
+      var lines = stdout.trim().split('\n');
+      var pids = [];
+      lines.forEach(function(line) {
+        if (line.indexOf('LISTENING') !== -1) {
+          var parts = line.trim().split(/\s+/);
+          var pid = parts[parts.length - 1];
+          // 排除自身进程
+          if (pid && pid !== myPid && pids.indexOf(pid) === -1) pids.push(pid);
+        }
+      });
+      if (pids.length === 0) { callback(); return; }
+      exec('taskkill /F /PID ' + pids.join(' /PID '), function() { callback(); });
+    });
+  } else {
+    // Linux/macOS: 查找并杀掉占用端口的进程，排除自身
+    var cmd = 'lsof -ti:' + port + ' 2>/dev/null | grep -v ' + myPid + ' | xargs kill -9 2>/dev/null';
+    if (platform !== 'darwin') cmd += '; fuser -k ' + port + '/tcp 2>/dev/null || true';
+    exec(cmd, function() { callback(); });
+  }
+}
+
+function startListening(port) {
+  tryingPort = port;
+  // 清理之前失败的 listen 句柄，防止 ERR_SERVER_ALREADY_LISTEN
+  try { server.close(); } catch(e) {}
+  server.listen(port);
+}
+
+function handleServerError(e) {
+  if (e.code === 'EADDRINUSE' && retryCount < MAX_RETRIES) {
+    retryCount++;
+    if (retryCount === 1) {
+      console.log('');
+      console.log('[!] 检测到端口 ' + tryingPort + ' 被占用');
+      console.log('[!] 正在自动清理旧进程...');
+      killProcessOnPort(tryingPort, function() {
+        setTimeout(function() {
+          console.log('[i] 正在重新启动服务器...');
+          startListening(PORT);
+        }, 1000);
+      });
+    } else {
+      var nextPort = PORT + retryCount - 1;
+      console.log('[!] 端口 ' + tryingPort + ' 仍被占用，尝试端口 ' + nextPort + '...');
+      startListening(nextPort);
+    }
+  } else if (e.code === 'EACCES') {
+    console.error('[!] 权限不足，无法绑定端口 ' + tryingPort + '。请使用 1024 以上的端口。');
+    process.exit(1);
+  } else {
+    console.error('[!] 服务器错误: ' + e.message);
+    process.exit(1);
+  }
+}
+
+// 错误处理：ws 库会自动将 HTTP 服务器的 error 事件转发到 WebSocketServer
+// 只需在 wss 上监听，避免重复处理
+wss.on('error', handleServerError);
+
+server.on('listening', function() {
+  actualPort = server.address().port;
+  printStartupInfo();
+});
+
+function printStartupInfo() {
   console.log('');
   console.log('╔═══════════════════════════════════════════════════════╗');
   console.log('║          舞台流程表 - 桌面客户端已启动                    ║');
@@ -271,10 +348,10 @@ server.listen(PORT, function() {
   console.log('║                                                         ║');
   console.log('║  ✅ 服务器已启动，其他设备可通过以下地址访问：           ║');
   console.log('║                                                         ║');
-  console.log('║  本机: http://localhost:' + PORT + ''.padEnd(24 - String(PORT).length, ' ') + '║');
+  console.log('║  本机: http://localhost:' + actualPort + ''.padEnd(24 - String(actualPort).length, ' ') + '║');
   if (localIPs.length > 0) {
     localIPs.forEach(function(ip) {
-      var line = '║  局域网: http://' + ip + ':' + PORT;
+      var line = '║  局域网: http://' + ip + ':' + actualPort;
       console.log(line + ''.padEnd(57 - line.length, ' ') + '║');
     });
   }
@@ -286,6 +363,9 @@ server.listen(PORT, function() {
   console.log('║  💾 数据文件: ' + DATA_FILE + ''.padEnd(57 - 14 - DATA_FILE.length, ' ') + '║');
   console.log('║                                                         ║');
   console.log('╚═══════════════════════════════════════════════════════╝');
+  if (actualPort !== PORT) {
+    console.log('[i] 注意: 默认端口 ' + PORT + ' 被占用，已自动切换到 ' + actualPort);
+  }
   console.log('');
   console.log('按 Ctrl+C 停止服务器');
   console.log('');
@@ -293,7 +373,7 @@ server.listen(PORT, function() {
   // 自动打开浏览器
   var openCmd;
   var platform = os.platform();
-  var url = 'http://localhost:' + PORT + '/?role=control';
+  var url = 'http://localhost:' + actualPort + '/?role=control';
   if (platform === 'win32') {
     openCmd = 'start "" "' + url + '"';
   } else if (platform === 'darwin') {
@@ -302,7 +382,10 @@ server.listen(PORT, function() {
     openCmd = 'xdg-open "' + url + '"';
   }
   try { require('child_process').exec(openCmd); } catch(e) {}
-});
+}
+
+// 启动服务器
+startListening(PORT);
 
 // 防止窗口意外关闭（pkg 打包后保持运行）
 process.on('SIGINT', function() {

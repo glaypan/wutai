@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { WebSocketServer, WebSocket } = require('ws');
 
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT) || 3000;
 const DATA_FILE = path.join(__dirname, 'show.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
@@ -348,7 +348,7 @@ function serveStatic(req, res) {
   // API: 服务器信息
   if (urlPath === '/api/server-info') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ ip: primaryIP, port: PORT, ips: localIPs }));
+    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs }));
     return;
   }
 
@@ -426,14 +426,93 @@ function serveStatic(req, res) {
   });
 }
 
-server.listen(PORT, function() {
+// ---------- 端口占用自动处理 ----------
+var actualPort = PORT;
+var tryingPort = PORT;
+var retryCount = 0;
+var MAX_RETRIES = 5;
+
+function killProcessOnPort(port, callback) {
+  var exec = require('child_process').exec;
+  var platform = process.platform;
+  var myPid = String(process.pid);
+  if (platform === 'win32') {
+    // Windows: 两步查找并杀掉占用端口的进程
+    exec('netstat -ano | findstr :' + port, function(err, stdout) {
+      if (err || !stdout) { callback(); return; }
+      var lines = stdout.trim().split('\n');
+      var pids = [];
+      lines.forEach(function(line) {
+        if (line.indexOf('LISTENING') !== -1) {
+          var parts = line.trim().split(/\s+/);
+          var pid = parts[parts.length - 1];
+          // 排除自身进程
+          if (pid && pid !== myPid && pids.indexOf(pid) === -1) pids.push(pid);
+        }
+      });
+      if (pids.length === 0) { callback(); return; }
+      exec('taskkill /F /PID ' + pids.join(' /PID '), function() { callback(); });
+    });
+  } else {
+    // Linux/macOS: 查找并杀掉占用端口的进程，排除自身
+    var cmd = 'lsof -ti:' + port + ' 2>/dev/null | grep -v ' + myPid + ' | xargs kill -9 2>/dev/null';
+    if (platform !== 'darwin') cmd += '; fuser -k ' + port + '/tcp 2>/dev/null || true';
+    exec(cmd, function() { callback(); });
+  }
+}
+
+function startListening(port) {
+  tryingPort = port;
+  // 清理之前失败的 listen 句柄，防止 ERR_SERVER_ALREADY_LISTEN
+  try { server.close(); } catch(e) {}
+  server.listen(port);
+}
+
+function handleServerError(e) {
+  if (e.code === 'EADDRINUSE' && retryCount < MAX_RETRIES) {
+    retryCount++;
+    if (retryCount === 1) {
+      console.log('');
+      console.log('[!] 检测到端口 ' + tryingPort + ' 被占用');
+      console.log('[!] 正在自动清理旧进程...');
+      killProcessOnPort(tryingPort, function() {
+        setTimeout(function() {
+          console.log('[i] 正在重新启动服务器...');
+          startListening(PORT);
+        }, 1000);
+      });
+    } else {
+      var nextPort = PORT + retryCount - 1;
+      console.log('[!] 端口 ' + tryingPort + ' 仍被占用，尝试端口 ' + nextPort + '...');
+      startListening(nextPort);
+    }
+  } else if (e.code === 'EACCES') {
+    console.error('[!] 权限不足，无法绑定端口 ' + tryingPort + '。请使用 1024 以上的端口。');
+    console.error('[!] 提示: set PORT=8080 && node server.js');
+    process.exit(1);
+  } else {
+    console.error('[!] 服务器错误: ' + e.message);
+    process.exit(1);
+  }
+}
+
+// 错误处理：ws 库会自动将 HTTP 服务器的 error 事件转发到 WebSocketServer
+// 只需在 wss 上监听，避免重复处理
+wss.on('error', handleServerError);
+
+server.on('listening', function() {
+  actualPort = server.address().port;
+  printStartupInfo();
+});
+
+function printStartupInfo() {
   console.log('╔══════════════════════════════════════════════════╗');
   console.log('║     舞台流程表服务已启动                            ║');
   console.log('╠══════════════════════════════════════════════════╣');
-  console.log('║  本机访问:  http://localhost:' + PORT + ''.padEnd(16 - String(PORT).length, ' ') + '║');
+  console.log('║  本机访问:  http://localhost:' + actualPort + ''.padEnd(16 - String(actualPort).length, ' ') + '║');
   if (localIPs.length > 0) {
     localIPs.forEach(function(ip) {
-      var line = '║  局域网IP:  http://' + ip + ':' + PORT;
+      var line = '║  局域网IP:  http://' + ip + ':' + actualPort;
       console.log(line + ''.padEnd(50 - line.length, ' ') + '║');
     });
   }
@@ -442,4 +521,10 @@ server.listen(PORT, function() {
   console.log('║  助理端:   /?role=assistant                        ║');
   console.log('║  幕后端:   /?role=backstage                        ║');
   console.log('╚══════════════════════════════════════════════════╝');
-});
+  if (actualPort !== PORT) {
+    console.log('[i] 注意: 默认端口 ' + PORT + ' 被占用，已自动切换到 ' + actualPort);
+  }
+}
+
+// 启动服务器
+startListening(PORT);
