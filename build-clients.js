@@ -388,6 +388,14 @@ function generateWindowsInstaller(b64Lines) {
   L.push('echo ==================================================');
   L.push('echo.');
   L.push('');
+  // 自动识别脚本所在目录（支持中文路径、空格、特殊字符）
+  L.push('echo [i] 脚本所在目录: %~dp0');
+  L.push('set "SCRIPT_DIR=%~dp0"');
+  L.push('set "APP_DIR=%SCRIPT_DIR%stage-manager"');
+  L.push('echo [i] 工作目录: %APP_DIR%');
+  L.push('if not exist "%APP_DIR%" mkdir "%APP_DIR%"');
+  L.push('cd /d "%APP_DIR%"');
+  L.push('');
   // 检查 Node.js
   L.push('where node >nul 2>&1');
   L.push('if %errorlevel% neq 0 (');
@@ -416,11 +424,6 @@ function generateWindowsInstaller(b64Lines) {
   L.push('  echo [v] Node.js 已安装:');
   L.push('  node --version');
   L.push(')');
-  L.push('');
-  // 创建工作目录
-  L.push('set "APP_DIR=%~dp0stage-manager"');
-  L.push('if not exist "%APP_DIR%" mkdir "%APP_DIR%"');
-  L.push('cd /d "%APP_DIR%"');
   L.push('');
   // 写入 base64
   L.push('echo [+] 写入服务器文件 (共 ' + b64Lines.length + ' 段)...');
@@ -468,6 +471,14 @@ function generateMacInstaller(b64Lines) {
   L.push('');
   L.push('set -e');
   L.push('');
+  // 自动识别脚本所在目录（支持中文路径、空格、特殊字符）
+  L.push('SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"');
+  L.push('APP_DIR="$SCRIPT_DIR/stage-manager"');
+  L.push('echo "[i] 脚本所在目录: $SCRIPT_DIR"');
+  L.push('echo "[i] 工作目录: $APP_DIR"');
+  L.push('mkdir -p "$APP_DIR"');
+  L.push('cd "$APP_DIR"');
+  L.push('');
   L.push('echo ""');
   L.push('echo "=================================================="');
   L.push('echo "  舞台流程表 - macOS 服务器启动器"');
@@ -501,12 +512,6 @@ function generateMacInstaller(b64Lines) {
   L.push('  export PATH="$NODE_DIR/bin:$PATH"');
   L.push('  echo "[v] Node.js 安装完成: $(node --version)"');
   L.push('fi');
-  L.push('');
-  // 创建工作目录
-  L.push('SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"');
-  L.push('APP_DIR="$SCRIPT_DIR/stage-manager"');
-  L.push('mkdir -p "$APP_DIR"');
-  L.push('cd "$APP_DIR"');
   L.push('');
   // 写入 base64 并解码
   // 使用 heredoc 写入 b64 文件 + node 解码，确保跨版本兼容性

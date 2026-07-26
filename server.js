@@ -366,9 +366,11 @@ function serveStatic(req, res) {
         res.end('404 - 客户端文件尚未生成，请先运行构建脚本: node build-clients.js');
         return;
       }
+      // 使用 RFC 5987 编码 filename，兼容中文/特殊字符
+      var encodedName = encodeURIComponent(dlFile);
       res.writeHead(200, {
         'Content-Type': 'application/octet-stream',
-        'Content-Disposition': 'attachment; filename="' + dlFile + '"'
+        'Content-Disposition': "attachment; filename=\"" + dlFile + "\"; filename*=UTF-8''" + encodedName
       });
       res.end(data);
     });

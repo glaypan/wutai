@@ -2,6 +2,7 @@
 # 舞台流程表 - 安卓手机 Termux 一键安装脚本
 # 用法：在 Termux 中执行 bash install-android.sh
 # 全程免 root
+# 自动识别脚本所在目录，支持中文文件夹名
 
 set -e
 
@@ -11,6 +12,14 @@ echo "  舞台流程表 - 安卓手机服务器安装"
 echo "  (基于 Termux，免 root)"
 echo "=================================================="
 echo ""
+
+# ---------- 自动识别脚本所在目录 ----------
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "[i] 脚本所在目录: $SCRIPT_DIR"
+
+# 安装目录：脚本所在目录下的 stage-manager 子目录
+INSTALL_DIR="$SCRIPT_DIR/stage-manager"
+echo "[i] 工作目录: $INSTALL_DIR"
 
 # ---------- 1. 更新系统 ----------
 echo "[1/6] 更新 Termux 软件源..."
@@ -28,7 +37,6 @@ echo "[3/6] 安装必要工具..."
 pkg install -y git curl termux-api
 
 # ---------- 4. 创建项目目录 ----------
-INSTALL_DIR="$HOME/stage-manager"
 echo ""
 echo "[4/6] 创建项目目录: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
@@ -36,17 +44,20 @@ cd "$INSTALL_DIR"
 
 # ---------- 5. 下载/复制文件 ----------
 # 检查是否有同目录的文件（用户从项目目录运行）
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 if [ -f "$SCRIPT_DIR/server.js" ]; then
   cp "$SCRIPT_DIR/server.js" "$INSTALL_DIR/"
   echo "[v] 已复制 server.js"
 else
   # 从 GitHub 下载
   echo "[+] 从 GitHub 下载项目文件..."
-  curl -L -o server.js "https://raw.githubusercontent.com/glaypan/wutai/main/server.js"
-  curl -L -o "舞台流程表.html" "https://raw.githubusercontent.com/glaypan/wutai/main/舞台流程表.html"
-  curl -L -o package.json "https://raw.githubusercontent.com/glaypan/wutai/main/package.json"
+  curl -L --fail -o server.js "https://raw.githubusercontent.com/glaypan/wutai/main/server.js" || {
+    echo "[X] 无法下载 server.js"
+    echo "    请将本脚本放在项目目录下运行"
+    echo "    或检查网络连接"
+    exit 1
+  }
+  curl -L --fail -o "舞台流程表.html" "https://raw.githubusercontent.com/glaypan/wutai/main/舞台流程表.html" || echo "[!] 下载 HTML 文件失败，跳过"
+  curl -L --fail -o package.json "https://raw.githubusercontent.com/glaypan/wutai/main/package.json" || echo "[!] 下载 package.json 失败，跳过"
 fi
 
 # 安装 ws 依赖
@@ -79,9 +90,9 @@ if [[ ! "$SET_BOOT" =~ ^[Nn]$ ]]; then
   cat > "$HOME/.termux/boot/start-stage-manager" <<BEOF
 #!/data/data/com.termux/files/usr/bin/sh
 termux-wake-lock
-cd $INSTALL_DIR
+cd "$INSTALL_DIR"
 export PORT=$PORT
-node server.js >> $INSTALL_DIR/server.log 2>&1
+node server.js >> "$INSTALL_DIR/server.log" 2>&1
 BEOF
   chmod +x "$HOME/.termux/boot/start-stage-manager"
   echo "[v] 开机自启脚本已创建"
@@ -97,6 +108,7 @@ echo "=================================================="
 echo "  ✅ 安装完成！"
 echo "=================================================="
 echo ""
+echo "  工作目录: $INSTALL_DIR"
 echo "  服务器端口: $PORT"
 echo ""
 echo "  --- 网络连接方式 ---"
@@ -144,10 +156,10 @@ echo "  2. 允许后台运行: 设置→应用→Termux→自启动→允许"
 echo "  3. 锁定后台: 最近任务里锁定Termux"
 echo ""
 echo "  --- 启动命令 ---"
-echo "  cd $INSTALL_DIR && PORT=$PORT node server.js"
+echo "  cd \"$INSTALL_DIR\" && PORT=$PORT node server.js"
 echo ""
 echo "  --- 查看日志 ---"
-echo "  cat $INSTALL_DIR/server.log"
+echo "  cat \"$INSTALL_DIR/server.log\""
 echo ""
 
 read -p "是否现在启动服务器? (Y/n): " START_NOW

@@ -786,7 +786,7 @@ body {
 .role-badge { font-size:18px; padding:4px 8px; border-radius:8px; margin-left:8px; cursor:pointer; user-select:none; transition: background .2s ease; }
 .role-badge:hover { opacity:0.85; }
 /* 下载客户端弹窗 */
-.download-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+.download-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:16px; margin-bottom:16px; }
 .download-card { display:flex; flex-direction:column; align-items:center; gap:8px; padding:24px 16px; border-radius:14px; border:1px solid var(--stroke); background:rgba(44,44,46,0.66); color:#fff; text-decoration:none; cursor:pointer; transition: transform .12s ease, background .2s ease, border-color .2s ease; }
 .download-card:hover { background:rgba(58,58,60,0.8); transform:translateY(-2px); border-color:rgba(10,132,255,0.4); }
 .download-card:active { transform:scale(0.98); }
@@ -1074,10 +1074,10 @@ body {
   <div id="modal-download" class="modal hidden">
     <div class="modal-box modal-wide">
       <div class="modal-header-row">
-        <h3>下载桌面客户端</h3>
+        <h3>下载客户端 / 安装脚本</h3>
         <button class="icon-btn" onclick="closeModal('modal-download')">✕</button>
       </div>
-      <p style="color:var(--text-2);font-size:14px;margin-bottom:12px">下载后运行，客户端自动作为服务器并显示局域网 IP。其他设备通过浏览器或扫码访问该 IP 即可使用。</p>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:12px">下载后运行，自动识别放置位置并就近建立工作目录。脚本会自动检测所在路径（含中文文件夹）并启动服务器，显示局域网 IP。</p>
       <div class="download-grid">
         <a class="download-card" id="dl-win" href="/download/stage-manager-win.bat" download>
           <div class="dl-icon">🪟</div>
@@ -1094,15 +1094,28 @@ body {
           <div class="dl-name">macOS M芯片</div>
           <div class="dl-sub">双击 .command (Apple Silicon)</div>
         </a>
+        <a class="download-card" id="dl-rpi" href="/download/stage-manager-rpi.sh" download>
+          <div class="dl-icon">🍓</div>
+          <div class="dl-name">树莓派/Linux</div>
+          <div class="dl-sub">bash 运行 .sh</div>
+        </a>
+        <a class="download-card" id="dl-android" href="/download/stage-manager-android.sh" download>
+          <div class="dl-icon">📱</div>
+          <div class="dl-name">安卓(Termux)</div>
+          <div class="dl-sub">Termux 中运行</div>
+        </a>
       </div>
       <div style="margin-top:12px;padding:12px 16px;background:rgba(10,132,255,0.08);border-radius:10px;border:1px solid rgba(10,132,255,0.2)">
         <p style="font-size:12px;color:var(--text-2);line-height:1.6">
           <strong style="color:#0a84ff">使用说明：</strong><br>
-          1. 下载对应系统的文件到电脑<br>
+          1. 下载对应系统的文件，放在任意位置（支持中文文件夹）<br>
           2. Windows 双击 .bat 文件运行<br>
           3. macOS 双击 .command 文件运行（首次需右键→打开）<br>
-          4. 运行后会自动下载 Node.js（如未安装）并启动服务器<br>
-          5. 终端会显示 IP 地址，其他设备浏览器访问即可
+          4. 树莓派/Linux：bash stage-manager-rpi.sh<br>
+          5. 安卓：先装 Termux，再 bash stage-manager-android.sh<br>
+          6. 脚本会自动检测自身路径，就近建立 stage-manager 工作目录<br>
+          7. 自动下载 Node.js（如未安装）并启动服务器<br>
+          8. 终端会显示 IP 地址，其他设备浏览器访问即可
         </p>
       </div>
       <div class="modal-actions">

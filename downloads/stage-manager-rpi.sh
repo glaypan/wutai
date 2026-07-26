@@ -2,6 +2,7 @@
 # 舞台流程表 - 树莓派/Linux 一键安装脚本
 # 适用于：树莓派、NanoPi、各种 Linux ARM/x86 设备
 # 用法：bash install-rpi.sh
+# 自动识别脚本所在目录，支持中文文件夹名
 
 set -e
 
@@ -16,9 +17,14 @@ ARCH=$(uname -m)
 echo "[i] 系统架构: $ARCH"
 echo "[i] 操作系统: $(uname -s)"
 
-# 安装目录
-INSTALL_DIR="$HOME/stage-manager"
-echo "[i] 安装目录: $INSTALL_DIR"
+# ---------- 自动识别脚本所在目录 ----------
+# 优先使用脚本自身所在目录（支持中文、空格、特殊字符路径）
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "[i] 脚本所在目录: $SCRIPT_DIR"
+
+# 安装目录：脚本所在目录下的 stage-manager 子目录
+INSTALL_DIR="$SCRIPT_DIR/stage-manager"
+echo "[i] 工作目录: $INSTALL_DIR"
 
 # ---------- 1. 检查/安装 Node.js ----------
 if command -v node &> /dev/null; then
@@ -77,18 +83,30 @@ mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
 # ---------- 3. 复制文件 ----------
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 # 如果同目录有 server.js，复制过来
 if [ -f "$SCRIPT_DIR/server.js" ]; then
   cp "$SCRIPT_DIR/server.js" "$INSTALL_DIR/"
   echo "[v] 已复制 server.js"
+else
+  # 从 GitHub 下载
+  echo "[+] 从 GitHub 下载 server.js..."
+  curl -L --fail -o server.js "https://raw.githubusercontent.com/glaypan/wutai/main/server.js" || {
+    echo "[X] 无法获取 server.js"
+    echo "    请将本脚本放在项目目录下运行"
+    echo "    或检查网络连接"
+    exit 1
+  }
+  echo "[v] 已下载 server.js"
 fi
 
 # 如果同目录有 舞台流程表.html，复制过来
 if [ -f "$SCRIPT_DIR/舞台流程表.html" ]; then
   cp "$SCRIPT_DIR/舞台流程表.html" "$INSTALL_DIR/"
   echo "[v] 已复制 舞台流程表.html"
+else
+  # 从 GitHub 下载
+  echo "[+] 从 GitHub 下载 舞台流程表.html..."
+  curl -L --fail -o "舞台流程表.html" "https://raw.githubusercontent.com/glaypan/wutai/main/舞台流程表.html" || echo "[!] 下载 HTML 文件失败，跳过"
 fi
 
 # 如果同目录有 package.json，复制过来
@@ -156,7 +174,8 @@ else
   echo "  安装完成！"
   echo "=================================================="
   echo ""
-  echo "  启动命令: cd $INSTALL_DIR && PORT=$PORT node server.js"
+  echo "  工作目录: $INSTALL_DIR"
+  echo "  启动命令: cd \"$INSTALL_DIR\" && PORT=$PORT node server.js"
   echo ""
   
   # 获取IP
