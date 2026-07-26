@@ -385,7 +385,7 @@ function generateWindowsInstaller(b64Lines) {
   L.push('  set "NODE_ZIP=%TEMP%\\nodejs.zip"');
   L.push('  set "NODE_DIR=%LOCALAPPDATA%\\StageManager\\nodejs"');
   L.push('  echo [+] 下载 Node.js !NODE_VER! ...');
-  L.push(`  powershell -NoProfile -Command "try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri ''!NODE_URL!'' -OutFile ''!NODE_ZIP!'' } catch { Write-Host ''下载失败:'' $_.Exception.Message; exit 1 }"`);
+  L.push('  curl -L -o "!NODE_ZIP!" "!NODE_URL!"');
   L.push('  if !errorlevel! neq 0 (');
   L.push('    echo [X] Node.js 下载失败，请手动安装: https://nodejs.org/');
   L.push('    pause');
@@ -393,7 +393,8 @@ function generateWindowsInstaller(b64Lines) {
   L.push('  )');
   L.push('  echo [+] 解压 Node.js ...');
   L.push('  if not exist "%LOCALAPPDATA%\\StageManager" mkdir "%LOCALAPPDATA%\\StageManager"');
-  L.push(`  powershell -NoProfile -Command "Expand-Archive -Path ''!NODE_ZIP!'' -DestinationPath ''%TEMP%\\node_extract'' -Force"`);
+  L.push('  if not exist "%TEMP%\\node_extract" mkdir "%TEMP%\\node_extract"');
+  L.push('  tar -xf "!NODE_ZIP!" -C "%TEMP%\\node_extract"');
   L.push('  if not exist "!NODE_DIR!" mkdir "!NODE_DIR!"');
   L.push('  xcopy /E /I /Y "%TEMP%\\node_extract\\node-!NODE_VER!-win-x64\\*" "!NODE_DIR!" >nul 2>&1');
   L.push('  set "PATH=!NODE_DIR!;%PATH%"');
@@ -418,8 +419,10 @@ function generateWindowsInstaller(b64Lines) {
     L.push('>> "%B64_FILE%" echo ' + b64Lines[i]);
   }
   L.push('');
-  // 解码
-  L.push(`powershell -NoProfile -Command "$b = [System.IO.File]::ReadAllText(''%B64_FILE%'') -replace ''\\s'',''''; [System.IO.File]::WriteAllBytes(''%APP_DIR%\\server.js'', [System.Convert]::FromBase64String($b))"`);
+  // 使用 node -e 直接解码（避免写入临时 JS 文件的转义问题）
+  // Node.js 的 Buffer.from(str,'base64') 自动忽略空白字符，无需 regex
+  L.push('echo [+] 解码服务器文件...');
+  L.push('node -e "var fs=require(\'fs\');fs.writeFileSync(process.argv[1],Buffer.from(fs.readFileSync(process.argv[2],\'utf-8\'),\'base64\'));" "%APP_DIR%\\server.js" "%B64_FILE%"');
   L.push('if !errorlevel! neq 0 (');
   L.push('  echo [X] 服务器文件写入失败');
   L.push('  pause');
