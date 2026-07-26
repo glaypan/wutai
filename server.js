@@ -280,18 +280,46 @@ function broadcastClientCount() {
 }
 
 // ---------- 获取局域网IP ----------
+// 过滤虚拟网卡（VMware/Hyper-V/WSL/Docker/Tailscale 等），只保留真实局域网 IP
+var VIRTUAL_PREFIXES = [
+  '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.',
+  '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.',
+  '10.147.', '10.94.',   // Tailscale / 部分虚拟网卡
+  '169.254.',            // link-local
+  '100.64.', '100.65.', '100.66.', '100.67.', '100.68.', '100.69.', // CGNAT
+  '192.0.0.', '198.18.', '198.19.'
+];
+var VIRTUAL_NAME_HINTS = ['vmware', 'vmnet', 'vbox', 'docker', 'wsl', 'hyper-v', 'vethernet', 'tailscale', 'zerotier', 'tap', 'tun', 'utun', 'bridge', 'virbr'];
+
+function isVirtualInterface(name) {
+  var lower = (name || '').toLowerCase();
+  return VIRTUAL_NAME_HINTS.some(function(h) { return lower.indexOf(h) !== -1; });
+}
+
+function isVirtualIP(addr) {
+  return VIRTUAL_PREFIXES.some(function(p) { return addr.indexOf(p) === 0; });
+}
+
 function getLocalIPs() {
   var os = require('os');
   var interfaces = os.networkInterfaces();
-  var ips = [];
+  var real = [];
+  var virtual = [];
   for (var name in interfaces) {
+    if (isVirtualInterface(name)) continue;
     interfaces[name].forEach(function(iface) {
       if (iface.family === 'IPv4' && !iface.internal) {
-        ips.push(iface.address);
+        if (isVirtualIP(iface.address)) {
+          virtual.push({ addr: iface.address, name: name });
+        } else {
+          real.push({ addr: iface.address, name: name });
+        }
       }
     });
   }
-  return ips;
+  // 优先返回真实局域网 IP；若全为虚拟网卡，则退回返回所有
+  if (real.length > 0) return real.map(function(x) { return x.addr; });
+  return virtual.map(function(x) { return x.addr; });
 }
 
 var localIPs = getLocalIPs();

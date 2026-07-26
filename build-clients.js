@@ -126,18 +126,30 @@ function generateStandaloneServer(htmlContent, wsFiles) {
   // ========== 服务器配置 ==========
   lines.push('var PORT = process.env.PORT || 3000;');
   lines.push('');
-  // ========== 获取局域网IP ==========
+  // ========== 获取局域网IP（过滤虚拟网卡）==========
+  lines.push('var VIRTUAL_PREFIXES = ["172.16.","172.17.","172.18.","172.19.","172.20.","172.21.","172.22.","172.23.","172.24.","172.25.","172.26.","172.27.","172.28.","172.29.","172.30.","172.31.","10.147.","10.94.","169.254.","100.64.","100.65.","100.66.","100.67.","100.68.","100.69.","192.0.0.","198.18.","198.19."];');
+  lines.push('var VIRTUAL_NAME_HINTS = ["vmware","vmnet","vbox","docker","wsl","hyper-v","vethernet","tailscale","zerotier","tap","tun","utun","bridge","virbr"];');
+  lines.push('function isVirtualInterface(name) {');
+  lines.push('  var lower = (name || "").toLowerCase();');
+  lines.push('  return VIRTUAL_NAME_HINTS.some(function(h) { return lower.indexOf(h) !== -1; });');
+  lines.push('}');
+  lines.push('function isVirtualIP(addr) {');
+  lines.push('  return VIRTUAL_PREFIXES.some(function(p) { return addr.indexOf(p) === 0; });');
+  lines.push('}');
   lines.push('function getLocalIPs() {');
   lines.push('  var interfaces = os.networkInterfaces();');
-  lines.push('  var ips = [];');
+  lines.push('  var real = []; var virtual = [];');
   lines.push('  for (var name in interfaces) {');
+  lines.push('    if (isVirtualInterface(name)) continue;');
   lines.push('    interfaces[name].forEach(function(iface) {');
   lines.push('      if (iface.family === "IPv4" && !iface.internal) {');
-  lines.push('        ips.push(iface.address);');
+  lines.push('        if (isVirtualIP(iface.address)) { virtual.push(iface.address); }');
+  lines.push('        else { real.push(iface.address); }');
   lines.push('      }');
   lines.push('    });');
   lines.push('  }');
-  lines.push('  return ips;');
+  lines.push('  if (real.length > 0) return real;');
+  lines.push('  return virtual;');
   lines.push('}');
   lines.push('');
   lines.push('var localIPs = getLocalIPs();');
@@ -497,12 +509,21 @@ function generateMacInstaller(b64Lines) {
   L.push('cd "$APP_DIR"');
   L.push('');
   // 写入 base64 并解码
+  // 使用 heredoc 写入 b64 文件 + node 解码，确保跨版本兼容性
   L.push('echo "[+] 写入服务器文件 (共 ' + b64Lines.length + ' 段)..."');
-  L.push('base64 -D << \'STAGE_MANAGER_DATA_END\' > server.js');
+  L.push('B64_FILE="$APP_DIR/server.b64"');
+  L.push('cat > "$B64_FILE" <<\'STAGE_MANAGER_B64_END\'');
   for (var i = 0; i < b64Lines.length; i++) {
     L.push(b64Lines[i]);
   }
-  L.push('STAGE_MANAGER_DATA_END');
+  L.push('STAGE_MANAGER_B64_END');
+  L.push('node -e "var fs=require(\'fs\');fs.writeFileSync(process.argv[1],Buffer.from(fs.readFileSync(process.argv[2],\'utf-8\'),\'base64\'));" server.js "$B64_FILE"');
+  L.push('if [ $? -ne 0 ]; then');
+  L.push('  echo "[X] 服务器文件写入失败"');
+  L.push('  read -p "按回车键退出..."');
+  L.push('  exit 1');
+  L.push('fi');
+  L.push('rm -f "$B64_FILE"');
   L.push('echo "[v] 服务器文件已就绪"');
   L.push('');
   // 启动
