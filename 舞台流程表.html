@@ -903,6 +903,10 @@ body {
   .nav-go { min-height:80px; font-size:22px; min-width:150px; padding:0 32px; }
   .nav-small { min-width:70px; padding:10px 10px; font-size:13px; }
 }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
   </style>
 </head>
 <body>
@@ -1285,10 +1289,11 @@ body {
         <button class="icon-btn" onclick="closeModal('modal-import')">✕</button>
       </div>
       <!-- 导入方式切换 -->
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <button class="btn btn-primary" id="import-tab-files" onclick="switchImportTab('files')" style="flex:1">📁 批量文件</button>
-        <button class="btn btn-secondary" id="import-tab-doc" onclick="switchImportTab('doc')" style="flex:1">📄 PDF/Word</button>
-        <button class="btn btn-secondary" id="import-tab-text" onclick="switchImportTab('text')" style="flex:1">✏️ 手动输入</button>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="import-tab-files" onclick="switchImportTab('files')" style="flex:1;min-width:80px;">📁 批量文件</button>
+        <button class="btn btn-secondary" id="import-tab-doc" onclick="switchImportTab('doc')" style="flex:1;min-width:80px;">📄 PDF/Word</button>
+        <button class="btn btn-secondary" id="import-tab-image" onclick="switchImportTab('image')" style="flex:1;min-width:80px;">🖼️ 图片识别</button>
+        <button class="btn btn-secondary" id="import-tab-text" onclick="switchImportTab('text')" style="flex:1;min-width:80px;">✏️ 手动输入</button>
       </div>
       <!-- 批量文件导入 -->
       <div id="import-files-panel">
@@ -1306,6 +1311,23 @@ body {
           <p style="font-size:12px;color:var(--text-2)">支持 PDF 和 Word(.docx) 格式</p>
           <input type="file" id="import-file-input" accept=".pdf,.docx" style="display:none">
         </div>
+      </div>
+      <!-- 图片OCR 导入 -->
+      <div id="import-image-panel" style="display:none">
+        <div class="import-drop-zone" id="import-image-drop-zone" onclick="document.getElementById('import-image-input').click()">
+          <p>🖼️ 点击选择或拖拽图片到此处</p>
+          <p style="font-size:12px;color:var(--text-2)">支持 JPG、PNG、GIF、WEBP 格式</p>
+          <p style="font-size:11px;color:var(--text-3);margin-top:4px">自动识别图片中的文字并拆分为节目单</p>
+          <input type="file" id="import-image-input" accept="image/*" style="display:none">
+        </div>
+        <div id="import-image-preview-wrap" style="display:none;margin-top:12px;text-align:center;">
+          <img id="import-image-preview" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);" />
+        </div>
+        <div id="import-ocr-status" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:var(--bg-1);border:1px solid var(--border);text-align:center;">
+          <div id="import-ocr-spinner" style="display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin-right:8px;vertical-align:middle;"></div>
+          <span id="import-ocr-status-text" style="color:var(--text-2);font-size:14px;">正在加载识别引擎...</span>
+        </div>
+        <button class="btn btn-primary" id="import-ocr-btn" style="margin-top:12px;width:100%;display:none;" onclick="startOcrRecognition()">🚀 开始识别</button>
       </div>
       <!-- 手动输入 -->
       <div id="import-text-panel" style="display:none">
@@ -2700,8 +2722,8 @@ var importTab = 'files';
 
 function switchImportTab(tab) {
   importTab = tab;
-  var tabs = { files: 'import-files-panel', doc: 'import-doc-panel', text: 'import-text-panel' };
-  var btns = { files: 'import-tab-files', doc: 'import-tab-doc', text: 'import-tab-text' };
+  var tabs = { files: 'import-files-panel', doc: 'import-doc-panel', image: 'import-image-panel', text: 'import-text-panel' };
+  var btns = { files: 'import-tab-files', doc: 'import-tab-doc', image: 'import-tab-image', text: 'import-tab-text' };
   for (var k in tabs) {
     var el = document.getElementById(tabs[k]);
     if (el) el.style.display = (k === tab) ? '' : 'none';
@@ -2730,8 +2752,18 @@ function openImport() {
   if (fi) fi.value = '';
   var ffi = document.getElementById('import-files-input');
   if (ffi) ffi.value = '';
+  var ii = document.getElementById('import-image-input');
+  if (ii) ii.value = '';
   var ti = document.getElementById('import-text-input');
   if (ti) ti.value = '';
+  // 清空图片预览和OCR状态
+  var ipw = document.getElementById('import-image-preview-wrap');
+  if (ipw) ipw.style.display = 'none';
+  var iocr = document.getElementById('import-ocr-status');
+  if (iocr) iocr.style.display = 'none';
+  var iob = document.getElementById('import-ocr-btn');
+  if (iob) iob.style.display = 'none';
+  ocrImageData = null;
   importPreviewData = [];
 }
 window.openImport = openImport;
@@ -2895,7 +2927,136 @@ window.parseManualText = function() {
       if (e && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) handleFilesBatch(e.dataTransfer.files);
     };
   }
+  // 图片OCR导入
+  var iii = document.getElementById('import-image-input');
+  if (iii) iii.onchange = function() { if (this.files && this.files[0]) handleImageSelect(this.files[0]); };
+  var idz = document.getElementById('import-image-drop-zone');
+  if (idz) {
+    idz.ondragover = function(e) { if (e) e.preventDefault(); this.classList.add('dragover'); };
+    idz.ondragleave = function() { this.classList.remove('dragover'); };
+    idz.ondrop = function(e) {
+      if (e) e.preventDefault(); this.classList.remove('dragover');
+      if (e && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) handleImageSelect(e.dataTransfer.files[0]);
+    };
+  }
 })();
+
+// ---------- 图片OCR识别 ----------
+var ocrImageData = null;
+var ocrTesseractLoaded = false;
+
+function handleImageSelect(file) {
+  if (!file || !file.type.match(/^image\//)) {
+    showToast('请选择图片文件');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    ocrImageData = e.target.result;
+    var img = document.getElementById('import-image-preview');
+    var wrap = document.getElementById('import-image-preview-wrap');
+    if (img) img.src = ocrImageData;
+    if (wrap) wrap.style.display = '';
+    var btn = document.getElementById('import-ocr-btn');
+    if (btn) btn.style.display = '';
+    var status = document.getElementById('import-ocr-status');
+    if (status) status.style.display = 'none';
+  };
+  reader.onerror = function() { showToast('图片读取失败'); };
+  reader.readAsDataURL(file);
+}
+
+// 动态加载 Tesseract.js
+function loadTesseractJs(callback) {
+  if (typeof Tesseract !== 'undefined') {
+    callback(null);
+    return;
+  }
+  var script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js';
+  script.onload = function() { callback(null); };
+  script.onerror = function() { callback(new Error('无法加载OCR引擎，请检查网络连接')); };
+  document.head.appendChild(script);
+}
+
+function startOcrRecognition() {
+  if (!ocrImageData) {
+    showToast('请先选择图片');
+    return;
+  }
+  var statusEl = document.getElementById('import-ocr-status');
+  var statusText = document.getElementById('import-ocr-status-text');
+  var spinner = document.getElementById('import-ocr-spinner');
+  var btn = document.getElementById('import-ocr-btn');
+
+  if (statusEl) statusEl.style.display = '';
+  if (spinner) spinner.style.display = 'inline-block';
+  if (statusText) statusText.textContent = '正在加载识别引擎...';
+  if (btn) btn.style.display = 'none';
+
+  loadTesseractJs(function(err) {
+    if (err) {
+      if (statusText) statusText.textContent = err.message;
+      if (spinner) spinner.style.display = 'none';
+      if (btn) btn.style.display = '';
+      showToast(err.message);
+      return;
+    }
+    if (statusText) statusText.textContent = '正在识别图片文字，请稍候...';
+
+    // 使用 Tesseract.js v4 API 识别
+    try {
+      Tesseract.recognize(
+        ocrImageData,
+        'chi_sim+eng',
+        {
+          logger: function(m) {
+            if (m.status === 'recognizing text' && statusText) {
+              statusText.textContent = '正在识别: ' + Math.round(m.progress * 100) + '%';
+            }
+          }
+        }
+      ).then(function(result) {
+        var text = result && result.data && result.data.text ? result.data.text : '';
+        if (!text.trim()) {
+          if (statusText) statusText.textContent = '未识别到文字，请尝试更清晰的图片';
+          if (spinner) spinner.style.display = 'none';
+          if (btn) btn.style.display = '';
+          showToast('未识别到文字');
+          return;
+        }
+        if (statusText) statusText.textContent = '识别完成，正在解析节目...';
+        // 解析识别结果
+        importPreviewData = textToPrograms(text);
+        if (importPreviewData.length === 0) {
+          if (statusText) statusText.textContent = '未解析到节目，识别的文字:\n' + text.substring(0, 100);
+          if (spinner) spinner.style.display = 'none';
+          if (btn) btn.style.display = '';
+          showToast('未解析到节目，请手动输入');
+          return;
+        }
+        // 显示预览
+        if (statusEl) statusEl.style.display = 'none';
+        renderImportPreview();
+        showToast('识别成功，共 ' + importPreviewData.length + ' 个节目');
+      }).catch(function(err) {
+        var msg = err && err.message ? err.message : '识别失败';
+        if (statusText) statusText.textContent = '识别失败: ' + msg;
+        if (spinner) spinner.style.display = 'none';
+        if (btn) btn.style.display = '';
+        showToast('识别失败: ' + msg);
+      });
+    } catch (e) {
+      var msg = e && e.message ? e.message : '识别引擎出错';
+      if (statusText) statusText.textContent = '识别引擎出错: ' + msg;
+      if (spinner) spinner.style.display = 'none';
+      if (btn) btn.style.display = '';
+      showToast('识别引擎出错: ' + msg);
+    }
+  });
+}
+window.startOcrRecognition = startOcrRecognition;
+
 function parseImportFile(file) {
   var ext = (file.name.split('.').pop() || '').toLowerCase();
   var reader = new FileReader();
@@ -2942,12 +3103,79 @@ function textToPrograms(text) {
   var lines = text.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
   var programs = [];
   var cur = null;
+
+  // 判断文档是否包含时间格式行（表格型节目单）
+  var timePattern = /^(\d{1,2}\s*[：:]\s*\d{2})(?:\s*[~\-～—]\s*(\d{1,2}\s*[：:]\s*\d{2}))?\s*[：:]?\s*(.*)/;
+  var hasNumberedItems = lines.some(function(l) {
+    return /^(?:第?\s*\d+\s*[.、)）]\s*|[(（]\s*\d+\s*[)）])/.test(l);
+  });
+  var hasTimeItems = lines.some(function(l) { return timePattern.test(l); });
+
+  // 策略1：有序号格式（如 1. 名称 / (1) 名称）
+  if (hasNumberedItems && !hasTimeItems) {
+    lines.forEach(function(line) {
+      var m = line.match(/^(?:第?\s*(\d+)\s*[.、)）]\s*|[(（]\s*(\d+)\s*[)）]\s*)(.+)/);
+      if (m) {
+        if (cur) programs.push(cur);
+        cur = { name: (m[3] || '').trim(), duration: 0, notes: '', musicCue: '', status: 'pending', useChannels: [] };
+      } else if (cur) {
+        if (/音乐|music|cue|节点|切入|前奏|间奏|副歌/i.test(line)) {
+          cur.musicCue = cur.musicCue ? cur.musicCue + '\n' + line : line;
+        } else {
+          cur.notes = cur.notes ? cur.notes + '\n' + line : line;
+        }
+      } else {
+        cur = { name: line, duration: 0, notes: '', musicCue: '', status: 'pending', useChannels: [] };
+      }
+    });
+    if (cur) programs.push(cur);
+    return programs;
+  }
+
+  // 策略2：时间+项目格式（表格型节目单）
   lines.forEach(function(line) {
-    var m = line.match(/^(?:第?\s*(\d+)\s*[.、)）]\s*|[(（]\s*(\d+)\s*[)）]\s*)(.+)/);
-    if (m) {
+    // 跳过纯分组标题（如"开场前的准备（16:30～19:00）"、"晚宴仪式"）
+    if (/^[^\d]{2,}(?:准备|仪式|流程|环节|休息|晚宴|午宴)[^\d]*$/.test(line) && !timePattern.test(line)) {
+      if (cur) {
+        cur.notes = (cur.notes ? cur.notes + '\n' : '') + '【' + line + '】';
+      }
+      return;
+    }
+
+    var tm = line.match(timePattern);
+    if (tm) {
+      var timeStr = tm[1].replace(/\s/g, '') + (tm[2] ? '~' + tm[2].replace(/\s/g, '') : '');
+      var rest = (tm[3] || '').trim();
+
+      // 从剩余文本分离项目名和内容
+      // 尝试用 2+空格 / 制表符分隔（表格转文本的特征）
+      var parts = rest.split(/\s{2,}|\t/);
+      var name = '', notes = '';
+      if (parts.length >= 2) {
+        name = parts[0].trim();
+        notes = parts.slice(1).join(' ').trim();
+      } else {
+        // 尝试用第一个中文标点分隔
+        var firstPunct = rest.search(/[。，,；;：:!！?？]/);
+        if (firstPunct > 1 && firstPunct < 20) {
+          name = rest.substring(0, firstPunct).trim();
+          notes = rest.substring(firstPunct).trim();
+        } else {
+          name = rest;
+        }
+      }
+
       if (cur) programs.push(cur);
-      cur = { name: (m[3] || '').trim(), duration: 0, notes: '', musicCue: '', status: 'pending', useChannels: [] };
+      cur = {
+        name: (timeStr + ' ' + name).trim(),
+        duration: 0,
+        notes: notes,
+        musicCue: '',
+        status: 'pending',
+        useChannels: []
+      };
     } else if (cur) {
+      // 无时间模式的续行，追加到当前节目
       if (/音乐|music|cue|节点|切入|前奏|间奏|副歌/i.test(line)) {
         cur.musicCue = cur.musicCue ? cur.musicCue + '\n' + line : line;
       } else {
@@ -2974,7 +3202,13 @@ function renderImportPreview() {
   var mr2 = document.getElementById('import-mode-row'); if (mr2) mr2.style.display = '';
   var cb2 = document.getElementById('import-confirm-btn'); if (cb2) cb2.style.display = '';
   wrap.innerHTML = importPreviewData.map(function(p, i) {
-    return '<div class="import-preview-item"><span style="margin-right:8px;color:#94a3b8;">' + (i + 1) + '</span><span class="ip-name">' + escapeHtml(p.name) + '</span></div>';
+    var notePreview = '';
+    if (p.notes) {
+      var preview = p.notes.replace(/\n/g, ' ').substring(0, 40);
+      if (p.notes.length > 40) preview += '...';
+      notePreview = '<span style="margin-left:8px;color:var(--text-3);font-size:12px;">' + escapeHtml(preview) + '</span>';
+    }
+    return '<div class="import-preview-item"><span style="margin-right:8px;color:#94a3b8;">' + (i + 1) + '</span><span class="ip-name">' + escapeHtml(p.name) + '</span>' + notePreview + '</div>';
   }).join('');
 }
 window.confirmImport = function() {
