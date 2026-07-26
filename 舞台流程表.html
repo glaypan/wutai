@@ -815,9 +815,36 @@ body {
 </head>
 <body>
   <!-- 连接状态 -->
-  <div id="conn-status" class="conn-status disconnected">
+  <div id="conn-status" class="conn-status disconnected" onclick="onConnStatusClick()" style="cursor:pointer">
     <span class="conn-dot"></span>
     <span class="conn-text">连接中...</span>
+  </div>
+
+  <!-- 手动连接服务器弹窗 -->
+  <div id="modal-connect-server" class="modal hidden">
+    <div class="modal-box" style="max-width:420px">
+      <div class="modal-header-row">
+        <h3>🔗 连接服务器</h3>
+        <button class="icon-btn" onclick="closeModal('modal-connect-server')">✕</button>
+      </div>
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:12px;">输入服务器IP地址，连接到树莓派、路由器或其他设备上运行的服务器</p>
+      <div class="form-group">
+        <label style="display:block;margin-bottom:6px;color:var(--text-1)">服务器地址</label>
+        <input type="text" id="connect-server-input" class="text-input" placeholder="例如: 192.168.1.100:3000" style="width:100%">
+      </div>
+      <div style="margin:8px 0;font-size:12px;color:var(--text-3)">
+        <p>提示：</p>
+        <p>• 直接输入 IP:端口，如 192.168.1.100:3000</p>
+        <p>• 也可以输入完整地址，如 http://192.168.1.100:3000</p>
+        <p>• 端口默认 3000，可省略</p>
+      </div>
+      <div id="connect-server-error" style="display:none;color:#ff4d4f;font-size:13px;margin:8px 0"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-connect-server')">取消</button>
+        <button class="btn btn-secondary" onclick="clearSavedServer()">清除保存的地址</button>
+        <button class="btn btn-primary" onclick="connectToServer()">🔗 连接</button>
+      </div>
+    </div>
   </div>
 
   <!-- 顶部栏 -->
@@ -1278,6 +1305,140 @@ function tryConnectWS(backgroundOnly) {
     };
   } catch(e) {
     // 静默失败，已在本地模式
+  }
+}
+
+// ---------- 手动连接远程服务器 ----------
+var SAVED_SERVER_KEY = 'stage-manager-server-addr';
+var manualServerConnected = false;
+
+function getSavedServer() {
+  try { return localStorage.getItem(SAVED_SERVER_KEY) || ''; } catch(e) { return ''; }
+}
+function saveServerAddr(addr) {
+  try { localStorage.setItem(SAVED_SERVER_KEY, addr); } catch(e) {}
+}
+function clearSavedServer() {
+  try { localStorage.removeItem(SAVED_SERVER_KEY); } catch(e) {}
+  var inp = document.getElementById('connect-server-input');
+  if (inp) inp.value = '';
+  showToast('已清除保存的地址');
+}
+
+// 点击连接状态栏
+window.onConnStatusClick = function() {
+  // 已连接服务器则不弹窗
+  if (wsMode && manualServerConnected) return;
+  openConnectServerModal();
+};
+
+function openConnectServerModal() {
+  var m = document.getElementById('modal-connect-server');
+  if (!m) return;
+  m.classList.remove('hidden');
+  var inp = document.getElementById('connect-server-input');
+  if (inp) {
+    inp.value = getSavedServer();
+    setTimeout(function() { inp.focus(); }, 50);
+  }
+  var err = document.getElementById('connect-server-error');
+  if (err) err.style.display = 'none';
+}
+window.openConnectServerModal = openConnectServerModal;
+
+// 解析用户输入的服务器地址
+function parseServerAddr(input) {
+  var addr = (input || '').trim();
+  if (!addr) return null;
+  // 去掉 http:// 或 https:// 前缀
+  addr = addr.replace(/^https?:\/\//i, '');
+  // 去掉末尾的 /
+  addr = addr.replace(/\/+$/, '');
+  // 如果没有端口，加默认 3000
+  if (addr.indexOf(':') === -1) {
+    addr = addr + ':3000';
+  }
+  return addr;
+}
+
+window.connectToServer = function() {
+  var inp = document.getElementById('connect-server-input');
+  if (!inp) return;
+  var addr = parseServerAddr(inp.value);
+  if (!addr) {
+    var err = document.getElementById('connect-server-error');
+    if (err) { err.textContent = '请输入服务器地址'; err.style.display = ''; }
+    return;
+  }
+  saveServerAddr(addr);
+  closeModal('modal-connect-server');
+  tryConnectManualServer(addr);
+};
+
+function tryConnectManualServer(host) {
+  var wsUrl = 'ws://' + host;
+  // 如果是 https 页面用 wss
+  if (location.protocol === 'https:') wsUrl = 'wss://' + host;
+  
+  connStatus.querySelector('.conn-text').textContent = "连接中...";
+  connStatus.classList.remove('connected');
+  
+  // 关闭旧连接
+  if (ws) { try { ws.close(); } catch(e) {} ws = null; }
+  
+  try {
+    ws = new WebSocket(wsUrl);
+    var connectTimeout = setTimeout(function() {
+      if (!wsMode) {
+        try { ws.close(); } catch(e) {}
+        connStatus.querySelector('.conn-text').textContent = "连接超时 · 点击重连";
+        showToast('连接超时，请检查IP地址和端口');
+      }
+    }, 5000);
+    
+    ws.onopen = function() {
+      clearTimeout(connectTimeout);
+      wsMode = true;
+      manualServerConnected = true;
+      connStatus.classList.add('connected');
+      connStatus.querySelector('.conn-text').textContent = "已连接 · " + host.split(':')[0];
+      sendMsg({ type: "get_state" });
+      showToast('已连接到服务器 ' + host);
+    };
+    ws.onclose = function() {
+      clearTimeout(connectTimeout);
+      if (manualServerConnected) {
+        manualServerConnected = false;
+        wsMode = false;
+        connStatus.classList.remove('connected');
+        connStatus.querySelector('.conn-text').textContent = "已断开 · 点击重连";
+      } else {
+        connStatus.querySelector('.conn-text').textContent = "连接失败 · 点击重连";
+      }
+    };
+    ws.onerror = function() {
+      clearTimeout(connectTimeout);
+    };
+    ws.onmessage = function(ev) {
+      var data;
+      try { data = JSON.parse(ev.data); } catch(e) { return; }
+      switch (data.type) {
+        case "full_state":
+          localState = mergeState(data.state || localState);
+          renderAll();
+          if (data.clientCount !== undefined) updateClientCount(data.clientCount);
+          break;
+        case "client_count":
+          updateClientCount(data.count);
+          break;
+        case "error":
+          if (data.code === 'forbidden') showToast('无权限：' + (data.action || ''));
+          break;
+      }
+    };
+  } catch(e) {
+    connStatus.querySelector('.conn-text').textContent = "连接失败 · 点击重连";
+    showToast('连接失败: ' + e.message);
   }
 }
 
@@ -2727,10 +2888,21 @@ function escapeAttr(s) { return escapeHtml(s); }
 
 // ---------- 启动 ----------
 initLocalMode();
-// 仅当由服务器托管时，连接 WS 做多端同步（file:// 双击场景不触发）
+// 如果由服务器托管，连接 WS 做多端同步
 if (location.protocol === 'http:' || location.protocol === 'https:') {
   tryConnectWS(false);
   fetchServerIP();
+} else {
+  // file:// 双击场景：检查是否有已保存的服务器地址，自动尝试连接
+  var savedAddr = getSavedServer();
+  if (savedAddr) {
+    connStatus.querySelector('.conn-text').textContent = "连接中...";
+    connStatus.classList.remove('connected');
+    tryConnectManualServer(savedAddr);
+  } else {
+    // 没有保存地址，显示提示
+    connStatus.querySelector('.conn-text').textContent = "本地模式 · 点击连接服务器";
+  }
 }
 </script>
 </body>
