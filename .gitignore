@@ -3,3 +3,11 @@ node_modules/
 .uploads/
 *.log
 show.json
+
+# 构建产物（通过 build-clients.js 生成，体积过大不入库）
+downloads/stage-manager-*.bat
+downloads/stage-manager-*.command
+downloads/stage-manager-*.sh
+
+# 分发包（通过 GitHub Release 发布）
+wutai-v*.zip

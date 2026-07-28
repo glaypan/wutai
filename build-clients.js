@@ -37,8 +37,26 @@ try {
   process.exit(1);
 }
 
+// 读取 Tesseract OCR 数据文件（二进制，base64 编码嵌入）
+var tessFiles = {};
+var tessDir = path.join(__dirname, 'tess');
+try {
+  fs.readdirSync(tessDir).forEach(function(f) {
+    var filePath = path.join(tessDir, f);
+    var stat = fs.statSync(filePath);
+    if (stat.isFile()) {
+      var data = fs.readFileSync(filePath);
+      tessFiles[f] = data.toString('base64');
+    }
+  });
+  var tessTotal = Object.keys(tessFiles).reduce(function(sum, k) { return sum + tessFiles[k].length; }, 0);
+  console.log('[v] 已读取 OCR 数据: ' + Object.keys(tessFiles).length + ' 个文件, ' + (tessTotal / 1024 / 1024).toFixed(1) + ' MB (base64)');
+} catch(e) {
+  console.error('[!] 无法读取 OCR 数据: ' + e.message);
+}
+
 // ========== 生成自包含服务器脚本 ==========
-var standaloneServer = generateStandaloneServer(htmlContent, wsFiles);
+var standaloneServer = generateStandaloneServer(htmlContent, wsFiles, tessFiles);
 var serverB64 = Buffer.from(standaloneServer).toString('base64');
 
 console.log('\n═══════════════════════════════════════════════════');
@@ -69,15 +87,35 @@ fs.chmodSync(path.join(DOWNLOAD_DIR, 'stage-manager-macos-arm64.command'), 0o755
 console.log('✅ macOS Intel: downloads/stage-manager-macos-intel.command');
 console.log('✅ macOS ARM:   downloads/stage-manager-macos-arm64.command');
 
+// ========== Linux (x64/ARMv7/ARM64 - 树莓派等) ==========
+var linuxSh = generateLinuxInstaller(b64Lines);
+fs.writeFileSync(path.join(DOWNLOAD_DIR, 'stage-manager-linux.sh'), linuxSh, 'utf-8');
+fs.chmodSync(path.join(DOWNLOAD_DIR, 'stage-manager-linux.sh'), 0o755);
+console.log('✅ Linux (x64/ARM/ARM64): downloads/stage-manager-linux.sh (' + (linuxSh.length / 1024).toFixed(0) + ' KB)');
+
+// ========== Android Termux ==========
+var termuxSh = generateTermuxInstaller(b64Lines);
+fs.writeFileSync(path.join(DOWNLOAD_DIR, 'stage-manager-termux.sh'), termuxSh, 'utf-8');
+fs.chmodSync(path.join(DOWNLOAD_DIR, 'stage-manager-termux.sh'), 0o755);
+console.log('✅ Android Termux: downloads/stage-manager-termux.sh');
+
+// ========== OpenWrt ==========
+var openwrtSh = generateOpenWrtInstaller(b64Lines);
+fs.writeFileSync(path.join(DOWNLOAD_DIR, 'stage-manager-openwrt.sh'), openwrtSh, 'utf-8');
+fs.chmodSync(path.join(DOWNLOAD_DIR, 'stage-manager-openwrt.sh'), 0o755);
+console.log('✅ OpenWrt: downloads/stage-manager-openwrt.sh');
+
 console.log('\n═══════════════════════════════════════════════════');
 console.log('  构建完成！启动服务器后页面 ⬇️ 按钮可下载');
+console.log('  iOS/Android 浏览器打开后可「添加到主屏幕」安装PWA');
 console.log('═══════════════════════════════════════════════════');
 
 
 // ========== 生成自包含服务器脚本 ==========
-function generateStandaloneServer(htmlContent, wsFiles) {
+function generateStandaloneServer(htmlContent, wsFiles, tessFiles) {
   var htmlB64 = Buffer.from(htmlContent).toString('base64');
   var wsJson = JSON.stringify(wsFiles);
+  var tessJson = JSON.stringify(tessFiles);
 
   var lines = [];
   lines.push('// stage-manager-standalone.js - 自包含服务器');
@@ -92,6 +130,7 @@ function generateStandaloneServer(htmlContent, wsFiles) {
   lines.push('// ========== 内嵌数据 ==========');
   lines.push('var __HTML_B64 = "' + htmlB64 + '";');
   lines.push('var __WS_FILES = ' + wsJson + ';');
+  lines.push('var __TESS_FILES = ' + tessJson + ';');
   lines.push('');
   // ========== 启动时写入 ws 模块到临时目录 ==========
   lines.push('// ========== 写入 ws 模块到 node_modules ==========');
@@ -161,7 +200,7 @@ function generateStandaloneServer(htmlContent, wsFiles) {
   lines.push('');
   lines.push('var defaultState = {');
   lines.push('  showName: "舞台流程表", mode: "setup", currentProgramIndex: 0,');
-  lines.push('  version: 3, globalChannels: { mics: [], lines: [] }, programs: []');
+  lines.push('  version: 3, globalChannels: { mics: [], lines: [] }, programs: [], subtitle: { lines: [], currentIndex: -1, visible: false }');
   lines.push('};');
   lines.push('');
   lines.push('function loadState() {');
@@ -201,6 +240,10 @@ function generateStandaloneServer(htmlContent, wsFiles) {
   lines.push('        useChannels: p.useChannels || (p.mics ? p.mics.filter(function(m){return m.active;}).map(function(m){return m.name;}) : []) };');
   lines.push('    })');
   lines.push('  };');
+  lines.push('  merged.subtitle = s.subtitle || { lines: [], currentIndex: -1, visible: false };');
+  lines.push('  if (!merged.subtitle.lines) merged.subtitle.lines = [];');
+  lines.push('  if (typeof merged.subtitle.currentIndex !== "number") merged.subtitle.currentIndex = -1;');
+  lines.push('  if (typeof merged.subtitle.visible !== "boolean") merged.subtitle.visible = false;');
   lines.push('  if (!merged.globalChannels.mics) merged.globalChannels.mics = [];');
   lines.push('  if (!merged.globalChannels.lines) merged.globalChannels.lines = [];');
   lines.push('  merged.globalChannels.mics = merged.globalChannels.mics.map(ensureChannel);');
@@ -290,6 +333,20 @@ function generateStandaloneServer(htmlContent, wsFiles) {
   lines.push('      if (msg.mode === "replace") { state.programs = newProgs; state.currentProgramIndex = 0; }');
   lines.push('      else { state.programs = state.programs.concat(newProgs); }');
   lines.push('      saveState(); broadcastFullState(); break;');
+  // ---------- 字幕功能 ----------
+  lines.push('    case "set_subtitle_lines":');
+  lines.push('      if (role !== "control") return sendError(ws, "forbidden", "set_subtitle_lines");');
+  lines.push('      state.subtitle.lines = (msg.lines || []).filter(function(l) { return typeof l === "string"; });');
+  lines.push('      state.subtitle.currentIndex = -1; saveState(); broadcastFullState(); break;');
+  lines.push('    case "control_subtitle":');
+  lines.push('      if (role !== "control" && role !== "director" && role !== "assistant") return sendError(ws, "forbidden", "control_subtitle");');
+  lines.push('      if (msg.action === "next") { state.subtitle.currentIndex = Math.min(state.subtitle.currentIndex + 1, state.subtitle.lines.length - 1); }');
+  lines.push('      else if (msg.action === "prev") { state.subtitle.currentIndex = Math.max(state.subtitle.currentIndex - 1, -1); }');
+  lines.push('      else if (msg.action === "goto") { if (typeof msg.index === "number") state.subtitle.currentIndex = Math.max(-1, Math.min(msg.index, state.subtitle.lines.length - 1)); }');
+  lines.push('      else if (msg.action === "show") { state.subtitle.visible = true; }');
+  lines.push('      else if (msg.action === "hide") { state.subtitle.visible = false; }');
+  lines.push('      else if (msg.action === "clear") { state.subtitle.lines = []; state.subtitle.currentIndex = -1; state.subtitle.visible = false; }');
+  lines.push('      saveState(); broadcastFullState(); break;');
   lines.push('  }');
   lines.push('}');
   lines.push('');
@@ -328,6 +385,36 @@ function generateStandaloneServer(htmlContent, wsFiles) {
   lines.push('    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });');
   lines.push('    res.end(HTML_CONTENT);');
   lines.push('    return;');
+  lines.push('  }');
+  // PWA: manifest.json
+  lines.push('  if (urlPath === "/manifest.json") {');
+  lines.push('    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });');
+  lines.push('    res.end(JSON.stringify({ name: "舞台流程表", short_name: "舞台流程", display: "standalone", background_color: "#000", theme_color: "#000", start_url: "/?role=control", scope: "/", icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" }] }));');
+  lines.push('    return;');
+  lines.push('  }');
+  // PWA: Service Worker
+  lines.push('  if (urlPath === "/sw.js") {');
+  lines.push('    res.writeHead(200, { "Content-Type": "application/javascript; charset=utf-8" });');
+  lines.push('    res.end("var CACHE=\'stage-manager-v1\';self.addEventListener(\'install\',function(e){self.skipWaiting();});self.addEventListener(\'activate\',function(e){e.waitUntil(self.clients.claim());});self.addEventListener(\'fetch\',function(e){if(e.request.method!==\'GET\')return;e.respondWith(caches.open(CACHE).then(function(c){return c.match(e.request).then(function(f){var p=fetch(e.request).then(function(r){if(r.ok)c.put(e.request,r.clone());return r;}).catch(function(){return f;});return f||p;});}));});");');
+  lines.push('    return;');
+  lines.push('  }');
+  // PWA: App Icon (SVG)
+  lines.push('  if (urlPath === "/icon.svg") {');
+  lines.push('    res.writeHead(200, { "Content-Type": "image/svg+xml" });');
+  lines.push('    res.end(\'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#000"/><text x="256" y="340" font-size="280" text-anchor="middle" fill="#fff" font-family="sans-serif">舞</text></svg>\');');
+  lines.push('    return;');
+  lines.push('  }');
+  // /tess/ 静态文件服务（OCR 数据从内存提供，完全离线）
+  lines.push('  if (urlPath.indexOf("/tess/") === 0) {');
+  lines.push('    var tessFile = urlPath.replace("/tess/", "");');
+  lines.push('    if (__TESS_FILES[tessFile]) {');
+  lines.push('      var tessData = Buffer.from(__TESS_FILES[tessFile], "base64");');
+  lines.push('      var tessExt = path.extname(tessFile).toLowerCase();');
+  lines.push('      var tessMime = {".js":"application/javascript; charset=utf-8",".gz":"application/gzip",".wasm":"application/wasm"}[tessExt] || "application/octet-stream";');
+  lines.push('      res.writeHead(200, { "Content-Type": tessMime, "Content-Length": tessData.length });');
+  lines.push('      res.end(tessData);');
+  lines.push('      return;');
+  lines.push('    }');
   lines.push('  }');
   lines.push('  res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });');
   lines.push('  res.end("404 Not Found");');
@@ -617,5 +704,243 @@ function generateMacInstaller(b64Lines) {
   L.push('node server.js');
   L.push('');
   L.push('read -p "按回车键退出..."');
+  return L.join('\n');
+}
+
+
+// ========== Linux 安装脚本 (x64/ARMv7/ARM64 - 树莓派/Ubuntu/Debian 等) ==========
+function generateLinuxInstaller(b64Lines) {
+  var L = [];
+  L.push('#!/bin/bash');
+  L.push('# 舞台流程表 - Linux 服务器启动器');
+  L.push('# 支持 x86_64, ARMv7 (树莓派32位), ARM64 (树莓派64位)');
+  L.push('# 双击运行或终端执行: bash xxx.sh');
+  L.push('');
+  L.push('set -e');
+  L.push('');
+  L.push('SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"');
+  L.push('APP_DIR="$SCRIPT_DIR/stage-manager"');
+  L.push('echo "[i] 脚本所在目录: $SCRIPT_DIR"');
+  L.push('echo "[i] 工作目录: $APP_DIR"');
+  L.push('mkdir -p "$APP_DIR"');
+  L.push('cd "$APP_DIR"');
+  L.push('');
+  L.push('echo ""');
+  L.push('echo "=================================================="');
+  L.push('echo "  舞台流程表 - Linux 服务器启动器"');
+  L.push('echo "=================================================="');
+  L.push('echo ""');
+  L.push('');
+  // 检测架构
+  L.push('ARCH=$(uname -m)');
+  L.push('echo "[i] 系统架构: $ARCH"');
+  L.push('if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then');
+  L.push('  NODE_ARCH="x64"');
+  L.push('  NODE_TAR_ARCH="linux-x64"');
+  L.push('elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then');
+  L.push('  NODE_ARCH="arm64"');
+  L.push('  NODE_TAR_ARCH="linux-arm64"');
+  L.push('elif [ "$ARCH" = "armv7l" ] || [ "$ARCH" = "armhf" ]; then');
+  L.push('  NODE_ARCH="armv7l"');
+  L.push('  NODE_TAR_ARCH="linux-armv7l"');
+  L.push('else');
+  L.push('  echo "[!] 未知的系统架构: $ARCH"');
+  L.push('  echo "[!] 尝试使用 x64 版本"');
+  L.push('  NODE_ARCH="x64"');
+  L.push('  NODE_TAR_ARCH="linux-x64"');
+  L.push('fi');
+  L.push('');
+  // 检查 Node.js
+  L.push('if command -v node &> /dev/null; then');
+  L.push('  echo "[v] Node.js 已安装: $(node --version)"');
+  L.push('else');
+  L.push('  echo "[!] 未检测到 Node.js，正在自动下载..."');
+  L.push('  NODE_VERSION="v18.20.4"');
+  L.push('  NODE_URL="https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-${NODE_TAR_ARCH}.tar.xz"');
+  L.push('  NODE_TAR="/tmp/stage_manager_node.tar.xz"');
+  L.push('  NODE_DIR="$HOME/.local/stage-manager-nodejs"');
+  L.push('  echo "[+] 下载 Node.js ${NODE_VERSION} (${NODE_TAR_ARCH})..."');
+  L.push('  curl -L --fail "$NODE_URL" -o "$NODE_TAR" || {');
+  L.push('    echo "[X] Node.js 下载失败，请手动安装: https://nodejs.org/"');
+  L.push('    exit 1');
+  L.push('  }');
+  L.push('  echo "[+] 解压 Node.js ..."');
+  L.push('  mkdir -p "$NODE_DIR"');
+  L.push('  tar -xJf "$NODE_TAR" -C "$NODE_DIR" --strip-components=1');
+  L.push('  export PATH="$NODE_DIR/bin:$PATH"');
+  L.push('  echo "[v] Node.js 安装完成: $(node --version)"');
+  L.push('fi');
+  L.push('');
+  // 写入 base64 并解码
+  L.push('echo "[+] 写入服务器文件 (共 ' + b64Lines.length + ' 段)..."');
+  L.push('B64_FILE="$APP_DIR/server.b64"');
+  L.push('cat > "$B64_FILE" <<\'STAGE_MANAGER_B64_END\'');
+  for (var i = 0; i < b64Lines.length; i++) {
+    L.push(b64Lines[i]);
+  }
+  L.push('STAGE_MANAGER_B64_END');
+  L.push('node -e "var fs=require(\'fs\');fs.writeFileSync(process.argv[1],Buffer.from(fs.readFileSync(process.argv[2],\'utf-8\'),\'base64\'));" server.js "$B64_FILE"');
+  L.push('if [ $? -ne 0 ]; then');
+  L.push('  echo "[X] 服务器文件写入失败"');
+  L.push('  exit 1');
+  L.push('fi');
+  L.push('rm -f "$B64_FILE"');
+  L.push('echo "[v] 服务器文件已就绪"');
+  L.push('');
+  // 启动
+  L.push('echo ""');
+  L.push('echo "=================================================="');
+  L.push('echo "  服务器正在启动..."');
+  L.push('echo "  请记录下方显示的 IP 地址，告知其他设备"');
+  L.push('echo "=================================================="');
+  L.push('echo ""');
+  L.push('');
+  L.push('node server.js');
+  L.push('');
+  return L.join('\n');
+}
+
+
+// ========== Android Termux 安装脚本 ==========
+function generateTermuxInstaller(b64Lines) {
+  var L = [];
+  L.push('#!/bin/bash');
+  L.push('# 舞台流程表 - Android Termux 服务器启动器');
+  L.push('# 需先安装 Termux: https://f-droid.org/packages/com.termux/');
+  L.push('# 在 Termux 中执行: bash termux-start.sh');
+  L.push('');
+  L.push('set -e');
+  L.push('');
+  L.push('echo ""');
+  L.push('echo "=================================================="');
+  L.push('echo "  舞台流程表 - Android Termux 服务器启动器"');
+  L.push('echo "=================================================="');
+  L.push('echo ""');
+  L.push('');
+  // 检查 Termux 环境
+  L.push('if [ -z "$TERMUX_VERSION" ]; then');
+  L.push('  echo "[!] 此脚本需要在 Termux 中运行"');
+  L.push('  echo "[!] 请先安装 Termux: https://f-droid.org/packages/com.termux/"');
+  L.push('  exit 1');
+  L.push('fi');
+  L.push('');
+  L.push('APP_DIR="$HOME/stage-manager"');
+  L.push('mkdir -p "$APP_DIR"');
+  L.push('cd "$APP_DIR"');
+  L.push('echo "[i] 工作目录: $APP_DIR"');
+  L.push('');
+  // 安装 Node.js
+  L.push('if command -v node &> /dev/null; then');
+  L.push('  echo "[v] Node.js 已安装: $(node --version)"');
+  L.push('else');
+  L.push('  echo "[!] 未检测到 Node.js，正在安装..."');
+  L.push('  pkg update -y && pkg install -y nodejs');
+  L.push('  echo "[v] Node.js 安装完成: $(node --version)"');
+  L.push('fi');
+  L.push('');
+  // 写入 base64 并解码
+  L.push('echo "[+] 写入服务器文件 (共 ' + b64Lines.length + ' 段)..."');
+  L.push('B64_FILE="$APP_DIR/server.b64"');
+  L.push('cat > "$B64_FILE" <<\'STAGE_MANAGER_B64_END\'');
+  for (var i = 0; i < b64Lines.length; i++) {
+    L.push(b64Lines[i]);
+  }
+  L.push('STAGE_MANAGER_B64_END');
+  L.push('node -e "var fs=require(\'fs\');fs.writeFileSync(process.argv[1],Buffer.from(fs.readFileSync(process.argv[2],\'utf-8\'),\'base64\'));" server.js "$B64_FILE"');
+  L.push('rm -f "$B64_FILE"');
+  L.push('echo "[v] 服务器文件已就绪"');
+  L.push('');
+  // 启动
+  L.push('echo ""');
+  L.push('echo "=================================================="');
+  L.push('echo "  服务器正在启动..."');
+  L.push('echo "  其他设备可通过本机 IP 访问"');
+  L.push('echo "=================================================="');
+  L.push('echo ""');
+  L.push('');
+  L.push('node server.js');
+  L.push('');
+  return L.join('\n');
+}
+
+
+// ========== OpenWrt 安装脚本 (路由器) ==========
+function generateOpenWrtInstaller(b64Lines) {
+  var L = [];
+  L.push('#!/bin/sh');
+  L.push('# 舞台流程表 - OpenWrt 路由器服务器启动器');
+  L.push('# 需要 OpenWrt 18.06+ 且有足够存储空间 (至少 80MB)"');
+  L.push('# 通过 SSH 执行: sh openwrt-start.sh');
+  L.push('');
+  L.push('echo ""');
+  L.push('echo "=================================================="');
+  L.push('echo "  舞台流程表 - OpenWrt 路由器服务器启动器"');
+  L.push('echo "=================================================="');
+  L.push('echo ""');
+  L.push('');
+  // 检查存储空间
+  L.push('FREE_SPACE=$(df -m / | tail -1 | awk \'{print $4}\')');
+  L.push('echo "[i] 可用存储空间: ${FREE_SPACE}MB"');
+  L.push('if [ "$FREE_SPACE" -lt 80 ]; then');
+  L.push('  echo "[X] 存储空间不足！需要至少 80MB，当前仅 ${FREE_SPACE}MB"');
+  L.push('  echo "[i] 建议: 1) 使用外接U盘 2) 使用精简版(不含OCR数据)"');
+  L.push('  exit 1');
+  L.push('fi');
+  L.push('');
+  // 检查内存
+  L.push('FREE_MEM=$(cat /proc/meminfo | grep MemAvailable | awk \'{print int($2/1024)}\')');
+  L.push('echo "[i] 可用内存: ${FREE_MEM}MB"');
+  L.push('if [ "$FREE_MEM" -lt 128 ]; then');
+  L.push('  echo "[!] 内存较少 (${FREE_MEM}MB)，可能影响性能"');
+  L.push('fi');
+  L.push('');
+  L.push('APP_DIR="/root/stage-manager"');
+  L.push('mkdir -p "$APP_DIR"');
+  L.push('cd "$APP_DIR"');
+  L.push('echo "[i] 工作目录: $APP_DIR"');
+  L.push('');
+  // 安装 Node.js
+  L.push('if command -v node &> /dev/null; then');
+  L.push('  echo "[v] Node.js 已安装: $(node --version)"');
+  L.push('else');
+  L.push('  echo "[!] 未检测到 Node.js，尝试通过 opkg 安装..."');
+  L.push('  opkg update');
+  L.push('  opkg install node');
+  L.push('  if command -v node &> /dev/null; then');
+  L.push('    echo "[v] Node.js 安装完成: $(node --version)"');
+  L.push('  else');
+  L.push('    echo "[X] 无法安装 Node.js"');
+  L.push('    echo "[i] 请手动安装 node 包: opkg install node"');
+  L.push('    echo "[i] 或下载适用于 OpenWrt 的 Node.js"');
+  L.push('    exit 1');
+  L.push('  fi');
+  L.push('fi');
+  L.push('');
+  // 写入 base64 并解码 (busybox ash 支持 heredoc)
+  L.push('echo "[+] 写入服务器文件 (共 ' + b64Lines.length + ' 段)..."');
+  L.push('B64_FILE="$APP_DIR/server.b64"');
+  L.push('cat > "$B64_FILE" <<\'STAGE_MANAGER_B64_END\'');
+  for (var i = 0; i < b64Lines.length; i++) {
+    L.push(b64Lines[i]);
+  }
+  L.push('STAGE_MANAGER_B64_END');
+  L.push('node -e "var fs=require(\'fs\');fs.writeFileSync(process.argv[1],Buffer.from(fs.readFileSync(process.argv[2],\'utf-8\'),\'base64\'));" server.js "$B64_FILE"');
+  L.push('if [ $? -ne 0 ]; then');
+  L.push('  echo "[X] 服务器文件写入失败"');
+  L.push('  exit 1');
+  L.push('fi');
+  L.push('rm -f "$B64_FILE"');
+  L.push('echo "[v] 服务器文件已就绪"');
+  L.push('');
+  // 启动
+  L.push('echo ""');
+  L.push('echo "=================================================="');
+  L.push('echo "  服务器正在启动..."');
+  L.push('echo "  其他设备可通过路由器 IP 访问"');
+  L.push('echo "=================================================="');
+  L.push('echo ""');
+  L.push('');
+  L.push('node server.js');
+  L.push('');
   return L.join('\n');
 }

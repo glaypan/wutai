@@ -1,6 +1,6 @@
 {
   "name": "stage-manager",
-  "version": "3.7.0",
+  "version": "4.0.0",
   "description": "舞台流程表 Web 应用 - WebSocket 实时同步",
   "main": "server.js",
   "scripts": {
@@ -8,6 +8,11 @@
     "build": "node build-clients.js"
   },
   "dependencies": {
+    "@tesseract.js-data/chi_sim": "^1.0.0",
+    "@tesseract.js-data/eng": "^1.0.0",
+    "pdfjs-dist": "^3.11.174",
+    "tesseract.js": "^5.1.1",
+    "tesseract.js-core": "^5.1.1",
     "ws": "^8.21.1"
   },
   "pkg": {

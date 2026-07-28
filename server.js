@@ -15,7 +15,8 @@ const defaultState = {
   currentProgramIndex: 0,
   version: 3,
   globalChannels: { mics: [], lines: [] },
-  programs: []
+  programs: [],
+  subtitle: { lines: [], currentIndex: -1, visible: false }
 };
 
 // ---------- 状态加载/保存 ----------
@@ -78,6 +79,11 @@ function mergeState(s) {
       };
     })
   };
+  // 字幕状态合并
+  merged.subtitle = s.subtitle || { lines: [], currentIndex: -1, visible: false };
+  if (!merged.subtitle.lines) merged.subtitle.lines = [];
+  if (typeof merged.subtitle.currentIndex !== 'number') merged.subtitle.currentIndex = -1;
+  if (typeof merged.subtitle.visible !== 'boolean') merged.subtitle.visible = false;
   if (!merged.globalChannels.mics) merged.globalChannels.mics = [];
   if (!merged.globalChannels.lines) merged.globalChannels.lines = [];
   merged.globalChannels.mics = merged.globalChannels.mics.map(ensureChannel);
@@ -224,6 +230,40 @@ function handleMessage(ws, msg) {
       saveState();
       broadcastFullState();
       break;
+
+    // ---------- 字幕功能 ----------
+    case 'set_subtitle_lines':
+      // 设置字幕内容（仅控制端）
+      if (role !== 'control') return sendError(ws, 'forbidden', 'set_subtitle_lines');
+      state.subtitle.lines = (msg.lines || []).filter(function(l) { return typeof l === 'string'; });
+      state.subtitle.currentIndex = -1;
+      saveState();
+      broadcastFullState();
+      break;
+
+    case 'control_subtitle':
+      // 字幕控制：上一句/下一句/显示/隐藏/跳转（控制端/导演端/助理端）
+      if (role !== 'control' && role !== 'director' && role !== 'assistant') return sendError(ws, 'forbidden', 'control_subtitle');
+      if (msg.action === 'next') {
+        state.subtitle.currentIndex = Math.min(state.subtitle.currentIndex + 1, state.subtitle.lines.length - 1);
+      } else if (msg.action === 'prev') {
+        state.subtitle.currentIndex = Math.max(state.subtitle.currentIndex - 1, -1);
+      } else if (msg.action === 'goto') {
+        if (typeof msg.index === 'number') {
+          state.subtitle.currentIndex = Math.max(-1, Math.min(msg.index, state.subtitle.lines.length - 1));
+        }
+      } else if (msg.action === 'show') {
+        state.subtitle.visible = true;
+      } else if (msg.action === 'hide') {
+        state.subtitle.visible = false;
+      } else if (msg.action === 'clear') {
+        state.subtitle.lines = [];
+        state.subtitle.currentIndex = -1;
+        state.subtitle.visible = false;
+      }
+      saveState();
+      broadcastFullState();
+      break;
   }
 }
 
@@ -333,6 +373,8 @@ var MIME = {
   '.json': 'application/json; charset=utf-8',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
+  '.gz': 'application/gzip',
+  '.wasm': 'application/wasm',
   '.exe': 'application/x-msdownload',
   '.bat': 'application/x-msdownload',
   '.command': 'application/octet-stream',
@@ -349,6 +391,58 @@ function serveStatic(req, res) {
   if (urlPath === '/api/server-info') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs }));
+    return;
+  }
+
+  // PWA: manifest.json
+  if (urlPath === '/manifest.json') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      name: "舞台流程表",
+      short_name: "舞台流程",
+      description: "舞台演出流程管理系统",
+      display: "standalone",
+      orientation: "any",
+      background_color: "#000000",
+      theme_color: "#000000",
+      start_url: "/?role=control",
+      scope: "/",
+      icons: [
+        { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" }
+      ]
+    }));
+    return;
+  }
+
+  // PWA: Service Worker
+  if (urlPath === '/sw.js') {
+    res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+    res.end([
+      "var CACHE='stage-manager-v1';",
+      "self.addEventListener('install',function(e){self.skipWaiting();});",
+      "self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});",
+      "self.addEventListener('fetch',function(e){",
+      "  if(e.request.method!=='GET')return;",
+      "  e.respondWith(",
+      "    caches.open(CACHE).then(function(cache){",
+      "      return cache.match(e.request).then(function(cached){",
+      "        var fetchPromise=fetch(e.request).then(function(response){",
+      "          if(response.ok)cache.put(e.request,response.clone());",
+      "          return response;",
+      "        }).catch(function(){return cached;});",
+      "        return cached||fetchPromise;",
+      "      });",
+      "    })",
+      "  );",
+      "});"
+    ].join('\n'));
+    return;
+  }
+
+  // PWA: App Icon (SVG)
+  if (urlPath === '/icon.svg') {
+    res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
+    res.end('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#000"/><text x="256" y="340" font-size="280" text-anchor="middle" fill="#fff" font-family="sans-serif">舞</text></svg>');
     return;
   }
 
