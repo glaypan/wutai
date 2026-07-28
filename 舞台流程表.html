@@ -1192,6 +1192,7 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
       <button class="icon-btn" id="download-btn" onclick="openDownloadModal()" title="下载客户端">⬇️</button>
       <button class="icon-btn" id="screen-setting-btn" onclick="openScreenSetting()" title="提示屏设置" style="display:none">🖥️</button>
       <button class="icon-btn" id="subtitle-btn" onclick="openSubtitlePanel()" title="字幕管理" style="display:none">📝</button>
+      <button class="icon-btn" id="osc-midi-btn" onclick="openOscMidiPanel()" title="OSC/MIDI 控制" style="display:none">🎹</button>
       <button class="icon-btn header-reset" id="header-reset-btn" onclick="resetProgram('all')" title="重置全部节目状态" style="display:none">↺</button>
     </div>
   </header>
@@ -1475,6 +1476,121 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
           <div class="modal-actions">
             <button class="btn btn-secondary" onclick="closeModal('modal-screen-setting')">关闭</button>
             <button class="btn btn-primary" onclick="saveScreenSetting()">💾 保存设置</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OSC/MIDI 控制设置弹窗 -->
+      <div id="modal-osc-midi" class="modal hidden">
+        <div class="modal-box" style="max-width:520px">
+          <div class="modal-header-row">
+            <h3>🎹 OSC / MIDI 控制</h3>
+            <button class="btn btn-sm btn-secondary" onclick="closeModal('modal-osc-midi')">✕</button>
+          </div>
+
+          <!-- OSC 部分 -->
+          <div style="margin-bottom:20px">
+            <div style="font-size:14px;font-weight:700;margin-bottom:10px">📡 OSC 控制</div>
+            <div style="background:rgba(10,132,255,0.08);border:1px solid rgba(10,132,255,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+              <div style="font-size:13px;color:var(--text-3);line-height:1.6">
+                <p style="margin:0 0 4px">服务器监听 OSC UDP 消息，可接收来自 QLab、OSCculator、TouchOSC 等软件的控制指令。</p>
+                <p style="margin:0 0 4px"><b>监听端口:</b> <span id="osc-port-display" style="font-family:monospace;color:var(--ios-blue)">5300</span></p>
+                <p style="margin:0"><b>状态:</b> <span id="osc-status" style="color:#4ade80">运行中</span></p>
+              </div>
+            </div>
+            <div style="font-size:13px;line-height:1.8;color:var(--text-3)">
+              <table style="width:100%;border-collapse:collapse;font-size:12px">
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:4px 8px;font-weight:600">功能</td>
+                  <td style="padding:4px 8px;font-weight:600">OSC 地址</td>
+                  <td style="padding:4px 8px;font-weight:600">参数</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:4px 8px">GO (完成+前进)</td>
+                  <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/go</td>
+                  <td style="padding:4px 8px;color:var(--text-4)">无</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:4px 8px">下一个节目</td>
+                  <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/next</td>
+                  <td style="padding:4px 8px;color:var(--text-4)">无</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:4px 8px">上一个节目</td>
+                  <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/prev</td>
+                  <td style="padding:4px 8px;color:var(--text-4)">无</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 8px">跳转到指定节目</td>
+                  <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/goto</td>
+                  <td style="padding:4px 8px">整数 (0-based)</td>
+                </tr>
+              </table>
+            </div>
+            <div style="margin-top:8px;font-size:11px;color:var(--text-4)">
+              💡 支持简写: /go, /next, /prev, /goto
+            </div>
+          </div>
+
+          <!-- MIDI 部分 -->
+          <div style="margin-bottom:20px">
+            <div style="font-size:14px;font-weight:700;margin-bottom:10px">🎹 MIDI 控制 (浏览器端)</div>
+            <div style="background:rgba(255,200,0,0.06);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+              <div style="font-size:13px;color:var(--text-3);line-height:1.6">
+                <p style="margin:0 0 4px">通过 Web MIDI API 监听 MIDI 输入设备（需 Chrome/Edge 浏览器）。</p>
+                <p style="margin:0"><b>状态:</b> <span id="midi-status" style="color:var(--text-4)">未连接</span></p>
+              </div>
+            </div>
+
+            <!-- MIDI 设备选择 -->
+            <div style="margin-bottom:12px">
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">MIDI 输入设备</label>
+              <select id="midi-device-select" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px" onchange="onMidiDeviceChange()">
+                <option value="">-- 选择 MIDI 设备 --</option>
+              </select>
+              <button class="btn btn-sm btn-secondary" style="margin-top:6px" onclick="refreshMidiDevices()">🔄 刷新设备列表</button>
+            </div>
+
+            <!-- MIDI 映射 -->
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">MIDI 映射设置</div>
+            <div style="display:grid;gap:8px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:12px;min-width:80px">GO (完成+前进)</span>
+                <select id="midi-go-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
+                  <option value="note">Note (音符)</option>
+                  <option value="cc">CC (控制变化)</option>
+                  <option value="pc">PC (程序变化)</option>
+                </select>
+                <input type="number" id="midi-go-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="60">
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:12px;min-width:80px">下一个节目</span>
+                <select id="midi-next-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
+                  <option value="note">Note (音符)</option>
+                  <option value="cc">CC (控制变化)</option>
+                  <option value="pc">PC (程序变化)</option>
+                </select>
+                <input type="number" id="midi-next-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="62">
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:12px;min-width:80px">上一个节目</span>
+                <select id="midi-prev-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
+                  <option value="note">Note (音符)</option>
+                  <option value="cc">CC (控制变化)</option>
+                  <option value="pc">PC (程序变化)</option>
+                </select>
+                <input type="number" id="midi-prev-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="58">
+              </div>
+            </div>
+            <div style="margin-top:8px;font-size:11px;color:var(--text-4)">
+              💡 默认: Note C3=GO, D3=Next, A#2=Prev (可通过 MIDI 键盘脚踏板等触发)
+            </div>
+            <div id="midi-last-event" style="margin-top:8px;font-size:12px;color:var(--text-4);font-family:monospace;min-height:18px"></div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal('modal-osc-midi')">取消</button>
+            <button class="btn btn-primary" onclick="saveOscMidiSetting()">💾 保存设置</button>
           </div>
         </div>
       </div>
@@ -2579,6 +2695,9 @@ function applyRoleVisibility() {
   // 字幕按钮：有字幕权限的角色显示
   var subBtn = document.getElementById('subtitle-btn');
   if (subBtn) subBtn.style.display = (can('subtitleInput') || can('subtitleControl')) ? '' : 'none';
+  // OSC/MIDI 按钮：仅控制端显示
+  var omBtn = document.getElementById('osc-midi-btn');
+  if (omBtn) omBtn.style.display = can('nav') ? '' : 'none';
   // 演出模式：隐藏进度条（只显示舞台卡片）
   var perfBar = document.getElementById('perf-progress-bar');
   if (perfBar) perfBar.style.display = 'none';
@@ -3143,6 +3262,188 @@ window.saveScreenSetting = function() {
   if (ROLE === 'screen') renderScreenView();
   closeModal('modal-screen-setting');
 };
+
+// ---------- OSC / MIDI 控制 ----------
+var midiAccess = null;
+var midiInput = null;
+var midiSettings = { go: { type: 'note', val: 60 }, next: { type: 'note', val: 62 }, prev: { type: 'note', val: 58 }, deviceId: '' };
+
+// 从 localStorage 恢复设置
+try {
+  var savedMidi = localStorage.getItem('midiSettings');
+  if (savedMidi) midiSettings = JSON.parse(savedMidi);
+} catch(e) {}
+
+window.openOscMidiPanel = function() {
+  var m = document.getElementById('modal-osc-midi');
+  if (!m) return;
+  m.classList.remove('hidden');
+  // 更新 OSC 端口显示
+  refreshOscInfo();
+  // 初始化 MIDI
+  initWebMidi();
+  // 恢复设置到 UI
+  restoreMidiSettingsUI();
+};
+
+function refreshOscInfo() {
+  // 从 server-info API 获取 OSC 端口
+  fetch('/api/server-info').then(function(r) { return r.json(); }).then(function(info) {
+    var portEl = document.getElementById('osc-port-display');
+    var statusEl = document.getElementById('osc-status');
+    if (info.oscPort) {
+      if (portEl) portEl.textContent = info.oscPort;
+      if (statusEl) { statusEl.textContent = '运行中'; statusEl.style.color = '#4ade80'; }
+    } else {
+      if (portEl) portEl.textContent = '已禁用';
+      if (statusEl) { statusEl.textContent = '已禁用'; statusEl.style.color = '#f87171'; }
+    }
+  }).catch(function() {});
+}
+
+function initWebMidi() {
+  if (!navigator.requestMIDIAccess) {
+    var st = document.getElementById('midi-status');
+    if (st) { st.textContent = '浏览器不支持 Web MIDI (请使用 Chrome/Edge)'; st.style.color = '#f87171'; }
+    return;
+  }
+  if (midiAccess) { refreshMidiDevices(); return; }
+  navigator.requestMIDIAccess({ sysex: false }).then(function(access) {
+    midiAccess = access;
+    var st = document.getElementById('midi-status');
+    if (st) { st.textContent = '已连接'; st.style.color = '#4ade80'; }
+    refreshMidiDevices();
+    // 设备变化时自动刷新
+    access.onstatechange = function() { refreshMidiDevices(); };
+  }).catch(function(err) {
+    var st = document.getElementById('midi-status');
+    if (st) { st.textContent = '连接失败: ' + err.message; st.style.color = '#f87171'; }
+  });
+}
+
+window.refreshMidiDevices = function() {
+  var select = document.getElementById('midi-device-select');
+  if (!select || !midiAccess) return;
+  // 保存当前选择
+  var prevVal = select.value || midiSettings.deviceId;
+  select.innerHTML = '<option value="">-- 选择 MIDI 设备 --</option>';
+  var inputs = midiAccess.inputs;
+  inputs.forEach(function(input) {
+    var opt = document.createElement('option');
+    opt.value = input.id;
+    opt.textContent = input.name + (input.manufacturer ? ' (' + input.manufacturer + ')' : '');
+    if (prevVal === input.id) opt.selected = true;
+    select.appendChild(opt);
+  });
+  // 自动恢复之前选择的设备
+  if (midiSettings.deviceId && !prevVal) {
+    select.value = midiSettings.deviceId;
+    onMidiDeviceChange();
+  }
+};
+
+window.onMidiDeviceChange = function() {
+  var select = document.getElementById('midi-device-select');
+  if (!select) return;
+  var deviceId = select.value;
+  // 断开之前的设备
+  if (midiInput) {
+    midiInput.onmidimessage = null;
+    midiInput = null;
+  }
+  // 连接新设备
+  if (deviceId && midiAccess) {
+    midiInput = midiAccess.inputs.get(deviceId);
+    if (midiInput) {
+      midiInput.onmidimessage = handleMidiMessage;
+      midiSettings.deviceId = deviceId;
+      var st = document.getElementById('midi-status');
+      if (st) { st.textContent = '已连接: ' + midiInput.name; st.style.color = '#4ade80'; }
+    }
+  } else {
+    midiSettings.deviceId = '';
+  }
+};
+
+function handleMidiMessage(event) {
+  if (!event.data || event.data.length < 2) return;
+  var status = event.data[0];
+  var data1 = event.data[1];
+  var data2 = event.data.length > 2 ? event.data[2] : 0;
+  var msgType = '';
+  var val = -1;
+  // Note On (0x90-0x9F)
+  if (status >= 0x90 && status <= 0x9F && data2 > 0) {
+    msgType = 'note'; val = data1;
+  }
+  // CC (0xB0-0xBF)
+  else if (status >= 0xB0 && status <= 0xBF) {
+    msgType = 'cc'; val = data1;
+  }
+  // Program Change (0xC0-0xCF)
+  else if (status >= 0xC0 && status <= 0xCF) {
+    msgType = 'pc'; val = data1;
+  }
+  if (val < 0) return;
+  // 显示最后事件
+  var eventEl = document.getElementById('midi-last-event');
+  if (eventEl) {
+    eventEl.textContent = '最后事件: ' + msgType.toUpperCase() + ' ' + val + (msgType === 'note' ? ' (vel:' + data2 + ')' : '');
+  }
+  // 检查映射
+  if (msgType === midiSettings.go.type && val === midiSettings.go.val) {
+    navProgram('go');
+  } else if (msgType === midiSettings.next.type && val === midiSettings.next.val) {
+    navProgram('next');
+  } else if (msgType === midiSettings.prev.type && val === midiSettings.prev.val) {
+    navProgram('prev');
+  }
+}
+
+function restoreMidiSettingsUI() {
+  var setVal = function(id, val) { var el = document.getElementById(id); if (el) el.value = val; };
+  setVal('midi-go-type', midiSettings.go.type);
+  setVal('midi-go-val', midiSettings.go.val);
+  setVal('midi-next-type', midiSettings.next.type);
+  setVal('midi-next-val', midiSettings.next.val);
+  setVal('midi-prev-type', midiSettings.prev.type);
+  setVal('midi-prev-val', midiSettings.prev.val);
+}
+
+window.saveOscMidiSetting = function() {
+  // 保存 MIDI 映射
+  midiSettings.go = { type: document.getElementById('midi-go-type').value, val: parseInt(document.getElementById('midi-go-val').value) || 0 };
+  midiSettings.next = { type: document.getElementById('midi-next-type').value, val: parseInt(document.getElementById('midi-next-val').value) || 0 };
+  midiSettings.prev = { type: document.getElementById('midi-prev-type').value, val: parseInt(document.getElementById('midi-prev-val').value) || 0 };
+  try { localStorage.setItem('midiSettings', JSON.stringify(midiSettings)); } catch(e) {}
+  showToast('OSC/MIDI 设置已保存');
+  closeModal('modal-osc-midi');
+};
+
+// 页面加载后自动初始化 MIDI (如果之前已配置设备)
+try {
+  if (midiSettings.deviceId && navigator.requestMIDIAccess) {
+    document.addEventListener('DOMContentLoaded', function() {
+      navigator.requestMIDIAccess({ sysex: false }).then(function(access) {
+        midiAccess = access;
+        var input = access.inputs.get(midiSettings.deviceId);
+        if (input) {
+          midiInput = input;
+          input.onmidimessage = handleMidiMessage;
+        }
+        access.onstatechange = function() {
+          if (midiSettings.deviceId && midiAccess) {
+            var newInput = midiAccess.inputs.get(midiSettings.deviceId);
+            if (newInput && !midiInput) {
+              midiInput = newInput;
+              newInput.onmidimessage = handleMidiMessage;
+            }
+          }
+        };
+      }).catch(function() {});
+    });
+  }
+} catch(e) {}
 
 // ---------- 字幕功能 ----------
 var parsedSubtitleLines = [];

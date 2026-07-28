@@ -319,6 +319,107 @@ function broadcastClientCount() {
   broadcast({ type: 'client_count', count: wss.clients.size });
 }
 
+// ---------- OSC 控制 (UDP 监听，零依赖) ----------
+// 支持的 OSC 地址:
+//   /stage/go     - GO (完成当前，前进到下一个)
+//   /stage/next   - 下一个节目
+//   /stage/prev   - 上一个节目
+//   /stage/goto N - 跳转到第 N 个节目 (N 为整数参数)
+var OSC_PORT = parseInt(process.env.OSC_PORT) || 5300;
+var oscEnabled = process.env.OSC_DISABLE !== '1';
+
+// 最小化 OSC 消息解析器 (OSC 1.0 规范)
+function parseOscMessage(buf) {
+  try {
+    var offset = 0;
+    // 读取地址模式 (null-terminated, 4字节对齐)
+    var addrEnd = buf.indexOf(0, offset);
+    if (addrEnd < 0) return null;
+    var address = buf.toString('ascii', offset, addrEnd);
+    offset = Math.ceil((addrEnd + 1) / 4) * 4;
+    // 读取类型标签 (以逗号开头的 null-terminated 字符串)
+    var tagEnd = buf.indexOf(0, offset);
+    if (tagEnd < 0) return { address: address, args: [] };
+    var tags = buf.toString('ascii', offset + 1, tagEnd); // 跳过逗号
+    offset = Math.ceil((tagEnd + 1) / 4) * 4;
+    // 解析参数
+    var args = [];
+    for (var i = 0; i < tags.length; i++) {
+      var t = tags[i];
+      if (t === 'i') {
+        args.push(buf.readInt32BE(offset)); offset += 4;
+      } else if (t === 'f') {
+        args.push(buf.readFloatBE(offset)); offset += 4;
+      } else if (t === 's') {
+        var sEnd = buf.indexOf(0, offset);
+        if (sEnd < 0) break;
+        args.push(buf.toString('utf-8', offset, sEnd));
+        offset = Math.ceil((sEnd + 1) / 4) * 4;
+      }
+    }
+    return { address: address, args: args };
+  } catch (e) {
+    return null;
+  }
+}
+
+function handleOscMessage(msg) {
+  var addr = (msg.address || '').toLowerCase();
+  var handled = false;
+
+  if (addr === '/stage/go' || addr === '/go' || addr === '/stage/advance') {
+    console.log('[OSC] GO');
+    doAdvance();
+    handled = true;
+  } else if (addr === '/stage/next' || addr === '/next') {
+    console.log('[OSC] Next');
+    doNav(1);
+    handled = true;
+  } else if (addr === '/stage/prev' || addr === '/prev') {
+    console.log('[OSC] Prev');
+    doNav(-1);
+    handled = true;
+  } else if ((addr === '/stage/goto' || addr === '/goto') && msg.args.length > 0) {
+    var targetIdx = parseInt(msg.args[0]);
+    if (!isNaN(targetIdx) && targetIdx >= 0 && targetIdx <= state.programs.length - 1) {
+      console.log('[OSC] Goto ' + targetIdx);
+      state.currentProgramIndex = targetIdx;
+      if (state.programs[targetIdx]) state.programs[targetIdx].status = 'active';
+      saveState();
+      broadcastFullState();
+      handled = true;
+    }
+  }
+
+  if (!handled) {
+    console.log('[OSC] 未识别的地址: ' + addr);
+  }
+  return handled;
+}
+
+var oscSocket = null;
+if (oscEnabled) {
+  try {
+    var dgram = require('dgram');
+    oscSocket = dgram.createSocket('udp4');
+    oscSocket.on('message', function(buf) {
+      var msg = parseOscMessage(buf);
+      if (msg && msg.address) {
+        handleOscMessage(msg);
+      }
+    });
+    oscSocket.on('error', function(err) {
+      console.error('[OSC] 监听错误: ' + err.message);
+    });
+    oscSocket.bind(OSC_PORT, function() {
+      console.log('[OSC] UDP 监听已启动 - 端口 ' + OSC_PORT);
+      console.log('[OSC] 支持的地址: /stage/go, /stage/next, /stage/prev, /stage/goto <N>');
+    });
+  } catch (e) {
+    console.error('[OSC] 启动失败: ' + e.message);
+  }
+}
+
 // ---------- 获取局域网IP ----------
 // 过滤虚拟网卡（VMware/Hyper-V/WSL/Docker/Tailscale 等），只保留真实局域网 IP
 var VIRTUAL_PREFIXES = [
@@ -390,7 +491,7 @@ function serveStatic(req, res) {
   // API: 服务器信息
   if (urlPath === '/api/server-info') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs }));
+    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs, oscPort: oscEnabled ? OSC_PORT : null }));
     return;
   }
 
@@ -616,6 +717,9 @@ function printStartupInfo() {
   console.log('║  助理端:   /?role=assistant                        ║');
   console.log('║  幕后端:   /?role=backstage                        ║');
   console.log('║  提示屏:   /?role=screen                            ║');
+  console.log('╠══════════════════════════════════════════════════╣');
+  console.log('║  OSC 控制: UDP 端口 ' + (oscEnabled ? OSC_PORT : '已禁用') + '                          ║');
+  console.log('║  /stage/go  /stage/next  /stage/prev  /stage/goto ║');
   console.log('╚══════════════════════════════════════════════════╝');
   if (actualPort !== PORT) {
     console.log('[i] 注意: 默认端口 ' + PORT + ' 被占用，已自动切换到 ' + actualPort);
