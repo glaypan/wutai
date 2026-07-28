@@ -521,6 +521,7 @@ function printStartupInfo() {
   console.log('║  导演端:   /?role=director                          ║');
   console.log('║  助理端:   /?role=assistant                        ║');
   console.log('║  幕后端:   /?role=backstage                        ║');
+  console.log('║  提示屏:   /?role=screen                            ║');
   console.log('╚══════════════════════════════════════════════════╝');
   if (actualPort !== PORT) {
     console.log('[i] 注意: 默认端口 ' + PORT + ' 被占用，已自动切换到 ' + actualPort);

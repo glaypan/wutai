@@ -954,10 +954,66 @@ body {
 /* 角色徽章 */
 .role-badge { font-size:12px; padding:4px 10px; border-radius:8px; margin-left:8px; font-weight:600; cursor:pointer; user-select:none; transition: background .2s ease; }
 .role-badge:hover { opacity:0.85; }
+/* ========== 提示屏全屏视图 ========== */
+.screen-view {
+  position:fixed; top:0; left:0; width:100vw; height:100vh;
+  background:#000; color:#fff; z-index:9999;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px; box-sizing:border-box; overflow:hidden;
+}
+.screen-view .screen-status {
+  font-size:28px; font-weight:700; margin-bottom:16px;
+  padding:8px 32px; border-radius:12px;
+  text-transform:uppercase; letter-spacing:4px;
+}
+.screen-view .screen-status.is-active { background:rgba(10,132,255,0.25); color:#7dbcff; border:2px solid rgba(10,132,255,0.4); }
+.screen-view .screen-status.is-completed { background:rgba(48,209,88,0.25); color:#86efac; border:2px solid rgba(48,209,88,0.4); }
+.screen-view .screen-status.is-pending { background:rgba(148,163,184,0.15); color:#94a3b8; border:2px solid rgba(148,163,184,0.3); }
+.screen-view .screen-program-name {
+  font-size:72px; font-weight:900; text-align:center;
+  line-height:1.2; margin-bottom:24px; max-width:90%;
+  word-break:break-word; text-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+.screen-view .screen-channels {
+  display:flex; flex-wrap:wrap; gap:12px; justify-content:center;
+  margin-bottom:32px;
+}
+.screen-view .screen-channel-tag {
+  font-size:32px; padding:12px 28px; border-radius:16px;
+  background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.2);
+  font-weight:600;
+}
+.screen-view .screen-music-cue {
+  font-size:36px; color:#ffbf6b; text-align:center;
+  max-width:80%; line-height:1.5; font-weight:500;
+  white-space:pre-wrap; margin-bottom:24px;
+}
+.screen-view .screen-notes {
+  font-size:28px; color:#cbd5e1; text-align:center;
+  max-width:80%; line-height:1.5;
+}
+.screen-view .screen-progress {
+  position:fixed; bottom:30px; left:0; width:100%;
+  text-align:center; font-size:24px; color:#6b7280;
+}
+.screen-view .screen-next-preview {
+  position:fixed; bottom:80px; left:0; width:100%;
+  text-align:center; font-size:26px; color:#9ca3af;
+}
+.screen-view .screen-next-preview .next-label { color:#6b7280; margin-right:12px; }
+.screen-view .screen-next-preview .next-name { color:#d1d5db; font-weight:600; }
+@media (max-width:768px) {
+  .screen-view .screen-program-name { font-size:48px; }
+  .screen-view .screen-music-cue { font-size:24px; }
+  .screen-view .screen-notes { font-size:20px; }
+  .screen-view .screen-channel-tag { font-size:22px; padding:8px 20px; }
+  .screen-view .screen-status { font-size:20px; }
+}
 .role-badge.control { background:rgba(10,132,255,.2); color:#7dbcff; }
 .role-badge.director { background:rgba(168,85,247,.2); color:#c084fc; }
 .role-badge.assistant { background:rgba(255,159,10,.2); color:#ffbf6b; }
 .role-badge.backstage { background:rgba(148,163,184,.2); color:#cbd5e1; }
+.role-badge.screen { background:rgba(34,197,94,.2); color:#86efac; }
 .role-switch-list { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
 .role-switch-btn { display:flex; align-items:center; gap:10px; padding:14px 16px; border-radius:12px; border:1px solid var(--stroke); background:rgba(44,44,46,0.66); color:#fff; cursor:pointer; transition: transform .12s ease, background .2s ease; text-align:left; }
 .role-switch-btn:hover { background:rgba(58,58,60,0.8); }
@@ -969,6 +1025,7 @@ body {
 .role-switch-btn.director { border-left:3px solid #a855f7; }
 .role-switch-btn.assistant { border-left:3px solid var(--ios-orange); }
 .role-switch-btn.backstage { border-left:3px solid #94a3b8; }
+.role-switch-btn.screen { border-left:3px solid #22c55e; }
 /* Toast 提示 */
 .toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.85); color:#fff; padding:16px 24px; border-radius:12px; z-index:9999; font-size:15px; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border:1px solid var(--stroke); }
 /* 导入弹窗 */
@@ -998,6 +1055,8 @@ body {
 .stage-card { cursor:pointer; transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease; position:relative; }
 .stage-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.3); }
 .stage-card.is-done { border-color: rgba(48,209,88,0.6) !important; background:rgba(48,209,88,0.08) !important; box-shadow:0 0 20px rgba(48,209,88,0.15); }
+.stage-card.is-done .stage-program-name { text-decoration: line-through; opacity: 0.5; }
+.stage-card.is-active { border-color: var(--ios-blue) !important; box-shadow: 0 4px 24px rgba(10,132,255,0.20); }
 /* 更明显的完成标志 */
 .program-item.is-completed { opacity:0.95; border-left:6px solid var(--ios-green) !important; border-color: rgba(48,209,88,0.5) !important; position:relative; background:rgba(48,209,88,0.08) !important; box-shadow:0 0 0 1px rgba(48,209,88,0.2), 0 2px 12px rgba(48,209,88,0.1); padding-right:64px; }
 .program-item.is-completed .prog-no { background:var(--ios-green) !important; color:#fff !important; box-shadow:0 2px 8px rgba(48,209,88,0.4); }
@@ -1226,6 +1285,11 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
           <span class="role-name">幕后端</span>
           <span class="role-desc">仅可修改备注</span>
         </button>
+        <button class="role-switch-btn screen" onclick="switchRole('screen')">
+          <span class="role-icon">🖥️</span>
+          <span class="role-name">提示屏</span>
+          <span class="role-desc">全屏展示当前节目</span>
+        </button>
       </div>
       <div class="modal-actions">
         <button class="btn btn-secondary" onclick="closeModal('modal-role-switch')">取消</button>
@@ -1272,6 +1336,19 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
             <div id="next-music" class="music-cue-display"></div>
           </div>
         </div>
+      </div>
+
+      <!-- 提示屏全屏视图 -->
+      <div id="screen-view" class="screen-view hidden">
+        <div class="screen-status is-pending" id="screen-status">等待开始</div>
+        <div class="screen-program-name" id="screen-name">—</div>
+        <div class="screen-channels" id="screen-channels"></div>
+        <div class="screen-music-cue" id="screen-music" style="display:none"></div>
+        <div class="screen-notes" id="screen-notes" style="display:none"></div>
+        <div class="screen-next-preview" id="screen-next" style="display:none">
+          <span class="next-label">⏭ 下一节目</span><span class="next-name" id="screen-next-name"></span>
+        </div>
+        <div class="screen-progress" id="screen-progress"></div>
       </div>
 
       <!-- 设置模式：添加/编辑节目 -->
@@ -1539,14 +1616,15 @@ let localState = {
 function getRole(){
   var p = new URLSearchParams(location.search);
   var r = p.get('role');
-  return ['control','assistant','backstage','director'].indexOf(r)>=0 ? r : 'control';
+  return ['control','director','assistant','backstage','screen'].indexOf(r)>=0 ? r : 'control';
 }
 var ROLE = getRole();
 var PERM = {
   control:    { mode:true, addDel:true, drag:true, editName:true, editDuration:true, editMusic:true, editChannel:true, editNotes:true, channelAdmin:true, importIt:true, nav:true, reset:true, exportIt:true, rename:true },
   director:   { nav:true },
   assistant:  { editMusic:true, editChannel:true, editNotes:true },
-  backstage:  { editNotes:true }
+  backstage:  { editNotes:true },
+  screen:     {}
 };
 function can(k){ return !!(PERM[ROLE] && PERM[ROLE][k]); }
 function showToast(msg){ var t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(function(){ t.remove(); },2500); }
@@ -2296,13 +2374,15 @@ var ROLE_LABELS = {
   control: '控制端',
   director: '导演端',
   assistant: '助理端',
-  backstage: '幕后端'
+  backstage: '幕后端',
+  screen: '提示屏'
 };
 var ROLE_ICONS = {
   control: '⚙️',
   director: '🎬',
   assistant: '🎭',
-  backstage: '📋'
+  backstage: '📋',
+  screen: '🖥️'
 };
 function applyRoleVisibility() {
   var badge = document.getElementById('role-badge');
@@ -2346,6 +2426,23 @@ function applyRoleVisibility() {
   // 演出模式：隐藏进度条（只显示舞台卡片）
   var perfBar = document.getElementById('perf-progress-bar');
   if (perfBar) perfBar.style.display = 'none';
+
+  // 提示屏角色：全屏展示，隐藏所有其他UI
+  var screenView = document.getElementById('screen-view');
+  if (ROLE === 'screen') {
+    // 隐藏主布局
+    document.querySelector('.main-layout').style.display = 'none';
+    document.querySelector('.header').style.display = 'none';
+    document.getElementById('nav-controls').style.display = 'none';
+    document.getElementById('setup-view').classList.add('hidden');
+    document.getElementById('performance-view').classList.add('hidden');
+    if (screenView) screenView.classList.remove('hidden');
+    renderScreenView();
+    return;
+  }
+  if (screenView) screenView.classList.add('hidden');
+  document.querySelector('.main-layout').style.display = '';
+
   // 非 control 强制 performance 模式
   if (ROLE !== 'control') {
     localState.mode = 'performance';
@@ -2361,9 +2458,83 @@ function applyRoleVisibility() {
   }
 }
 
+// ---------- 提示屏渲染 ----------
+function renderScreenView() {
+  var idx = localState.currentProgramIndex;
+  var progs = localState.programs || [];
+  var current = progs[idx];
+  var next = progs[idx + 1];
+  var allChannels = getAllChannels();
+
+  // 状态
+  var statusEl = document.getElementById('screen-status');
+  var statusText, statusClass;
+  if (!current) {
+    statusText = '等待开始'; statusClass = 'is-pending';
+  } else if (current.status === 'completed') {
+    statusText = '✅ 已完成'; statusClass = 'is-completed';
+  } else if (current.status === 'active') {
+    statusText = '🎤 正在进行'; statusClass = 'is-active';
+  } else {
+    statusText = '等待开始'; statusClass = 'is-pending';
+  }
+  if (statusEl) { statusEl.textContent = statusText; statusEl.className = 'screen-status ' + statusClass; }
+
+  // 节目名称
+  var nameEl = document.getElementById('screen-name');
+  if (nameEl) nameEl.innerText = current ? current.name : '—';
+
+  // 通道
+  var chWrap = document.getElementById('screen-channels');
+  if (chWrap) {
+    chWrap.innerHTML = '';
+    if (current && current.useChannels) {
+      allChannels.filter(function(ch){ return current.useChannels.indexOf(ch.id) !== -1; }).forEach(function(ch){
+        var tag = document.createElement('div');
+        tag.className = 'screen-channel-tag';
+        tag.innerText = ch.name || ch.id;
+        chWrap.appendChild(tag);
+      });
+    }
+  }
+
+  // 音乐节点
+  var musicEl = document.getElementById('screen-music');
+  if (musicEl) {
+    musicEl.innerText = (current && current.musicCue) ? current.musicCue : '';
+    musicEl.style.display = (current && current.musicCue) ? '' : 'none';
+  }
+
+  // 备注
+  var notesEl = document.getElementById('screen-notes');
+  if (notesEl) {
+    notesEl.innerText = (current && current.notes) ? current.notes : '';
+    notesEl.style.display = (current && current.notes) ? '' : 'none';
+  }
+
+  // 下一节目预览
+  var nextEl = document.getElementById('screen-next');
+  var nextNameEl = document.getElementById('screen-next-name');
+  if (nextEl && nextNameEl) {
+    if (next) {
+      nextNameEl.innerText = next.name;
+      nextEl.style.display = '';
+    } else {
+      nextEl.style.display = 'none';
+    }
+  }
+
+  // 进度
+  var total = progs.length;
+  var doneCount = 0;
+  progs.forEach(function(p) { if (p.status === 'completed') doneCount++; });
+  var progEl = document.getElementById('screen-progress');
+  if (progEl) progEl.innerText = doneCount + ' / ' + total + ' 已完成';
+}
+
 // ---------- 角色切换 ----------
 window.switchRole = function(newRole) {
-  if (['control', 'director', 'assistant', 'backstage'].indexOf(newRole) < 0) return;
+  if (['control', 'director', 'assistant', 'backstage', 'screen'].indexOf(newRole) < 0) return;
   var url = new URL(location.href);
   url.searchParams.set('role', newRole);
   location.href = url.toString();
@@ -2408,6 +2579,7 @@ function renderAll() {
   renderProgramList();
   initProgramDragSort();
   renderStageView();
+  if (ROLE === 'screen') renderScreenView();
   renderProgramChannelSelector();
 }
 
@@ -2571,11 +2743,15 @@ function renderStageView() {
   var currCard = document.querySelector('.current-card');
   if (currCard) {
     var curDone = current && current.status === 'completed';
+    var curActive = current && current.status === 'active';
     currCard.classList.toggle('is-done', curDone);
+    currCard.classList.toggle('is-active', curActive);
     ensureStageBadge(currCard, 'current-badge', curDone);
     var curLabel = document.getElementById('current-card-label');
     if (curLabel) {
-      curLabel.textContent = curDone ? '✅ 已完成' : '🎤 正在进行';
+      if (curDone) curLabel.textContent = '✅ 已完成';
+      else if (curActive) curLabel.textContent = '🎤 正在进行';
+      else curLabel.textContent = '⏸ 等待开始';
     }
     currCard.onclick = function() { if (current) openProgramDetail(idx); };
   }

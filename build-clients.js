@@ -420,6 +420,7 @@ function generateStandaloneServer(htmlContent, wsFiles) {
   lines.push('  console.log("  🎬 导演端:   http://" + (localIPs[0]||"localhost") + ":" + actualPort + "/?role=director");');
   lines.push('  console.log("  🎭 助理端:   http://" + (localIPs[0]||"localhost") + ":" + actualPort + "/?role=assistant");');
   lines.push('  console.log("  📋 幕后端:   http://" + (localIPs[0]||"localhost") + ":" + actualPort + "/?role=backstage");');
+  lines.push('  console.log("  🖥️ 提示屏:   http://" + (localIPs[0]||"localhost") + ":" + actualPort + "/?role=screen");');
   lines.push('  console.log("");');
   lines.push('  console.log("  💾 数据文件: " + DATA_FILE);');
   lines.push('  if (actualPort !== PORT) {');
