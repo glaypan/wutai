@@ -1450,110 +1450,284 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
 
       <!-- OSC/MIDI 控制设置弹窗 -->
       <div id="modal-osc-midi" class="modal hidden">
-        <div class="modal-box" style="max-width:520px">
+        <div class="modal-box" style="max-width:560px;max-height:85vh;overflow-y:auto">
           <div class="modal-header-row">
             <h3>🎹 OSC / MIDI 控制</h3>
             <button class="btn btn-sm btn-secondary" onclick="closeModal('modal-osc-midi')">✕</button>
           </div>
 
-          <!-- OSC 部分 -->
-          <div style="margin-bottom:20px">
-            <div style="font-size:14px;font-weight:700;margin-bottom:10px">📡 OSC 控制</div>
-            <div style="background:rgba(10,132,255,0.08);border:1px solid rgba(10,132,255,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
-              <div style="font-size:13px;color:var(--text-3);line-height:1.6">
-                <p style="margin:0 0 4px">服务器监听 OSC UDP 消息，可接收来自 QLab、OSCculator、TouchOSC 等软件的控制指令。</p>
-                <p style="margin:0 0 4px"><b>监听端口:</b> <span id="osc-port-display" style="font-family:monospace;color:var(--ios-blue)">5300</span></p>
-                <p style="margin:0"><b>状态:</b> <span id="osc-status" style="color:#4ade80">运行中</span></p>
+          <!-- Tab 导航 -->
+          <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+            <button id="osc-tab-settings" onclick="switchOscTab('settings')" style="padding:8px 16px;font-size:13px;font-weight:600;border:none;background:none;color:var(--ios-blue);border-bottom:2px solid var(--ios-blue);margin-bottom:-2px;cursor:pointer">⚙️ 设置</button>
+            <button id="osc-tab-guide" onclick="switchOscTab('guide')" style="padding:8px 16px;font-size:13px;font-weight:600;border:none;background:none;color:var(--text-4);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer">📖 连接指南</button>
+          </div>
+
+          <!-- ===== Tab: 设置 ===== -->
+          <div id="osc-panel-settings">
+            <!-- OSC 部分 -->
+            <div style="margin-bottom:20px">
+              <div style="font-size:14px;font-weight:700;margin-bottom:10px">📡 OSC 控制</div>
+              <div style="background:rgba(10,132,255,0.08);border:1px solid rgba(10,132,255,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+                <div style="font-size:13px;color:var(--text-3);line-height:1.6">
+                  <p style="margin:0 0 4px">服务器监听 OSC UDP 消息，可接收来自 QLab、OSCculator、TouchOSC 等软件的控制指令。</p>
+                  <p style="margin:0 0 4px"><b>监听端口:</b> <span id="osc-port-display" style="font-family:monospace;color:var(--ios-blue)">5300</span> <span style="color:var(--text-4);font-size:11px">(环境变量 OSC_PORT 可修改)</span></p>
+                  <p style="margin:0"><b>状态:</b> <span id="osc-status" style="color:#4ade80">检测中...</span></p>
+                </div>
               </div>
+
+              <!-- OSC 地址表 -->
+              <div style="font-size:13px;line-height:1.8;color:var(--text-3);margin-bottom:12px">
+                <table style="width:100%;border-collapse:collapse;font-size:12px">
+                  <tr style="border-bottom:1px solid var(--border)">
+                    <td style="padding:4px 8px;font-weight:600">功能</td>
+                    <td style="padding:4px 8px;font-weight:600">OSC 地址</td>
+                    <td style="padding:4px 8px;font-weight:600">参数</td>
+                    <td style="padding:4px 8px;font-weight:600">测试</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid var(--border)">
+                    <td style="padding:4px 8px">GO (完成+前进)</td>
+                    <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/go</td>
+                    <td style="padding:4px 8px;color:var(--text-4)">无</td>
+                    <td style="padding:4px 8px"><button class="btn btn-sm" style="padding:2px 8px;font-size:11px;background:var(--ios-blue);color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="oscTest('go')">测试</button></td>
+                  </tr>
+                  <tr style="border-bottom:1px solid var(--border)">
+                    <td style="padding:4px 8px">下一个节目</td>
+                    <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/next</td>
+                    <td style="padding:4px 8px;color:var(--text-4)">无</td>
+                    <td style="padding:4px 8px"><button class="btn btn-sm" style="padding:2px 8px;font-size:11px;background:var(--ios-blue);color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="oscTest('next')">测试</button></td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px 8px">上一个节目</td>
+                    <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/prev</td>
+                    <td style="padding:4px 8px;color:var(--text-4)">无</td>
+                    <td style="padding:4px 8px"><button class="btn btn-sm" style="padding:2px 8px;font-size:11px;background:var(--ios-blue);color:#fff;border:none;border-radius:4px;cursor:pointer" onclick="oscTest('prev')">测试</button></td>
+                  </tr>
+                </table>
+              </div>
+              <div style="margin-top:4px;font-size:11px;color:var(--text-4)">
+                💡 支持简写: /go, /next, /prev, /goto &lt;N&gt; （goto 可跳转到指定节目序号）
+              </div>
+              <div id="osc-test-result" style="margin-top:8px;font-size:12px;min-height:18px"></div>
             </div>
-            <div style="font-size:13px;line-height:1.8;color:var(--text-3)">
-              <table style="width:100%;border-collapse:collapse;font-size:12px">
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:4px 8px;font-weight:600">功能</td>
-                  <td style="padding:4px 8px;font-weight:600">OSC 地址</td>
-                  <td style="padding:4px 8px;font-weight:600">参数</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:4px 8px">GO (完成+前进)</td>
-                  <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/go</td>
-                  <td style="padding:4px 8px;color:var(--text-4)">无</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:4px 8px">下一个节目</td>
-                  <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/next</td>
-                  <td style="padding:4px 8px;color:var(--text-4)">无</td>
-                </tr>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:4px 8px">上一个节目</td>
-                  <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/prev</td>
-                  <td style="padding:4px 8px;color:var(--text-4)">无</td>
-                </tr>
-                <tr>
-                  <td style="padding:4px 8px">跳转到指定节目</td>
-                  <td style="padding:4px 8px;font-family:monospace;color:var(--ios-blue)">/stage/goto</td>
-                  <td style="padding:4px 8px">整数 (0-based)</td>
-                </tr>
-              </table>
-            </div>
-            <div style="margin-top:8px;font-size:11px;color:var(--text-4)">
-              💡 支持简写: /go, /next, /prev, /goto
+
+            <!-- MIDI 部分 -->
+            <div style="margin-bottom:20px">
+              <div style="font-size:14px;font-weight:700;margin-bottom:10px">🎹 MIDI 控制 (浏览器端)</div>
+              <div style="background:rgba(255,200,0,0.06);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+                <div style="font-size:13px;color:var(--text-3);line-height:1.6">
+                  <p style="margin:0 0 4px">通过 Web MIDI API 监听 MIDI 输入设备（需 Chrome/Edge 浏览器）。</p>
+                  <p style="margin:0"><b>状态:</b> <span id="midi-status" style="color:var(--text-4)">未连接</span></p>
+                </div>
+              </div>
+
+              <!-- MIDI 设备选择 -->
+              <div style="margin-bottom:12px">
+                <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">MIDI 输入设备</label>
+                <div style="display:flex;gap:8px">
+                  <select id="midi-device-select" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px" onchange="onMidiDeviceChange()">
+                    <option value="">-- 选择 MIDI 设备 --</option>
+                  </select>
+                  <button class="btn btn-sm btn-secondary" style="white-space:nowrap" onclick="refreshMidiDevices()">🔄 刷新</button>
+                </div>
+              </div>
+
+              <!-- MIDI 映射 -->
+              <div style="font-size:13px;font-weight:600;margin-bottom:8px">MIDI 映射设置 <span style="font-weight:400;color:var(--text-4);font-size:11px">(点击「学习」后操作 MIDI 设备自动填入)</span></div>
+              <div style="display:grid;gap:8px">
+                <!-- GO -->
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:12px;min-width:80px">GO (完成+前进)</span>
+                  <select id="midi-go-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
+                    <option value="note">Note (音符)</option>
+                    <option value="cc">CC (控制变化)</option>
+                    <option value="pc">PC (程序变化)</option>
+                  </select>
+                  <input type="number" id="midi-go-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="60">
+                  <button id="midi-learn-go" class="btn btn-sm" style="padding:4px 8px;font-size:11px;white-space:nowrap;border:1px solid var(--ios-blue);background:transparent;color:var(--ios-blue);border-radius:6px;cursor:pointer" onclick="startMidiLearn('go')">🎯 学习</button>
+                </div>
+                <!-- Next -->
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:12px;min-width:80px">下一个节目</span>
+                  <select id="midi-next-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
+                    <option value="note">Note (音符)</option>
+                    <option value="cc">CC (控制变化)</option>
+                    <option value="pc">PC (程序变化)</option>
+                  </select>
+                  <input type="number" id="midi-next-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="62">
+                  <button id="midi-learn-next" class="btn btn-sm" style="padding:4px 8px;font-size:11px;white-space:nowrap;border:1px solid var(--ios-blue);background:transparent;color:var(--ios-blue);border-radius:6px;cursor:pointer" onclick="startMidiLearn('next')">🎯 学习</button>
+                </div>
+                <!-- Prev -->
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:12px;min-width:80px">上一个节目</span>
+                  <select id="midi-prev-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
+                    <option value="note">Note (音符)</option>
+                    <option value="cc">CC (控制变化)</option>
+                    <option value="pc">PC (程序变化)</option>
+                  </select>
+                  <input type="number" id="midi-prev-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="58">
+                  <button id="midi-learn-prev" class="btn btn-sm" style="padding:4px 8px;font-size:11px;white-space:nowrap;border:1px solid var(--ios-blue);background:transparent;color:var(--ios-blue);border-radius:6px;cursor:pointer" onclick="startMidiLearn('prev')">🎯 学习</button>
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:11px;color:var(--text-4)">
+                💡 默认: Note C3(60)=GO, D3(62)=Next, A#2(58)=Prev
+              </div>
+              <div id="midi-learn-status" style="margin-top:8px;font-size:12px;color:var(--ios-blue);font-weight:600;min-height:18px"></div>
+              <div id="midi-last-event" style="margin-top:4px;font-size:12px;color:var(--text-4);font-family:monospace;min-height:18px"></div>
             </div>
           </div>
 
-          <!-- MIDI 部分 -->
-          <div style="margin-bottom:20px">
-            <div style="font-size:14px;font-weight:700;margin-bottom:10px">🎹 MIDI 控制 (浏览器端)</div>
-            <div style="background:rgba(255,200,0,0.06);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
-              <div style="font-size:13px;color:var(--text-3);line-height:1.6">
-                <p style="margin:0 0 4px">通过 Web MIDI API 监听 MIDI 输入设备（需 Chrome/Edge 浏览器）。</p>
-                <p style="margin:0"><b>状态:</b> <span id="midi-status" style="color:var(--text-4)">未连接</span></p>
+          <!-- ===== Tab: 连接指南 ===== -->
+          <div id="osc-panel-guide" style="display:none;font-size:13px;line-height:1.7;color:var(--text-3)">
+            <!-- macOS -->
+            <div style="margin-bottom:16px">
+              <div style="font-size:14px;font-weight:700;margin-bottom:8px">🖥️ macOS</div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+                <div style="font-weight:600;margin-bottom:6px">QLab (推荐)</div>
+                <ol style="margin:0;padding-left:20px">
+                  <li>打开 QLab，新建一个 Workspace</li>
+                  <li>添加一个 Cue（任意类型）</li>
+                  <li>在右侧 Inspector 中找到 <b>Network</b> 选项卡</li>
+                  <li>设置 <b>Host</b>: <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">127.0.0.1</code>（本机）或服务器 IP</li>
+                  <li>设置 <b>Port</b>: <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">5300</code></li>
+                  <li>设置 <b>OSC Message</b>: <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">/stage/go</code></li>
+                  <li>点击 GO 或按空格键触发</li>
+                </ol>
+              </div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+                <div style="font-weight:600;margin-bottom:6px">TouchOSC (iPad/iPhone)</div>
+                <ol style="margin:0;padding-left:20px">
+                  <li>App Store 下载 <b>TouchOSC</b>（收费）或 <b>MRGC Lite OSC Editor</b>（免费）</li>
+                  <li>打开 TouchOSC → Settings → OSC</li>
+                  <li>设置 <b>Host</b>: 服务器局域网 IP（如 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">192.168.1.100</code>）</li>
+                  <li>设置 <b>Port</b>: <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">5300</code></li>
+                  <li>编辑 Layout，给按钮设置 OSC 地址：<code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">/stage/go</code>、<code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">/stage/next</code>、<code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">/stage/prev</code></li>
+                  <li>点击按钮即可控制</li>
+                </ol>
+              </div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px">
+                <div style="font-weight:600;margin-bottom:6px">OSCulator</div>
+                <ol style="margin:0;padding-left:20px">
+                  <li>下载 <b>OSCulator</b>（https://osculator.net）</li>
+                  <li>添加 OSC Event，设置地址为 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">/stage/go</code></li>
+                  <li>在 Quick Config 中将目标设为 <b>OSC</b> → Host: <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">127.0.0.1</code> Port: <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">5300</code></li>
+                  <li>可绑定 MIDI 设备、键盘快捷键、Wiimote 等触发</li>
+                </ol>
               </div>
             </div>
 
-            <!-- MIDI 设备选择 -->
-            <div style="margin-bottom:12px">
-              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">MIDI 输入设备</label>
-              <select id="midi-device-select" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px" onchange="onMidiDeviceChange()">
-                <option value="">-- 选择 MIDI 设备 --</option>
-              </select>
-              <button class="btn btn-sm btn-secondary" style="margin-top:6px" onclick="refreshMidiDevices()">🔄 刷新设备列表</button>
+            <!-- Windows -->
+            <div style="margin-bottom:16px">
+              <div style="font-size:14px;font-weight:700;margin-bottom:8px">🪟 Windows</div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+                <div style="font-weight:600;margin-bottom:6px">OSC Router / TouchOSC Bridge</div>
+                <ol style="margin:0;padding-left:20px">
+                  <li>安装 <b>TouchOSC Bridge</b>（免费，https://hexler.net/touchosc）或 <b>OSC Router</b></li>
+                  <li>配置发送目标 IP 为服务器 IP，端口 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">5300</code></li>
+                  <li>设置 OSC 地址为 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">/stage/go</code> 等</li>
+                </ol>
+              </div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+                <div style="font-weight:600;margin-bottom:6px"> ableton Live / Reaper (MIDI)</div>
+                <ol style="margin:0;padding-left:20px">
+                  <li>在 DAW 中设置 MIDI 输出到虚拟 MIDI 端口（如 loopMIDI）</li>
+                  <li>在浏览器 OSC/MIDI 设置中选择该虚拟 MIDI 端口</li>
+                  <li>在 DAW 中映射键盘/控制器到对应 Note/CC</li>
+                </ol>
+              </div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px">
+                <div style="font-weight:600;margin-bottom:6px">Python 发送 OSC (开发者)</div>
+                <pre style="margin:0;font-size:11px;overflow-x:auto;background:rgba(0,0,0,0.2);padding:8px;border-radius:6px">pip install python-osc
+
+from pythonosc.udp_client import SimpleUDPClient
+client = SimpleUDPClient("127.0.0.1", 5300)
+client.send_message("/stage/go", [])
+client.send_message("/stage/goto", [3])  # 跳转第4个节目</pre>
+              </div>
             </div>
 
-            <!-- MIDI 映射 -->
-            <div style="font-size:13px;font-weight:600;margin-bottom:8px">MIDI 映射设置</div>
-            <div style="display:grid;gap:8px">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:12px;min-width:80px">GO (完成+前进)</span>
-                <select id="midi-go-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
-                  <option value="note">Note (音符)</option>
-                  <option value="cc">CC (控制变化)</option>
-                  <option value="pc">PC (程序变化)</option>
-                </select>
-                <input type="number" id="midi-go-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="60">
+            <!-- iOS / Android -->
+            <div style="margin-bottom:16px">
+              <div style="font-size:14px;font-weight:700;margin-bottom:8px">📱 iOS / Android</div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+                <div style="font-weight:600;margin-bottom:6px">TouchOSC (iOS/Android)</div>
+                <ol style="margin:0;padding-left:20px">
+                  <li>App Store / Google Play 下载 <b>TouchOSC</b></li>
+                  <li>设置 → OSC → Host: 服务器 IP，Port: <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">5300</code></li>
+                  <li>编辑布局，按钮地址设为 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">/stage/go</code> 等</li>
+                </ol>
               </div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:12px;min-width:80px">下一个节目</span>
-                <select id="midi-next-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
-                  <option value="note">Note (音符)</option>
-                  <option value="cc">CC (控制变化)</option>
-                  <option value="pc">PC (程序变化)</option>
-                </select>
-                <input type="number" id="midi-next-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="62">
-              </div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:12px;min-width:80px">上一个节目</span>
-                <select id="midi-prev-type" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px">
-                  <option value="note">Note (音符)</option>
-                  <option value="cc">CC (控制变化)</option>
-                  <option value="pc">PC (程序变化)</option>
-                </select>
-                <input type="number" id="midi-prev-val" placeholder="值" style="width:60px;padding:4px;border-radius:6px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:12px" value="58">
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px">
+                <div style="font-weight:600;margin-bottom:6px">开源OSC (Android)</div>
+                <ol style="margin:0;padding-left:20px">
+                  <li>Google Play 下载 <b>OSC Controller</b> 或 <b>andOSC</b></li>
+                  <li>设置目标 IP 和端口 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">5300</code></li>
+                  <li>添加按钮，地址设为 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">/stage/go</code> 等</li>
+                </ol>
               </div>
             </div>
-            <div style="margin-top:8px;font-size:11px;color:var(--text-4)">
-              💡 默认: Note C3=GO, D3=Next, A#2=Prev (可通过 MIDI 键盘脚踏板等触发)
+
+            <!-- MIDI 硬件 -->
+            <div style="margin-bottom:16px">
+              <div style="font-size:14px;font-weight:700;margin-bottom:8px">🎹 MIDI 硬件设备</div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+                <div style="font-weight:600;margin-bottom:6px">MIDI 键盘 / 脚踏板 / 控制器</div>
+                <ol style="margin:0;padding-left:20px">
+                  <li>用 USB 线连接 MIDI 设备到电脑</li>
+                  <li>用 Chrome 或 Edge 打开舞台流程表控制端</li>
+                  <li>点击顶栏 🎹 按钮打开 OSC/MIDI 设置</li>
+                  <li>在「MIDI 输入设备」下拉框中选择你的设备</li>
+                  <li>点击「🎯 学习」按钮，然后按下 MIDI 设备上的按键/踏板</li>
+                  <li>系统自动识别 Note/CC/PC 类型并填入映射值</li>
+                  <li>点击「💾 保存设置」</li>
+                </ol>
+                <div style="margin-top:8px;font-size:12px;color:var(--text-4)">
+                  💡 支持: USB-MIDI 键盘、MIDI 脚踏板、AKAI LPD8、Korg nanoKONTROL、Behringer FCB1010 等
+                </div>
+              </div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px">
+                <div style="font-weight:600;margin-bottom:6px">虚拟 MIDI 端口（软件桥接）</div>
+                <ul style="margin:0;padding-left:20px">
+                  <li><b>macOS:</b> 安装 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">Audio MIDI Setup</code> → 打开 MIDI Studio → IAC Driver（系统自带）</li>
+                  <li><b>Windows:</b> 安装 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">loopMIDI</code>（免费）创建虚拟端口</li>
+                  <li><b>Linux:</b> 使用 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">a2jmidid</code> 桥接 ALSA MIDI 到 JACK</li>
+                </ul>
+              </div>
             </div>
-            <div id="midi-last-event" style="margin-top:8px;font-size:12px;color:var(--text-4);font-family:monospace;min-height:18px"></div>
+
+            <!-- 命令行测试 -->
+            <div style="margin-bottom:16px">
+              <div style="font-size:14px;font-weight:700;margin-bottom:8px">💻 命令行测试</div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+                <div style="font-weight:600;margin-bottom:6px">macOS / Linux (sendosc)</div>
+                <pre style="margin:0;font-size:11px;overflow-x:auto;background:rgba(0,0,0,0.2);padding:8px;border-radius:6px">brew install sendosc   # macOS
+
+sendosc 127.0.0.1 5300 /stage/go
+sendosc 127.0.0.1 5300 /stage/next
+sendosc 127.0.0.1 5300 /stage/prev
+sendosc 127.0.0.1 5300 /stage/goto i 2</pre>
+              </div>
+              <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:12px">
+                <div style="font-weight:600;margin-bottom:6px">Node.js (osc-min)</div>
+                <pre style="margin:0;font-size:11px;overflow-x:auto;background:rgba(0,0,0,0.2);padding:8px;border-radius:6px">npm install osc-min
+
+const osc = require("osc-min");
+const dgram = require("dgram");
+const buf = osc.toBuffer({ address: "/stage/go", args: [] });
+dgram.createSocket("udp4").send(buf, 5300, "127.0.0.1");</pre>
+              </div>
+            </div>
+
+            <!-- 注意事项 -->
+            <div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:12px;margin-bottom:12px">
+              <div style="font-weight:600;margin-bottom:6px">⚠️ 注意事项</div>
+              <ul style="margin:0;padding-left:20px;font-size:12px">
+                <li>OSC 需要服务器和发送端在同一局域网（或同一台机器）</li>
+                <li>OSC 默认端口 5300，可通过环境变量 <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">OSC_PORT</code> 修改，<code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">OSC_DISABLE=1</code> 禁用</li>
+                <li>MIDI 仅在浏览器端运行（Chrome/Edge），Safari/Firefox 不支持 Web MIDI API</li>
+                <li>MIDI 设置保存在浏览器 localStorage 中，不同设备/浏览器需分别配置</li>
+                <li>防火墙需放行 UDP 5300 端口（OSC）</li>
+              </ul>
+            </div>
           </div>
 
           <div class="modal-actions">
@@ -3242,151 +3416,104 @@ try {
   if (savedMidi) midiSettings = JSON.parse(savedMidi);
 } catch(e) {}
 
-window.openOscMidiPanel = function() {
-  var m = document.getElementById('modal-osc-midi');
-  if (!m) return;
-  m.classList.remove('hidden');
-  // 更新 OSC 端口显示
-  refreshOscInfo();
-  // 初始化 MIDI
-  initWebMidi();
-  // 恢复设置到 UI
-  restoreMidiSettingsUI();
-};
-
-function refreshOscInfo() {
-  // 从 server-info API 获取 OSC 端口
-  fetch('/api/server-info').then(function(r) { return r.json(); }).then(function(info) {
-    var portEl = document.getElementById('osc-port-display');
-    var statusEl = document.getElementById('osc-status');
-    if (info.oscPort) {
-      if (portEl) portEl.textContent = info.oscPort;
-      if (statusEl) { statusEl.textContent = '运行中'; statusEl.style.color = '#4ade80'; }
-    } else {
-      if (portEl) portEl.textContent = '已禁用';
-      if (statusEl) { statusEl.textContent = '已禁用'; statusEl.style.color = '#f87171'; }
-    }
-  }).catch(function() {});
-}
-
-function initWebMidi() {
-  if (!navigator.requestMIDIAccess) {
-    var st = document.getElementById('midi-status');
-    if (st) { st.textContent = '浏览器不支持 Web MIDI (请使用 Chrome/Edge)'; st.style.color = '#f87171'; }
-    return;
-  }
-  if (midiAccess) { refreshMidiDevices(); return; }
-  navigator.requestMIDIAccess({ sysex: false }).then(function(access) {
-    midiAccess = access;
-    var st = document.getElementById('midi-status');
-    if (st) { st.textContent = '已连接'; st.style.color = '#4ade80'; }
-    refreshMidiDevices();
-    // 设备变化时自动刷新
-    access.onstatechange = function() { refreshMidiDevices(); };
-  }).catch(function(err) {
-    var st = document.getElementById('midi-status');
-    if (st) { st.textContent = '连接失败: ' + err.message; st.style.color = '#f87171'; }
-  });
-}
-
-window.refreshMidiDevices = function() {
-  var select = document.getElementById('midi-device-select');
-  if (!select || !midiAccess) return;
-  // 保存当前选择
-  var prevVal = select.value || midiSettings.deviceId;
-  select.innerHTML = '<option value="">-- 选择 MIDI 设备 --</option>';
-  var inputs = midiAccess.inputs;
-  inputs.forEach(function(input) {
-    var opt = document.createElement('option');
-    opt.value = input.id;
-    opt.textContent = input.name + (input.manufacturer ? ' (' + input.manufacturer + ')' : '');
-    if (prevVal === input.id) opt.selected = true;
-    select.appendChild(opt);
-  });
-  // 自动恢复之前选择的设备
-  if (midiSettings.deviceId && !prevVal) {
-    select.value = midiSettings.deviceId;
-    onMidiDeviceChange();
-  }
-};
-
-window.onMidiDeviceChange = function() {
-  var select = document.getElementById('midi-device-select');
-  if (!select) return;
-  var deviceId = select.value;
-  // 断开之前的设备
-  if (midiInput) {
-    midiInput.onmidimessage = null;
-    midiInput = null;
-  }
-  // 连接新设备
-  if (deviceId && midiAccess) {
-    midiInput = midiAccess.inputs.get(deviceId);
-    if (midiInput) {
-      midiInput.onmidimessage = handleMidiMessage;
-      midiSettings.deviceId = deviceId;
-      var st = document.getElementById('midi-status');
-      if (st) { st.textContent = '已连接: ' + midiInput.name; st.style.color = '#4ade80'; }
-    }
+// ---------- Tab 切换 ----------
+window.switchOscTab = function(tab) {
+  var settings = document.getElementById('osc-panel-settings');
+  var guide = document.getElementById('osc-panel-guide');
+  var btnS = document.getElementById('osc-tab-settings');
+  var btnG = document.getElementById('osc-tab-guide');
+  if (tab === 'settings') {
+    if (settings) settings.style.display = '';
+    if (guide) guide.style.display = 'none';
+    if (btnS) { btnS.style.color = 'var(--ios-blue)'; btnS.style.borderBottom = '2px solid var(--ios-blue)'; }
+    if (btnG) { btnG.style.color = 'var(--text-4)'; btnG.style.borderBottom = '2px solid transparent'; }
   } else {
-    midiSettings.deviceId = '';
+    if (settings) settings.style.display = 'none';
+    if (guide) guide.style.display = '';
+    if (btnS) { btnS.style.color = 'var(--text-4)'; btnS.style.borderBottom = '2px solid transparent'; }
+    if (btnG) { btnG.style.color = 'var(--ios-blue)'; btnG.style.borderBottom = '2px solid var(--ios-blue)'; }
   }
 };
 
-function handleMidiMessage(event) {
-  if (!event.data || event.data.length < 2) return;
-  var status = event.data[0];
-  var data1 = event.data[1];
-  var data2 = event.data.length > 2 ? event.data[2] : 0;
-  var msgType = '';
-  var val = -1;
-  // Note On (0x90-0x9F)
-  if (status >= 0x90 && status <= 0x9F && data2 > 0) {
-    msgType = 'note'; val = data1;
+// ---------- OSC 测试 ----------
+window.oscTest = function(action) {
+  var resultEl = document.getElementById('osc-test-result');
+  if (resultEl) { resultEl.textContent = '正在发送 ' + action + '...'; resultEl.style.color = 'var(--ios-blue)'; }
+  // 通过 WebSocket 发送命令（与 OSC 效果相同）
+  var msg = { type: 'advance', role: 'control' };
+  if (action === 'next') msg = { type: 'next', role: 'control' };
+  else if (action === 'prev') msg = { type: 'prev', role: 'control' };
+  try {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(msg));
+      if (resultEl) { resultEl.textContent = '✅ 已发送 /stage/' + action + ' (通过 WebSocket)'; resultEl.style.color = '#4ade80'; }
+    } else {
+      if (resultEl) { resultEl.textContent = '❌ WebSocket 未连接'; resultEl.style.color = '#f87171'; }
+    }
+  } catch(e) {
+    if (resultEl) { resultEl.textContent = '❌ 发送失败: ' + e.message; resultEl.style.color = '#f87171'; }
   }
-  // CC (0xB0-0xBF)
-  else if (status >= 0xB0 && status <= 0xBF) {
-    msgType = 'cc'; val = data1;
-  }
-  // Program Change (0xC0-0xCF)
-  else if (status >= 0xC0 && status <= 0xCF) {
-    msgType = 'pc'; val = data1;
-  }
-  if (val < 0) return;
-  // 显示最后事件
-  var eventEl = document.getElementById('midi-last-event');
-  if (eventEl) {
-    eventEl.textContent = '最后事件: ' + msgType.toUpperCase() + ' ' + val + (msgType === 'note' ? ' (vel:' + data2 + ')' : '');
-  }
-  // 检查映射
-  if (msgType === midiSettings.go.type && val === midiSettings.go.val) {
-    navProgram('go');
-  } else if (msgType === midiSettings.next.type && val === midiSettings.next.val) {
-    navProgram('next');
-  } else if (msgType === midiSettings.prev.type && val === midiSettings.prev.val) {
-    navProgram('prev');
-  }
-}
+  // 3秒后清除
+  setTimeout(function() {
+    if (resultEl) resultEl.textContent = '';
+  }, 3000);
+};
 
-function restoreMidiSettingsUI() {
-  var setVal = function(id, val) { var el = document.getElementById(id); if (el) el.value = val; };
-  setVal('midi-go-type', midiSettings.go.type);
-  setVal('midi-go-val', midiSettings.go.val);
-  setVal('midi-next-type', midiSettings.next.type);
-  setVal('midi-next-val', midiSettings.next.val);
-  setVal('midi-prev-type', midiSettings.prev.type);
-  setVal('midi-prev-val', midiSettings.prev.val);
-}
+// ---------- MIDI 学习模式 ----------
+var midiLearnTarget = null; // 'go' | 'next' | 'prev' | null
 
-window.saveOscMidiSetting = function() {
-  // 保存 MIDI 映射
-  midiSettings.go = { type: document.getElementById('midi-go-type').value, val: parseInt(document.getElementById('midi-go-val').value) || 0 };
-  midiSettings.next = { type: document.getElementById('midi-next-type').value, val: parseInt(document.getElementById('midi-next-val').value) || 0 };
-  midiSettings.prev = { type: document.getElementById('midi-prev-type').value, val: parseInt(document.getElementById('midi-prev-val').value) || 0 };
+window.startMidiLearn = function(target) {
+  midiLearnTarget = target;
+  var statusEl = document.getElementById('midi-learn-status');
+  if (statusEl) {
+    var labels = { go: 'GO (完成+前进)', next: '下一个节目', prev: '上一个节目' };
+    statusEl.textContent = '🎯 学习模式: 请操作 MIDI 设备的「' + labels[target] + '」按键...';
+  }
+  // 更新按钮样式
+  ['go', 'next', 'prev'].forEach(function(t) {
+    var btn = document.getElementById('midi-learn-' + t);
+    if (btn) {
+      if (t === target) {
+        btn.textContent = '🔴 学习中...';
+        btn.style.background = 'var(--ios-blue)';
+        btn.style.color = '#fff';
+      } else {
+        btn.textContent = '🎯 学习';
+        btn.style.background = 'transparent';
+        btn.style.color = 'var(--ios-blue)';
+      }
+    }
+  });
+};
+
+function applyMidiLearn(msgType, val) {
+  if (!midiLearnTarget) return false;
+  var target = midiLearnTarget;
+  midiLearnTarget = null;
+  // 更新 UI
+  var typeSelect = document.getElementById('midi-' + target + '-type');
+  var valInput = document.getElementById('midi-' + target + '-val');
+  if (typeSelect) typeSelect.value = msgType;
+  if (valInput) valInput.value = val;
+  // 更新设置
+  midiSettings[target] = { type: msgType, val: val };
   try { localStorage.setItem('midiSettings', JSON.stringify(midiSettings)); } catch(e) {}
-  showToast('OSC/MIDI 设置已保存');
-  closeModal('modal-osc-midi');
-};
+  // 恢复按钮
+  var btn = document.getElementById('midi-learn-' + target);
+  if (btn) {
+    btn.textContent = '🎯 学习';
+    btn.style.background = 'transparent';
+    btn.style.color = 'var(--ios-blue)';
+  }
+  var statusEl = document.getElementById('midi-learn-status');
+  if (statusEl) {
+    var labels = { go: 'GO', next: '下一个', prev: '上一个' };
+    statusEl.textContent = '✅ ' + labels[target] + ' 已映射: ' + msgType.toUpperCase() + ' ' + val;
+    statusEl.style.color = '#4ade80';
+    setTimeout(function() { if (statusEl) statusEl.textContent = ''; }, 3000);
+  }
+  return true;
+}
 
 // 页面加载后自动初始化 MIDI (如果之前已配置设备)
 try {
