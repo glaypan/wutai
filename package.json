@@ -1,6 +1,6 @@
 {
   "name": "stage-manager",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "舞台流程表 Web 应用 - WebSocket 实时同步",
   "main": "server.js",
   "scripts": {
