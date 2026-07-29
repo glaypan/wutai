@@ -11,3 +11,4 @@ downloads/stage-manager-*.sh
 
 # 分发包（通过 GitHub Release 发布）
 wutai-v*.zip
+downloads/*安装包*.zip

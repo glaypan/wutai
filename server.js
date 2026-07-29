@@ -519,11 +519,12 @@ function serveStatic(req, res) {
   if (urlPath === '/sw.js') {
     res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
     res.end([
-      "var CACHE='stage-manager-v1';",
+      "var CACHE='stage-manager-v2';",
       "self.addEventListener('install',function(e){self.skipWaiting();});",
-      "self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});",
+      "self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});",
       "self.addEventListener('fetch',function(e){",
       "  if(e.request.method!=='GET')return;",
+      "  if(e.request.url.indexOf('/tess/')!==-1){e.respondWith(fetch(e.request));return;}",
       "  e.respondWith(",
       "    caches.open(CACHE).then(function(cache){",
       "      return cache.match(e.request).then(function(cached){",
@@ -531,7 +532,7 @@ function serveStatic(req, res) {
       "          if(response.ok)cache.put(e.request,response.clone());",
       "          return response;",
       "        }).catch(function(){return cached;});",
-      "        return cached||fetchPromise;",
+      "        return fetchPromise;",
       "      });",
       "    })",
       "  );",
@@ -544,6 +545,29 @@ function serveStatic(req, res) {
   if (urlPath === '/icon.svg') {
     res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
     res.end('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#000"/><text x="256" y="340" font-size="280" text-anchor="middle" fill="#fff" font-family="sans-serif">舞</text></svg>');
+    return;
+  }
+
+  // /tess/ 静态文件服务（PDF.js + Tesseract OCR，从磁盘读取）
+  if (urlPath.indexOf('/tess/') === 0) {
+    var tessFile = urlPath.replace('/tess/', '');
+    // 防路径穿越
+    if (tessFile.indexOf('..') !== -1 || tessFile.indexOf('/') !== -1) {
+      res.writeHead(403); res.end('Forbidden'); return;
+    }
+    var tessPath = path.join(__dirname, 'tess', tessFile);
+    fs.readFile(tessPath, function(err, data) {
+      if (err) {
+        console.error('[tess] 文件未找到: ' + tessFile);
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('404 Not Found');
+        return;
+      }
+      var tessExt = path.extname(tessFile).toLowerCase();
+      var tessMime = MIME[tessExt] || 'application/octet-stream';
+      res.writeHead(200, { 'Content-Type': tessMime, 'Content-Length': data.length, 'Cache-Control': 'no-cache' });
+      res.end(data);
+    });
     return;
   }
 

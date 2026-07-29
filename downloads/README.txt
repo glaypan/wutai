@@ -1,5 +1,12 @@
-舞台流程表 v4.0 - 全平台安装包
+舞台流程表 v4.1 - 全平台安装包
 ============================================
+
+【更新内容】
+  - 修复 PDF.js 库未加载问题
+  - PDF.js 和 OCR 引擎完全内置，无需联网
+  - 启动时自动释放 OCR 数据文件到本地
+  - 脚本加载失败自动重试（最多3次）
+  - Service Worker 缓存更新（v2）
 
 【安装包列表】
   stage-manager-win.bat           Windows (x64)
@@ -59,6 +66,19 @@
   - 完全离线运行，无需互联网
   - 内嵌 PDF.js 解析库（支持文本型和图片型PDF）
   - 内嵌 Tesseract.js OCR 引擎（支持中英文识别）
+  - 首次启动自动释放 OCR 数据到 tess/ 目录
+  - 脚本加载失败自动重试
   - WebSocket 实时同步
+  - OSC 控制 (UDP 端口 5300)
+  - MIDI 控制 (Web MIDI API)
   - 端口冲突自动处理
   - PWA 可安装到手机桌面
+
+【OSC 控制】
+  地址: /stage/go, /stage/next, /stage/prev, /stage/goto <N>
+  端口: UDP 5300 (默认)
+  可在设置 → OSC/MIDI 中查看详细连接指南
+
+【MIDI 控制】
+  在设置 → OSC/MIDI 中开启 MIDI 学习
+  支持 MIDI 控制器、踏板、键盘等设备
