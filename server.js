@@ -4,7 +4,22 @@ const fs = require('fs');
 const path = require('path');
 const { WebSocketServer, WebSocket } = require('ws');
 
-const PORT = parseInt(process.env.PORT) || 3000;
+// ---------- 配置文件 ----------
+var CONFIG_FILE = path.join(__dirname, 'config.json');
+function loadConfig() {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+    }
+  } catch(e) { console.error('加载 config.json 失败:', e.message); }
+  return {};
+}
+function saveConfig(cfg) {
+  try { fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), 'utf-8'); } catch(e) { console.error('保存 config.json 失败:', e.message); }
+}
+var _config = loadConfig();
+
+const PORT = parseInt(process.env.PORT) || _config.port || 3000;
 const DATA_FILE = path.join(__dirname, 'show.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
@@ -325,7 +340,7 @@ function broadcastClientCount() {
 //   /stage/next   - 下一个节目
 //   /stage/prev   - 上一个节目
 //   /stage/goto N - 跳转到第 N 个节目 (N 为整数参数)
-var OSC_PORT = parseInt(process.env.OSC_PORT) || 5300;
+var OSC_PORT = parseInt(process.env.OSC_PORT) || _config.oscPort || 5300;
 var oscEnabled = process.env.OSC_DISABLE !== '1';
 
 // 最小化 OSC 消息解析器 (OSC 1.0 规范)
@@ -493,6 +508,33 @@ function serveStatic(req, res) {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs, oscPort: oscEnabled ? OSC_PORT : null }));
     return;
+  }
+
+  // API: 端口配置
+  if (urlPath === '/api/config') {
+    if (req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ port: _config.port || 3000, oscPort: _config.oscPort || 5300 }));
+      return;
+    }
+    if (req.method === 'POST') {
+      var body = '';
+      req.on('data', function(chunk) { body += chunk; });
+      req.on('end', function() {
+        try {
+          var cfg = JSON.parse(body);
+          if (cfg.port) _config.port = parseInt(cfg.port);
+          if (cfg.oscPort) _config.oscPort = parseInt(cfg.oscPort);
+          saveConfig(_config);
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: true, port: _config.port, oscPort: _config.oscPort }));
+        } catch(e) {
+          res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: false, error: e.message }));
+        }
+      });
+      return;
+    }
   }
 
   // PWA: manifest.json

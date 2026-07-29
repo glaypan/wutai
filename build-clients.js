@@ -190,8 +190,20 @@ function generateStandaloneServer(htmlContent, wsFiles, tessFiles) {
   lines.push('var HTML_CONTENT = Buffer.from(__HTML_B64, "base64").toString("utf-8");');
   lines.push('var { WebSocketServer, WebSocket } = require("ws");');
   lines.push('');
+  // ========== 配置文件 ==========
+  lines.push('// ========== 配置文件 ==========');
+  lines.push('var CONFIG_FILE = path.join(process.cwd(), "config.json");');
+  lines.push('function loadConfig() {');
+  lines.push('  try { if (fs.existsSync(CONFIG_FILE)) return JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8")); } catch(e) {}');
+  lines.push('  return {};');
+  lines.push('}');
+  lines.push('function saveConfig(cfg) {');
+  lines.push('  try { fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), "utf-8"); } catch(e) {}');
+  lines.push('}');
+  lines.push('var _config = loadConfig();');
+  lines.push('');
   // ========== 服务器配置 ==========
-  lines.push('var PORT = parseInt(process.env.PORT) || 3000;');
+  lines.push('var PORT = parseInt(process.env.PORT) || _config.port || 3000;');
   lines.push('');
   // ========== 获取局域网IP（过滤虚拟网卡）==========
   lines.push('var VIRTUAL_PREFIXES = ["172.16.","172.17.","172.18.","172.19.","172.20.","172.21.","172.22.","172.23.","172.24.","172.25.","172.26.","172.27.","172.28.","172.29.","172.30.","172.31.","10.147.","10.94.","169.254.","100.64.","100.65.","100.66.","100.67.","100.68.","100.69.","192.0.0.","198.18.","198.19."];');
@@ -402,7 +414,7 @@ function generateStandaloneServer(htmlContent, wsFiles, tessFiles) {
   lines.push('function broadcastClientCount() { broadcast({ type: "client_count", count: wss.clients.size }); }');
   lines.push('');
   // ========== OSC 控制 (UDP, 零依赖) ==========
-  lines.push('var OSC_PORT = parseInt(process.env.OSC_PORT) || 5300;');
+  lines.push('var OSC_PORT = parseInt(process.env.OSC_PORT) || _config.oscPort || 5300;');
   lines.push('var oscEnabled = process.env.OSC_DISABLE !== "1";');
   lines.push('function parseOscMessage(buf) {');
   lines.push('  try { var offset = 0; var addrEnd = buf.indexOf(0, offset);');
@@ -441,6 +453,32 @@ function generateStandaloneServer(htmlContent, wsFiles, tessFiles) {
   lines.push('    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });');
   lines.push('    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs, oscPort: oscEnabled ? OSC_PORT : null }));');
   lines.push('    return;');
+  lines.push('  }');
+  // API: 端口配置
+  lines.push('  if (urlPath === "/api/config") {');
+  lines.push('    if (req.method === "GET") {');
+  lines.push('      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });');
+  lines.push('      res.end(JSON.stringify({ port: _config.port || 3000, oscPort: _config.oscPort || 5300 }));');
+  lines.push('      return;');
+  lines.push('    }');
+  lines.push('    if (req.method === "POST") {');
+  lines.push('      var body = "";');
+  lines.push('      req.on("data", function(chunk) { body += chunk; });');
+  lines.push('      req.on("end", function() {');
+  lines.push('        try {');
+  lines.push('          var cfg = JSON.parse(body);');
+  lines.push('          if (cfg.port) _config.port = parseInt(cfg.port);');
+  lines.push('          if (cfg.oscPort) _config.oscPort = parseInt(cfg.oscPort);');
+  lines.push('          saveConfig(_config);');
+  lines.push('          res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });');
+  lines.push('          res.end(JSON.stringify({ ok: true, port: _config.port, oscPort: _config.oscPort }));');
+  lines.push('        } catch(e) {');
+  lines.push('          res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });');
+  lines.push('          res.end(JSON.stringify({ ok: false, error: e.message }));');
+  lines.push('        }');
+  lines.push('      });');
+  lines.push('      return;');
+  lines.push('    }');
   lines.push('  }');
   lines.push('  if (urlPath === "/" || urlPath === "/index.html") {');
   lines.push('    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });');
