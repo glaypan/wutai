@@ -21,10 +21,11 @@ console.log('══════════════════════�
 console.log('  舞台流程表 - 多文件 ZIP 安装包构建');
 console.log('═══════════════════════════════════════════════════\n');
 
-// ========== 1. 读取 HTML ==========
+// ========== 1. 读取 HTML（外部化：运行时从 app-source.html 读取） ==========
 var htmlContent = fs.readFileSync(path.join(WORKSPACE, '舞台流程表.html'), 'utf-8');
-var htmlB64 = Buffer.from(htmlContent).toString('base64');
 console.log('[1] HTML: ' + (htmlContent.length / 1024).toFixed(1) + ' KB');
+// v6.0.4+: 不再内嵌 __HTML_B64，直接复制 app-source.html 到输出目录
+fs.writeFileSync(path.join(OUTPUT_DIR, 'app-source.html'), htmlContent, 'utf-8');
 
 // ========== 2. 读取 ws 模块 ==========
 var wsFiles = {};
@@ -47,7 +48,7 @@ try {
 var wsJson = JSON.stringify(wsFiles);
 
 // ========== 3. 生成独立服务器 ==========
-var serverCode = generateStandaloneServer(htmlB64, wsJson);
+var serverCode = generateStandaloneServer(wsJson);
 fs.writeFileSync(path.join(OUTPUT_DIR, 'server-standalone.js'), serverCode, 'utf-8');
 console.log('[3] 独立服务器: ' + (serverCode.length / 1024).toFixed(1) + ' KB');
 
@@ -132,10 +133,10 @@ console.log('══════════════════════�
 
 
 // ========== 独立服务器生成 ==========
-function generateStandaloneServer(htmlB64, wsJson) {
+function generateStandaloneServer(wsJson) {
   var lines = [];
   lines.push('// stage-manager-standalone.js - 舞台流程表独立服务器');
-  lines.push('// 内嵌 HTML 和 ws 模块，tess 文件从同目录读取');
+  lines.push('// HTML 从同目录 app-source.html 读取，ws 模块内嵌，tess 文件从同目录读取');
   lines.push('');
   lines.push('var http = require("http");');
   lines.push('var fs = require("fs");');
@@ -143,11 +144,10 @@ function generateStandaloneServer(htmlB64, wsJson) {
   lines.push('var os = require("os");');
   lines.push('var dgram = require("dgram");');
   lines.push('');
-  // ========== 内嵌数据 ==========
-  lines.push('var __HTML_B64 = "' + htmlB64 + '";');
+  // ========== 外部化 HTML（v6.0.4+：运行时从 app-source.html 读取） ==========
   lines.push('var __WS_FILES = ' + wsJson + ';');
   lines.push('');
-  lines.push('var HTML_CONTENT = Buffer.from(__HTML_B64, "base64").toString("utf-8");');
+  lines.push('var HTML_CONTENT = fs.readFileSync(path.join(__dirname, "app-source.html"), "utf-8");');
   lines.push('');
   // ========== 写入 ws 模块 ==========
   lines.push('(function() {');
@@ -178,9 +178,16 @@ function generateStandaloneServer(htmlB64, wsJson) {
   lines.push('}');
   lines.push('var _config = loadConfig();');
   lines.push('');
+  // ========== 聚合入口页 HTML（内联，分发时无需额外文件） ==========
+  lines.push('var CLIENT_PORTAL_HTML = \'<!doctype html><meta charset="utf-8"><title>选择角色</title><style>body{font-family:sans-serif;background:#000;color:#fff;padding:24px;text-align:center}a{display:block;padding:16px;margin:8px auto;max-width:300px;background:#1c1c1e;border-radius:12px;color:#0a84ff;text-decoration:none;font-size:18px}a:hover{background:#2c2c2e}</style><h1>舞台流程表</h1><p>选择您的角色</p><a href="/?role=control">控制端</a><a href="/?role=director">导演端</a><a href="/?role=assistant">助理端</a><a href="/?role=backstage">幕后端</a><a href="/?role=screen">提示屏</a>\';');
+  lines.push('');
   lines.push('var PORT = parseInt(process.env.PORT) || _config.port || 3000;');
   lines.push('var OSC_PORT = parseInt(process.env.OSC_PORT) || _config.oscPort || 5300;');
   lines.push('var oscEnabled = process.env.OSC_DISABLE !== "1";');
+  lines.push('var CLIENT_PORT_ENV_OVERRIDE = !!process.env.CLIENT_PORT;');
+  lines.push('var CLIENT_PORT = parseInt(process.env.CLIENT_PORT) || _config.clientPort || _config.displayPort || 3002;');
+  lines.push('var actualClientPort = CLIENT_PORT;');
+  lines.push('if (CLIENT_PORT === PORT) { actualClientPort = PORT === 65535 ? 65534 : PORT + 1; console.warn("[!] clientPort 与主端口相同，自动调整为 " + actualClientPort); }');
   lines.push('');
   // ========== 获取局域网IP ==========
   lines.push('var VIRTUAL_PREFIXES = ["172.16.","172.17.","172.18.","172.19.","172.20.","172.21.","172.22.","172.23.","172.24.","172.25.","172.26.","172.27.","172.28.","172.29.","172.30.","172.31.","10.147.","10.94.","169.254.","100.64.","100.65.","100.66.","100.67.","100.68.","100.69.","192.0.0.","198.18.","198.19."];');
@@ -246,6 +253,10 @@ function generateStandaloneServer(htmlB64, wsJson) {
   // ========== HTTP + WebSocket ==========
   lines.push('var server = http.createServer(function(req, res) { serveStatic(req, res); });');
   lines.push('var wss = new WebSocketServer({ server });');
+  lines.push('var clientServer = http.createServer(function(req, res) { serveStatic(req, res, true); });');
+  lines.push('var clientWss = new WebSocketServer({ noServer: true, maxPayload: 1024 * 1024 });');
+  lines.push('clientServer.on("upgrade", function(req, socket, head) { clientWss.handleUpgrade(req, socket, head, function(ws) { clientWss.emit("connection", ws, req); }); });');
+  lines.push('clientWss.on("connection", function(ws) { sendTo(ws, { type: "full_state", state: state, clientCount: wss.clients.size + clientWss.clients.size }); broadcastClientCount(); ws.on("message", function(raw) { var msg; try { msg = JSON.parse(raw.toString()); } catch (e) { return; } handleMessage(ws, msg); }); ws.on("close", function() { broadcastClientCount(); }); });');
   lines.push('wss.on("connection", function(ws) {');
   lines.push('  sendTo(ws, { type: "full_state", state: state, clientCount: wss.clients.size });');
   lines.push('  broadcastClientCount();');
@@ -326,9 +337,9 @@ function generateStandaloneServer(htmlB64, wsJson) {
   lines.push('}');
   lines.push('function sendTo(ws, obj) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj)); }');
   lines.push('function sendError(ws, code, action) { sendTo(ws, { type: "error", code: code, action: action }); }');
-  lines.push('function broadcast(obj) { var data = JSON.stringify(obj); wss.clients.forEach(function(c) { if (c.readyState === WebSocket.OPEN) c.send(data); }); }');
-  lines.push('function broadcastFullState() { broadcast({ type: "full_state", state: state, clientCount: wss.clients.size }); }');
-  lines.push('function broadcastClientCount() { broadcast({ type: "client_count", count: wss.clients.size }); }');
+  lines.push('function broadcast(obj) { var data = JSON.stringify(obj); [wss, clientWss].forEach(function(s) { s.clients.forEach(function(c) { if (c.readyState === WebSocket.OPEN) c.send(data); }); }); }');
+  lines.push('function broadcastFullState() { broadcast({ type: "full_state", state: state, clientCount: wss.clients.size + clientWss.clients.size }); }');
+  lines.push('function broadcastClientCount() { broadcast({ type: "client_count", count: wss.clients.size + clientWss.clients.size }); }');
   lines.push('');
   // ========== OSC ==========
   lines.push('function parseOscMessage(buf) {');
@@ -373,19 +384,23 @@ function generateStandaloneServer(htmlB64, wsJson) {
   lines.push('');
   // ========== 静态文件服务 ==========
   lines.push('var MIME = { ".html":"text/html; charset=utf-8", ".js":"application/javascript; charset=utf-8", ".css":"text/css; charset=utf-8", ".json":"application/json; charset=utf-8", ".png":"image/png", ".svg":"image/svg+xml", ".gz":"application/gzip", ".wasm":"application/wasm" };');
-  lines.push('function serveStatic(req, res) {');
+  lines.push('function serveStatic(req, res, isClientPortal) {');
   lines.push('  var urlPath = decodeURIComponent((req.url || "/").split("?")[0]);');
+  lines.push('  if (isClientPortal && (urlPath === "/" || urlPath === "/index.html")) {');
+  lines.push('    var token = (req.url.split("?")[1] || "").split("token=")[1];');
+  lines.push('    if (!token) { res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }); res.end(CLIENT_PORTAL_HTML); return; }');
+  lines.push('  }');
   // API: server-info
   lines.push('  if (urlPath === "/api/server-info") {');
   lines.push('    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });');
-  lines.push('    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs, oscPort: oscEnabled ? OSC_PORT : null }));');
+  lines.push('    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs, oscPort: oscEnabled ? OSC_PORT : null, clientPort: actualClientPort, configuredClientPort: _config.clientPort, clientPortOverride: CLIENT_PORT_ENV_OVERRIDE }));');
   lines.push('    return;');
   lines.push('  }');
   // API: config
   lines.push('  if (urlPath === "/api/config") {');
   lines.push('    if (req.method === "GET") {');
   lines.push('      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });');
-  lines.push('      res.end(JSON.stringify({ port: _config.port || 3000, oscPort: _config.oscPort || 5300 }));');
+  lines.push('      res.end(JSON.stringify({ port: _config.port || 3000, oscPort: _config.oscPort || 5300, clientPort: _config.clientPort || 3002 }));');
   lines.push('      return;');
   lines.push('    }');
   lines.push('    if (req.method === "POST") {');
@@ -396,6 +411,7 @@ function generateStandaloneServer(htmlB64, wsJson) {
   lines.push('          var cfg = JSON.parse(body);');
   lines.push('          if (cfg.port) _config.port = parseInt(cfg.port);');
   lines.push('          if (cfg.oscPort) _config.oscPort = parseInt(cfg.oscPort);');
+  lines.push('          if (cfg.clientPort) _config.clientPort = parseInt(cfg.clientPort);');
   lines.push('          saveConfig(_config);');
   lines.push('          res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });');
   lines.push('          res.end(JSON.stringify({ ok: true, port: _config.port, oscPort: _config.oscPort }));');
@@ -469,12 +485,16 @@ function generateStandaloneServer(htmlB64, wsJson) {
   lines.push('  console.log("");');
   lines.push('  console.log("  本机访问:  http://localhost:" + actualPort);');
   lines.push('  if (localIPs.length > 0) { localIPs.forEach(function(ip) { console.log("  局域网访问: http://" + ip + ":" + actualPort); }); }');
+  lines.push('  console.log("  聚合入口:  http://" + primaryIP + ":" + (actualClientPort || CLIENT_PORT));');
   lines.push('  if (oscEnabled) console.log("  OSC 监听:  UDP " + OSC_PORT);');
   lines.push('  console.log("");');
   lines.push('  console.log("  按 Ctrl+C 停止服务器");');
   lines.push('  console.log("═══════════════════════════════════════════════════");');
   lines.push('});');
   lines.push('server.listen(tryingPort);');
+  lines.push('clientServer.on("error", function(e) { console.error("[!] clientServer 错误: " + e.message); });');
+  lines.push('clientServer.on("listening", function() { actualClientPort = clientServer.address().port; });');
+  lines.push('clientServer.listen(actualClientPort);');
   lines.push('');
   return lines.join('\n');
 }

@@ -28,7 +28,7 @@ function freePort() {
 
 function testState() {
   return {
-    showName: 'v6.0.3 浏览器测试',
+    showName: 'v6.0.4 浏览器测试',
     mode: 'setup',
     currentProgramIndex: 0,
     version: 5,
@@ -76,7 +76,7 @@ async function waitForHttp(url, child) {
 }
 
 async function startIsolatedServer() {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-manager-v603-'));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-manager-v604-'));
   for (const name of ['server-standalone.js', 'stage-core.js', 'app-source.html', 'tess', 'vendor', 'media']) {
     const source = path.join(ROOT, name);
     if (fs.existsSync(source)) fs.cpSync(source, path.join(directory, name), { recursive: true });
@@ -147,7 +147,7 @@ async function waitForApplication(page) {
   await page.waitForFunction(() => wsMode === true && localState && localState.programs && localState.programs.length === 2);
 }
 
-test('v6.0.3 browser workflows, permissions, OCR resources, and responsive layouts', { timeout: 120000 }, async () => {
+test('v6.0.4 browser workflows, permissions, OCR resources, and responsive layouts', { timeout: 120000 }, async () => {
   let fixture;
   let browser;
   try {

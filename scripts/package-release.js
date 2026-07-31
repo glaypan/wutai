@@ -9,8 +9,8 @@ const ROOT = path.resolve(__dirname, '..');
 const outFlag = process.argv.indexOf('--out');
 if (outFlag < 0 || !process.argv[outFlag + 1]) throw new Error('usage: node scripts/package-release.js --out <directory>');
 const OUT = path.resolve(process.argv[outFlag + 1]);
-const STAGE = path.join(OUT, 'stage-manager-v6.0.3');
-const FILES = ['app-source.html', 'server-standalone.js', 'stage-core.js', 'README.md', 'RELEASE-v6.0.3.md', '使用说明.txt', '启动-Windows.bat', '启动-macOS-Intel.command', '启动-macOS-ARM.command', '启动-Linux.sh', '启动-OpenWrt.sh', '启动-Termux.sh'];
+const STAGE = path.join(OUT, 'stage-manager-v6.0.4');
+const FILES = ['app-source.html', 'server-standalone.js', 'stage-core.js', 'lib', 'README.md', 'RELEASE-v6.0.4.md', '使用说明.txt', '启动-Windows.bat', '启动-macOS-Intel.command', '启动-macOS-ARM.command', '启动-Linux.sh', '启动-OpenWrt.sh', '启动-Termux.sh'];
 const RESOURCE_FILES = {
   tess: ['pdf.min.js', 'pdf.worker.min.js', 'tesseract.min.js', 'worker.min.js', 'tesseract-core-lstm.wasm.js', 'tesseract-core-simd-lstm.wasm.js', 'tesseract-core-simd.wasm.js', 'tesseract-core.wasm.js', 'chi_sim.traineddata.gz', 'eng.traineddata.gz'],
   vendor: ['FileSaver.min.js', 'html2pdf.bundle.min.js', 'mammoth.browser.min.js'],
@@ -41,8 +41,8 @@ for (const file of walk(STAGE)) {
   if (FORBIDDEN.test(relative)) throw new Error(`forbidden release entry: ${relative}`);
 }
 
-const zip = path.join(OUT, 'stage-manager-v6.0.3-all-platforms.zip');
-const tgz = path.join(OUT, 'stage-manager-v6.0.3-all-platforms.tar.gz');
+const zip = path.join(OUT, 'stage-manager-v6.0.4-all-platforms.zip');
+const tgz = path.join(OUT, 'stage-manager-v6.0.4-all-platforms.tar.gz');
 for (const file of [zip, tgz, `${zip}.sha256`, `${tgz}.sha256`, path.join(OUT, 'SHA256SUMS.txt')]) fs.rmSync(file, { force: true });
 if (process.platform === 'win32') {
   const q = value => value.replace(/'/g, "''");

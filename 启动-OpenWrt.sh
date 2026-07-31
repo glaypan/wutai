@@ -16,5 +16,11 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! node -e 'process.exit(Number(process.versions.node.split(".")[0])>=16?0:1)' 2>/dev/null; then
+  echo "[ERROR] Node.js 16 or higher is required."
+  echo "Current version: $(node -v 2>/dev/null || echo unknown)"
+  exit 1
+fi
+
 echo "Starting Stage Manager..."
 AUTO_OPEN=0 node "$SERVER_JS"

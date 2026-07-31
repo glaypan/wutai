@@ -51,3 +51,24 @@ test('gzip OCR resources are served with gzip content encoding', () => {
   const server = source();
   assert.match(server, /if\s*\(tessExt\s*===\s*["']\.gz["']\)\s*tessHeaders\[["']Content-Encoding["']\]\s*=\s*["']gzip["']/);
 });
+
+test('clientPort 聚合入口端口架构', () => {
+  const server = source();
+  // clientPort 配置与服务器
+  assert.match(server, /clientPort/, 'server-standalone.js must reference clientPort');
+  assert.match(server, /clientServer/, 'server-standalone.js must define clientServer');
+  assert.match(server, /clientWss/, 'server-standalone.js must define clientWss');
+  assert.match(server, /CLIENT_PORTAL_HTML/, 'server-standalone.js must use CLIENT_PORTAL_HTML for aggregation portal');
+  assert.match(server, /require\(["']\.\/lib\/client-portal-html["']\)/, 'server-standalone.js must require lib/client-portal-html');
+  // 移除的 display 代码
+  assert.doesNotMatch(server, /displayServer/, 'server-standalone.js must not contain displayServer');
+  assert.doesNotMatch(server, /displayWss/, 'server-standalone.js must not contain displayWss');
+  assert.doesNotMatch(server, /DISPLAY_PORT\b/, 'server-standalone.js must not contain DISPLAY_PORT');
+  // /api/server-info 与 /api/config 含 clientPort 字段
+  assert.match(server, /clientPort:\s*actualClientPort/, '/api/server-info must return clientPort');
+  assert.match(server, /clientPortOverride/, '/api/server-info must return clientPortOverride');
+  // 主端口非控制端角色重定向到 clientPort
+  assert.match(server, /302/, 'server-standalone.js must use 302 redirect for port isolation');
+  // 启动日志含聚合入口
+  assert.match(server, /clientServer\.listen/, 'server-standalone.js must listen on clientServer');
+});

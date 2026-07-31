@@ -3,15 +3,15 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RUNTIME_PARENT="$SCRIPT_DIR/.runtime"
-NODE_HOME="$RUNTIME_PARENT/node-v16.20.2-darwin-x64"
+NODE_HOME="$RUNTIME_PARENT/node-v20.18.1-darwin-x64"
 NODE_BIN="$NODE_HOME/bin/node"
-NODE_ARCHIVE="$SCRIPT_DIR/runtime/node-v16.20.2-darwin-x64.tar.gz"
-NODE_SHA256="d7a46eaf2b57ffddeda16ece0d887feb2e31a91ad33f8774da553da0249dc4a6"
+NODE_ARCHIVE="$SCRIPT_DIR/runtime/node-v20.18.1-darwin-x64.tar.gz"
+NODE_SHA256="c5497dd17c8875b53712edaf99052f961013cedc203964583fc0cfc0aaf93581"
 
 cd "$SCRIPT_DIR"
 
 echo "═══════════════════════════════════════════════════"
-echo "  舞台流程表 - macOS 10.14.6 Intel"
+echo "  舞台流程表 - macOS Intel"
 echo "═══════════════════════════════════════════════════"
 
 if [ "$(uname -s)" != "Darwin" ] || [ "$(uname -m)" != "x86_64" ]; then
@@ -25,9 +25,9 @@ if [ ! -x "$NODE_BIN" ] && command -v node >/dev/null 2>&1 && node -e 'var m=Num
 fi
 
 if [ ! -x "$NODE_BIN" ]; then
-  echo "[+] 首次运行，正在准备内置 Node.js 16.20.2..."
+  echo "[+] 首次运行，正在准备内置 Node.js 20.18.1..."
   if [ ! -f "$NODE_ARCHIVE" ]; then
-    echo "[错误] 缺少运行环境文件: runtime/node-v16.20.2-darwin-x64.tar.gz"
+    echo "[错误] 缺少运行环境文件: runtime/node-v20.18.1-darwin-x64.tar.gz"
     read -r -p "按回车键退出..."
     exit 1
   fi
@@ -51,7 +51,7 @@ if [ ! -x "$NODE_BIN" ]; then
   if [ -e "$NODE_HOME" ]; then
     mv "$NODE_HOME" "$NODE_HOME.incomplete.$(date +%Y%m%d%H%M%S)"
   fi
-  mv "$RUNTIME_TEMP/node-v16.20.2-darwin-x64" "$NODE_HOME"
+  mv "$RUNTIME_TEMP/node-v20.18.1-darwin-x64" "$NODE_HOME"
   chmod +x "$NODE_BIN"
   trap - EXIT
   rm -rf -- "$RUNTIME_TEMP"

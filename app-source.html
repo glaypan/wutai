@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#000000">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icon.svg">
-  <title>舞台流程表 v6.0.3</title>
+<title>舞台流程表 v6.0.4</title>
 <!-- PDF.js + Tesseract.js（从服务端加载，完全离线，带重试机制） -->
 <script>
 // 动态加载脚本，支持重试
@@ -155,8 +155,8 @@ var TESS_CONFIG = {
   --border: rgba(255,255,255,0.10);
   --text: #f2f2f7;
   --text-1: #e2e8f0;
-  --text-2: #98989f;
-  --text-3: #64748b;
+  --text-2: #b0b0b8;
+  --text-3: #828a98;
   --primary: #0a84ff;
   --ios-blue: #0a84ff;
   --ios-green: #30d158;
@@ -165,6 +165,15 @@ var TESS_CONFIG = {
   --ios-purple: #bf5af2;
   --glass-blur: none;
   --radius: 8px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 }
 :root[data-theme="light"] {
   --bg-base: #f3f4f6;
@@ -179,6 +188,15 @@ var TESS_CONFIG = {
   --text-3: #6b7280;
   --primary: #0866c6;
   --ios-blue: #0866c6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 }
 * {
   box-sizing: border-box;
@@ -541,6 +559,8 @@ body.midi-bridge-mode > *:not(#midi-bridge-view) {display:none!important;}
   border: 1px solid var(--stroke);
   padding:20px;
   animation: viewFadeIn 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  will-change: transform, opacity;
 }
 .edit-panel-header {
   display:flex;
@@ -598,6 +618,8 @@ body.midi-bridge-mode > *:not(#midi-bridge-view) {display:none!important;}
   margin-right: env(safe-area-inset-right);
   box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
   animation: modalSlideUp 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  will-change: transform, opacity;
 }
 .modal-wide {
   width:min(96%,680px);
@@ -1339,10 +1361,10 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
 :root[data-theme="light"] .console-section { background:#fff; }
 :root[data-theme="light"] .header .icon-btn, :root[data-theme="light"] .header .mode-toggle-btn { color:var(--text); }
 .icon-svg { width:18px; height:18px; display:block; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-.toolbar-groups { display:flex; align-items:stretch; gap:8px; min-width:0; flex:1 1 auto; overflow-x:auto; }
-.toolbar-group { display:flex; align-items:center; gap:4px; padding:4px; border:1px solid var(--stroke); border-radius:8px; background:var(--bg-1); min-width:max-content; }
+.toolbar-groups { display:flex; align-items:stretch; gap:var(--space-sm); min-width:0; flex:1 1 auto; overflow-x:auto; }
+.toolbar-group { display:flex; align-items:center; gap:var(--space-xs); padding:var(--space-xs); border:1px solid var(--stroke); border-radius:var(--radius-lg); background:var(--bg-1); min-width:max-content; }
 .toolbar-group-label { color:var(--text-3); font-size:11px; writing-mode:vertical-rl; text-orientation:mixed; padding:2px 3px; }
-.toolbar-command { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:0 10px; border:1px solid transparent; border-radius:6px; background:transparent; color:var(--text); cursor:pointer; white-space:nowrap; }
+.toolbar-command { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:0 10px; border:1px solid transparent; border-radius:var(--radius-md); background:transparent; color:var(--text); cursor:pointer; white-space:nowrap; }
 .toolbar-command:hover { background:var(--bg-elev-2); border-color:var(--stroke); }
 .toolbar-command .icon-svg { width:16px; height:16px; }
 .header .icon-btn { display:inline-flex; align-items:center; justify-content:center; }
@@ -1353,8 +1375,8 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
   .header-left, .header-center { width:100%; margin:4px 0; }
   .toolbar-groups { display:none; }
   .header-right { display:none; }
-  .mobile-bottom-nav { position:fixed; display:grid; grid-template-columns:repeat(4,1fr); gap:4px; left:0; right:0; bottom:0; z-index:1200; min-height:60px; padding:6px 8px calc(6px + env(safe-area-inset-bottom)); background:var(--bg-elev); border-top:1px solid var(--stroke); }
-  .mobile-bottom-nav button { min-width:44px; min-height:44px; border:1px solid transparent; border-radius:6px; background:transparent; color:var(--text-2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:11px; cursor:pointer; }
+  .mobile-bottom-nav { position:fixed; display:grid; grid-template-columns:repeat(4,1fr); gap:var(--space-xs); left:0; right:0; bottom:0; z-index:1200; min-height:60px; padding:6px 8px calc(6px + env(safe-area-inset-bottom)); background:var(--bg-elev); border-top:1px solid var(--stroke); }
+  .mobile-bottom-nav button { min-width:44px; min-height:44px; border:1px solid transparent; border-radius:var(--radius-md); background:transparent; color:var(--text-2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:11px; cursor:pointer; }
   .mobile-bottom-nav button.is-active { color:var(--primary); background:var(--bg-elev-2); border-color:var(--stroke); }
   .mobile-bottom-nav .icon-svg { width:18px; height:18px; }
   .edit-panel, .modal-box { position:fixed; inset:0; width:100%; max-width:none; max-height:none; height:100%; margin:0; border-radius:0; padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(84px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left)); overflow-y:auto; }
@@ -1825,8 +1847,8 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
                     <input type="number" id="config-server-port" placeholder="3000" min="1" max="65535" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px;font-family:monospace">
                   </div>
                   <div style="flex:1;min-width:140px">
-                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">提示屏端口 (HTTP/WS)</label>
-                    <input type="number" id="config-display-port" placeholder="3001" min="1" max="65535" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px;font-family:monospace">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">客户端入口端口 (HTTP/WS)</label>
+                    <input type="number" id="client-port-input" placeholder="3002" min="1" max="65535" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px;font-family:monospace">
                   </div>
                   <div style="flex:1;min-width:140px">
                     <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">OSC 端口 (UDP)</label>
@@ -1858,30 +1880,35 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
                     <input type="password" id="password-input-control" autocomplete="new-password" placeholder="输入新密码" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px">
                     <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--text-3)"><input type="checkbox" id="password-clear-control"> 清除密码</label>
                     <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px" onclick="copyPasswordLink('control')">复制密码链接</button>
+                    <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px;margin-left:4px" onclick="showRoleQR('control')">显示二维码</button>
                   </div>
                   <div class="password-role-row" data-role="director" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border)">
                     <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">导演端 <span id="password-status-director" style="font-weight:500;color:var(--text-4)">读取中</span></label>
                     <input type="password" id="password-input-director" autocomplete="new-password" placeholder="输入新密码" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px">
                     <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--text-3)"><input type="checkbox" id="password-clear-director"> 清除密码</label>
                     <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px" onclick="copyPasswordLink('director')">复制密码链接</button>
+                    <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px;margin-left:4px" onclick="showRoleQR('director')">显示二维码</button>
                   </div>
                   <div class="password-role-row" data-role="assistant" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border)">
                     <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">助理端 <span id="password-status-assistant" style="font-weight:500;color:var(--text-4)">读取中</span></label>
                     <input type="password" id="password-input-assistant" autocomplete="new-password" placeholder="输入新密码" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px">
                     <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--text-3)"><input type="checkbox" id="password-clear-assistant"> 清除密码</label>
                     <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px" onclick="copyPasswordLink('assistant')">复制密码链接</button>
+                    <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px;margin-left:4px" onclick="showRoleQR('assistant')">显示二维码</button>
                   </div>
                   <div class="password-role-row" data-role="backstage" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border)">
                     <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">幕后端 <span id="password-status-backstage" style="font-weight:500;color:var(--text-4)">读取中</span></label>
                     <input type="password" id="password-input-backstage" autocomplete="new-password" placeholder="输入新密码" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px">
                     <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--text-3)"><input type="checkbox" id="password-clear-backstage"> 清除密码</label>
                     <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px" onclick="copyPasswordLink('backstage')">复制密码链接</button>
+                    <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px;margin-left:4px" onclick="showRoleQR('backstage')">显示二维码</button>
                   </div>
                   <div class="password-role-row" data-role="screen" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border)">
                     <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">提示屏 <span id="password-status-screen" style="font-weight:500;color:var(--text-4)">读取中</span></label>
                     <input type="password" id="password-input-screen" autocomplete="new-password" placeholder="输入新密码" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px">
                     <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--text-3)"><input type="checkbox" id="password-clear-screen"> 清除密码</label>
                     <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px" onclick="copyPasswordLink('screen')">复制密码链接</button>
+                    <button class="btn btn-sm" style="margin-top:6px;padding:4px 10px;font-size:12px;margin-left:4px" onclick="showRoleQR('screen')">显示二维码</button>
                   </div>
                 </div>
                 <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
@@ -4026,7 +4053,9 @@ window.switchRole = function(newRole) {
     .catch(function(e) { showToast(e.message || '无法切换角色'); });
 };
 window.openRoleSwitcher = function() {
-  document.getElementById('modal-role-switch').classList.remove('hidden');
+  var host = cachedServerIP || location.hostname || 'localhost';
+  var port = cachedClientPort || 3002;
+  window.open('http://' + host + ':' + port + '/', '_blank');
 };
 
 // ---------- 全局渲染入口 ----------
@@ -4929,14 +4958,14 @@ function renderPortRuntimeStatus(cfg) {
   var el = document.getElementById('port-runtime-status');
   if (!el || !cfg) return;
   var actualMain = cfg.actualPort || cfg.port || cachedServerPort || 3000;
-  var actualDisplay = cfg.actualDisplayPort || cfg.displayPort || cachedDisplayPort || 3001;
+  var actualClient = cfg.actualClientPort || cfg.clientPort || cachedClientPort || 3002;
   var actualOsc = cfg.actualOscEnabled === false || cfg.actualOscPort === null ? '关' : (cfg.actualOscPort || cfg.oscPort || 5300);
   var configuredMain = cfg.port || cfg.configuredPort || 3000;
-  var configuredDisplay = cfg.displayPort || cfg.configuredDisplayPort || 3001;
+  var configuredClient = cfg.clientPort || cfg.configuredClientPort || 3002;
   var configuredOsc = cfg.oscEnabled === false ? '关' : (cfg.oscPort || cfg.configuredOscPort || 5300);
-  var changed = actualMain !== configuredMain || actualDisplay !== configuredDisplay || actualOsc !== configuredOsc;
-  var override = cfg.portOverride || cfg.displayPortOverride || cfg.oscPortOverride || cfg.oscDisableOverride;
-  el.textContent = '当前运行 HTTP ' + actualMain + ' / 提示屏 ' + actualDisplay + ' / OSC ' + actualOsc + '；下次启动配置 HTTP ' + configuredMain + ' / 提示屏 ' + configuredDisplay + ' / OSC ' + configuredOsc + (override ? '；当前由启动环境变量覆盖' : (changed ? '；重启后切换到配置端口' : ''));
+  var changed = actualMain !== configuredMain || actualClient !== configuredClient || actualOsc !== configuredOsc;
+  var override = cfg.portOverride || cfg.clientPortOverride || cfg.oscPortOverride || cfg.oscDisableOverride;
+  el.textContent = '当前运行 HTTP ' + actualMain + ' / 客户端入口 ' + actualClient + ' / OSC ' + actualOsc + '；下次启动配置 HTTP ' + configuredMain + ' / 客户端入口 ' + configuredClient + ' / OSC ' + configuredOsc + (override ? '；当前由启动环境变量覆盖' : (changed ? '；重启后切换到配置端口' : ''));
   el.style.color = override ? '#fbbf24' : (changed ? 'var(--ios-orange)' : 'var(--text-2)');
 }
 
@@ -4955,13 +4984,13 @@ window.syncOscPortInputs = function(sourceId) {
 function loadPortConfig() {
   fetch('/api/config', { headers: authHeaders() }).then(function(r) { return r.json(); }).then(function(cfg) {
     var sp = document.getElementById('config-server-port');
-    var dp = document.getElementById('config-display-port');
+    var cp = document.getElementById('client-port-input');
     var op = document.getElementById('config-osc-port');
     var opInline = document.getElementById('config-osc-port-inline');
     var oe = document.getElementById('config-osc-enabled');
     var lan = document.getElementById('config-osc-lan');
     if (sp) sp.value = cfg.port || 3000;
-    if (dp) dp.value = cfg.displayPort || 3001;
+    if (cp) cp.value = cfg.clientPort || 3002;
     if (op) op.value = cfg.oscPort || 5300;
     if (opInline) opInline.value = cfg.oscPort || 5300;
     if (oe) oe.checked = cfg.oscEnabled !== false;
@@ -4974,28 +5003,28 @@ function loadPortConfig() {
 // 端口配置：保存
 window.savePortConfig = function() {
   var sp = document.getElementById('config-server-port');
-  var dp = document.getElementById('config-display-port');
+  var cp = document.getElementById('client-port-input');
   var op = document.getElementById('config-osc-port');
   var opInline = document.getElementById('config-osc-port-inline');
   var oe = document.getElementById('config-osc-enabled');
   var lan = document.getElementById('config-osc-lan');
   var resultEl = document.getElementById('port-config-result');
   var port = parseInt(sp ? sp.value : '3000') || 3000;
-  var displayPort = parseInt(dp ? dp.value : '3001') || 3001;
+  var clientPort = parseInt(cp ? cp.value : '3002') || 3002;
   var oscPort = parseInt(op ? op.value : (opInline ? opInline.value : '5300')) || 5300;
   if (port < 1 || port > 65535) { if (resultEl) { resultEl.textContent = '❌ 服务器端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
-  if (displayPort < 1 || displayPort > 65535) { if (resultEl) { resultEl.textContent = '❌ 提示屏端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
-  if (displayPort === port) { if (resultEl) { resultEl.textContent = '❌ 主服务端口和提示屏端口不能相同'; resultEl.style.color = '#f87171'; } return; }
+  if (clientPort < 1 || clientPort > 65535) { if (resultEl) { resultEl.textContent = '❌ 客户端入口端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
+  if (clientPort === port) { if (resultEl) { resultEl.textContent = '❌ 主服务端口和客户端入口端口不能相同'; resultEl.style.color = '#f87171'; } return; }
   if (oscPort < 1 || oscPort > 65535) { if (resultEl) { resultEl.textContent = '❌ OSC 端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
   fetch('/api/config', {
     method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ port: port, displayPort: displayPort, oscPort: oscPort, oscEnabled: !!(oe && oe.checked), oscAllowLan: !!(lan && lan.checked), rolePermissions: collectRolePermissions() })
+    body: JSON.stringify({ port: port, clientPort: clientPort, oscPort: oscPort, oscEnabled: !!(oe && oe.checked), oscAllowLan: !!(lan && lan.checked), rolePermissions: collectRolePermissions() })
   }).then(function(r) { return r.json().then(function(data) { if (!r.ok) throw new Error(data.error || '保存失败'); return data; }); }).then(function(data) {
     cachedAccessLinks = null;
     if (data.rolePermissions) renderRolePermissions(data.rolePermissions);
     renderPortRuntimeStatus(data);
-    var override = data.portOverride || data.displayPortOverride || data.oscPortOverride || data.oscDisableOverride;
+    var override = data.portOverride || data.clientPortOverride || data.oscPortOverride || data.oscDisableOverride;
     if (resultEl) {
       resultEl.textContent = override ? '✅ 已保存；但当前启动环境正在覆盖端口，关闭后用启动脚本重新运行才会使用配置端口' : '✅ 已保存！请关闭服务器窗口并重新运行安装包以使端口生效';
       resultEl.style.color = '#4ade80';
@@ -5086,7 +5115,7 @@ function buildPasswordLink(role, password) {
   var template = cachedPasswordTemplates && cachedPasswordTemplates[role];
   if (template) return template.replace('{password}', encodeURIComponent(password));
   var host = cachedServerIP || location.hostname || 'localhost';
-  var port = role === 'screen' ? (cachedDisplayPort || 3001) : (cachedServerPort || location.port || 3000);
+  var port = role === 'control' ? (cachedServerPort || location.port || 3000) : (cachedClientPort || 3002);
   return location.protocol + '//' + host + ':' + port + '/?role=' + encodeURIComponent(role) + '&password=' + encodeURIComponent(password);
 }
 
@@ -5107,6 +5136,28 @@ window.copyPasswordLink = function(role) {
     catch(e) { showToast('复制失败，请手动复制: ' + url); }
     area.remove();
   }
+};
+
+window.showRoleQR = function(role) {
+  var input = document.getElementById('password-input-' + role);
+  var password = input ? input.value : '';
+  if (!password) return showToast('请先在该角色输入框里输入密码，再生成二维码');
+  if (password.length < 4 || password.length > 64) return showToast('密码长度需为 4-64 个字符');
+  var url = buildPasswordLink(role, password);
+  var container = document.getElementById('qr-container');
+  if (!container) return showToast('二维码容器未找到');
+  container.innerHTML = '';
+  var div = document.createElement('div');
+  div.style.cssText = 'text-align:center;margin-bottom:16px';
+  div.innerHTML = '<p style="margin-bottom:8px;color:#fff;font-weight:600">' + (PASSWORD_ROLE_LABELS[role] || role) + '</p><div class="qr-item" data-url="' + url + '"></div><p style="font-size:11px;color:#999;margin-top:4px;word-break:break-all">' + escapeHtml(url) + '</p>';
+  container.appendChild(div);
+  if (typeof QRCode !== 'undefined') {
+    var item = container.querySelector('.qr-item');
+    if (item) new QRCode(item, { text: url, width: 200, height: 200, colorDark: '#000000', colorLight: '#ffffff' });
+  }
+  var urlEl = document.getElementById('qr-url');
+  if (urlEl) urlEl.textContent = url;
+  document.getElementById('modal-qr').classList.remove('hidden');
 };
 
 // 获取服务器 OSC 状态
@@ -5464,7 +5515,7 @@ function updateSubtitleUI() {
 // ---------- 服务器IP获取 ----------
 var cachedServerIP = '';
 var cachedServerPort = 3000;
-var cachedDisplayPort = 3001;
+var cachedClientPort = 3002;
 function fetchServerIP() {
   fetch('/api/server-info', { headers: authHeaders() })
     .then(function(r) { return r.json(); })
@@ -5472,7 +5523,7 @@ function fetchServerIP() {
       if (data.ip) {
         cachedServerIP = data.ip;
         cachedServerPort = data.port || 3000;
-        cachedDisplayPort = data.displayPort || 3001;
+        cachedClientPort = data.clientPort || 3002;
         if (data.links) cachedAccessLinks = data.links;
         if (data.permissions) applyServerPermissions(data.permissions);
         if (data.rolePermissions) renderRolePermissions(data.rolePermissions);
@@ -5543,7 +5594,7 @@ window.showQR = function () {
     {key:'director', label:'导演端（导航/字幕）'},
     {key:'assistant', label:'助理端（备注/音乐/通道）'},
     {key:'backstage', label:'幕后端（仅备注）'},
-    {key:'screen', label:'提示屏（独立端口/只读）'}
+    {key:'screen', label:'提示屏（聚合入口/只读）'}
   ];
   function generateQRs(links) {
     container.innerHTML = '';
@@ -5571,7 +5622,7 @@ window.showQR = function () {
         if (!data.links) throw new Error('只有控制端可以生成安全链接');
         cachedServerIP = data.ip || cachedServerIP;
         cachedServerPort = data.port || 3000;
-        cachedDisplayPort = data.displayPort || 3001;
+        cachedClientPort = data.clientPort || 3002;
         cachedAccessLinks = data.links;
         generateQRs(data.links);
       })

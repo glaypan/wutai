@@ -6,6 +6,7 @@ SERVER_JS="$SCRIPT_DIR/server-standalone.js"
 RUNTIME_DIR="$SCRIPT_DIR/.runtime"
 NODE_HOME="$RUNTIME_DIR/node-v20.18.1-darwin-arm64"
 NODE_BIN="$NODE_HOME/bin/node"
+NODE_SHA256="9e92ce1032455a9cc419fe71e908b27ae477799371b45a0844eedb02279922a4"
 
 cd "$SCRIPT_DIR"
 
@@ -29,6 +30,18 @@ elif [ ! -x "$NODE_BIN" ]; then
   TMP_DIR="$(mktemp -d "$RUNTIME_DIR/node-download.XXXXXX")"
   trap 'rm -rf "$TMP_DIR"' EXIT
   curl -fL "https://nodejs.org/dist/v20.18.1/node-v20.18.1-darwin-arm64.tar.gz" -o "$TMP_DIR/node.tar.gz"
+  if command -v shasum >/dev/null 2>&1; then
+    ACTUAL_SHA256="$(shasum -a 256 "$TMP_DIR/node.tar.gz" | awk '{print $1}')"
+  else
+    ACTUAL_SHA256="$(openssl dgst -sha256 "$TMP_DIR/node.tar.gz" | awk '{print $NF}')"
+  fi
+  if [ "$ACTUAL_SHA256" != "$NODE_SHA256" ]; then
+    echo "[ERROR] Node.js runtime SHA-256 verification failed."
+    echo "Expected: $NODE_SHA256"
+    echo "Actual:   $ACTUAL_SHA256"
+    rm -rf "$TMP_DIR"
+    exit 1
+  fi
   tar -xzf "$TMP_DIR/node.tar.gz" -C "$RUNTIME_DIR"
   chmod +x "$NODE_BIN"
   rm -rf "$TMP_DIR"

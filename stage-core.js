@@ -49,11 +49,12 @@
     };
   }
 
-  function applyTimerAction(now, value, action, programIndex) {
+  // 内部辅助：对已归一化的 timer 执行动作，避免下游重复调用 normalizeRuntimeTimer（仅模块内部使用）
+  function applyTimerActionInternal(now, timer, action, programIndex) {
     var timestamp = asPositiveNumber(now);
-    var timer = normalizeRuntimeTimer(value, programIndex);
     if (action === 'reset') return resetTimerForProgram(programIndex);
     if (action === 'pause') {
+      // 暂停仅对正在运行且已开始的 timer 生效，记录 pausedAt 供后续继续时累加暂停时长
       if (timer.running && timer.startedAt) {
         timer.running = false;
         timer.pausedAt = timestamp;
@@ -62,6 +63,7 @@
     }
     if (action === 'start') {
       if (timer.running) return timer;
+      // 继续：从暂停态恢复时把这段暂停时长累加进 pausedTotalMs；首次启动则重置起点
       if (timer.startedAt && timer.pausedAt) {
         timer.pausedTotalMs += Math.max(0, timestamp - timer.pausedAt);
       } else {
@@ -72,6 +74,11 @@
       timer.running = true;
     }
     return timer;
+  }
+
+  function applyTimerAction(now, value, action, programIndex) {
+    var timer = normalizeRuntimeTimer(value, programIndex);
+    return applyTimerActionInternal(now, timer, action, programIndex);
   }
 
   function computeTimer(now, timerState, program) {
@@ -98,6 +105,7 @@
 
   function minutesToMilliseconds(value) {
     var minutes = Number(value);
+    // 1440 分钟 = 24 小时，作为节目时长的硬上限；超出或非法输入返回 0 表示拒绝
     if (!isFinite(minutes) || minutes < 0 || minutes > 1440) return 0;
     return Math.round(minutes * 60000);
   }
@@ -118,7 +126,8 @@
   function finishRehearsal(now, timerState, programIndex, program) {
     var timer = normalizeRuntimeTimer(timerState, programIndex);
     var timing = computeTimer(now, timer, program);
-    var stopped = applyTimerAction(now, timer, 'pause', programIndex);
+    // timer 已归一化，直接走 internal 避免二次归一化（行为与 applyTimerAction 完全一致）
+    var stopped = applyTimerActionInternal(now, timer, 'pause', programIndex);
     return {
       elapsedMs: timing.elapsedMs,
       rehearsalDurationMs: timing.elapsedMs,
@@ -151,6 +160,7 @@
   function formatTimerClock(value, signed) {
     var raw = Number(value);
     var milliseconds = isFinite(raw) ? raw : 0;
+    // 超时不自动推进节目：负值表示已超时，取绝对值显示并在 signed 模式下加 '+' 前缀提示
     var prefix = signed && milliseconds < 0 ? '+' : '';
     var absolute = Math.abs(milliseconds);
     var minutes = Math.floor(absolute / 60000);
@@ -160,27 +170,44 @@
       (seconds < 10 ? '0' : '') + seconds + '.' + tenths;
   }
 
+  // 内部辅助：构建已启用轨道的 id 集合（enabled !== false 即视为启用，两个调用点逻辑等价）
+  function collectEnabledTracks(tracks) {
+    var map = {};
+    (Array.isArray(tracks) ? tracks : []).forEach(function (track) {
+      if (track && track.enabled !== false) map[String(track.id)] = true;
+    });
+    return map;
+  }
+
+  // 内部辅助：过滤出当前节目下、属于启用轨道且尚未触发的 cue（仅模块内部使用）
+  function filterPendingCues(cues, programIndex, enabledTracks, triggered) {
+    return (Array.isArray(cues) ? cues : []).filter(function (cue) {
+      return cue && Number(cue.programIndex) === Number(programIndex) &&
+        enabledTracks[String(cue.trackId)] === true && !triggered[String(cue.id)];
+    });
+  }
+
+  // 内部辅助：按 offsetMs 升序排序（filter 已返回新数组，可直接原地 sort 不污染原数组）
+  function sortByOffsetMs(cues) {
+    return cues.sort(function (a, b) {
+      return (Number(a.offsetMs) || 0) - (Number(b.offsetMs) || 0);
+    });
+  }
+
   function nextCueSnapshot(timeline, programIndex, elapsedMs, triggeredIds, autoCue) {
     var source = timeline || {};
     var tracks = Array.isArray(source.tracks) ? source.tracks : [];
-    var cues = Array.isArray(source.cues) ? source.cues : [];
-    var enabledTracks = {};
+    var enabledTracks = collectEnabledTracks(tracks);
     var trackNames = {};
     var triggered = triggeredIds || {};
     var elapsed = Math.max(0, Number(elapsedMs) || 0);
 
     tracks.forEach(function (track) {
       if (!track || track.enabled === false) return;
-      enabledTracks[String(track.id)] = true;
       trackNames[String(track.id)] = String(track.name || track.id || '');
     });
 
-    var pending = cues.filter(function (cue) {
-      return cue && Number(cue.programIndex) === Number(programIndex) &&
-        enabledTracks[String(cue.trackId)] === true && !triggered[String(cue.id)];
-    }).sort(function (a, b) {
-      return (Number(a.offsetMs) || 0) - (Number(b.offsetMs) || 0);
-    });
+    var pending = sortByOffsetMs(filterPendingCues(source.cues, programIndex, enabledTracks, triggered));
     var cue = pending.length ? pending[0] : null;
     return {
       cue: cue,
@@ -192,23 +219,14 @@
 
   function collectDueCues(timeline, programIndex, elapsedMs, triggeredIds) {
     var source = timeline || {};
-    var enabledTracks = {};
+    var enabledTracks = collectEnabledTracks(source.tracks);
     var triggered = triggeredIds || {};
-    var tracks = Array.isArray(source.tracks) ? source.tracks : [];
-    var cues = Array.isArray(source.cues) ? source.cues : [];
+    var elapsed = Math.max(0, Number(elapsedMs) || 0);
 
-    tracks.forEach(function (track) {
-      if (track && track.enabled !== false) enabledTracks[String(track.id)] = true;
-    });
-
-    return cues.filter(function (cue) {
-      return cue && Number(cue.programIndex) === Number(programIndex) &&
-        enabledTracks[String(cue.trackId)] === true &&
-        !triggered[String(cue.id)] &&
-        Math.max(0, Number(cue.offsetMs) || 0) <= Math.max(0, Number(elapsedMs) || 0);
-    }).sort(function (a, b) {
-      return (Number(a.offsetMs) || 0) - (Number(b.offsetMs) || 0);
-    });
+    // Cue 触发条件：节目匹配 + 启用轨道 + 未触发 + offsetMs 已到达当前 elapsed
+    return sortByOffsetMs(filterPendingCues(source.cues, programIndex, enabledTracks, triggered).filter(function (cue) {
+      return Math.max(0, Number(cue.offsetMs) || 0) <= elapsed;
+    }));
   }
 
   function buildChannels(category, type, count, baseIndex, idSeed, label, customType) {

@@ -36,3 +36,13 @@
 ## 校验
 
 Release 页面提供 SHA-256。下载后应先核对哈希，再用于正式演出环境。
+
+## 2026-07-31 优化追加说明
+
+本次在 v6.0.3 基础上完成系统性测试与多端优化，详细报告见 [OPTIMIZATION-REPORT-v6.0.3.md](OPTIMIZATION-REPORT-v6.0.3.md)。**未修改兼容性承诺**，主要变更：
+
+- **服务端**：`server-standalone.js` 与 `server.js` 新增 `tessFileCache` 内存缓存，OCR 资源首次读盘后缓存 `{headers, data}`，后续请求直接从内存返回；`server.js` 补齐 `.traineddata.gz` 的 `Content-Encoding: gzip` 响应头。
+- **核心**：`stage-core.js` 新增 4 个 ES5 内部辅助函数（`applyTimerActionInternal`/`collectEnabledTracks`/`filterPendingCues`/`sortByOffsetMs`），消除 `finishRehearsal` 二次归一化与 `nextCueSnapshot`/`collectDueCues` 重复过滤；对外 API 21 项不变；保持纯 ES5 写法兼容 Safari 14/旧 V8。
+- **前端 UI**：`app-source.html` 与 `public/style.css` 新增 9 个 CSS token（5 间距 + 4 圆角），工具栏与移动端导航 token 化；暗色主题 `--text-2`/`--text-3` 对比度提升至 7.6:1/4.8:1（WCAG AA）；为 `.edit-panel` 与 `.modal-box` 新增 transform/opacity 过渡动画。
+- **验证**：5 平台（Windows/macOS Intel+ARM/Linux/Termux/iOS+Android）静态兼容性验证全部通过；4 个测试文件全部断言模式静态命中；`verify-release.js` 静态校验通过（仅内嵌 HTML base64 字节比对需运行时补验）。
+- **环境限制**：本次开发机 PowerShell ExecutionPolicy=Restricted 阻断运行时命令，发布前需解除限制并执行 `npm test` / `npm run verify` 完成运行时回归。

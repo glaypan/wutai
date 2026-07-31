@@ -2,7 +2,10 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { WebSocketServer, WebSocket } = require('ws');
+const { WebSocketServer } = require('ws');
+const { MIME, sendTo, sendError, createBroadcasters } = require('./lib/server-shared');
+const { buildClientPortalHtml } = require('./lib/client-portal-html');
+const CLIENT_PORTAL_HTML = buildClientPortalHtml();
 
 // ---------- 配置文件 ----------
 var CONFIG_FILE = path.join(__dirname, 'config.json');
@@ -20,6 +23,13 @@ function saveConfig(cfg) {
 var _config = loadConfig();
 
 const PORT = parseInt(process.env.PORT) || _config.port || 3000;
+const CLIENT_PORT_ENV_OVERRIDE = !!process.env.CLIENT_PORT;
+const CLIENT_PORT = parseInt(process.env.CLIENT_PORT) || _config.clientPort || _config.displayPort || 3002;
+var actualClientPort = CLIENT_PORT;
+if (CLIENT_PORT === PORT) {
+  actualClientPort = PORT === 65535 ? 65534 : PORT + 1;
+  console.warn('[!] clientPort 与主端口相同，自动调整为 ' + actualClientPort);
+}
 const DATA_FILE = path.join(__dirname, 'show.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
@@ -135,9 +145,16 @@ function canEditField(role, field) {
 // ---------- WebSocket ----------
 const server = http.createServer(function(req, res) { serveStatic(req, res); });
 const wss = new WebSocketServer({ server });
+const clientServer = http.createServer(function(req, res) { serveStatic(req, res, true); });
+const clientWss = new WebSocketServer({ noServer: true, maxPayload: 1024 * 1024 });
+clientServer.on('upgrade', function(req, socket, head) {
+  clientWss.handleUpgrade(req, socket, head, function(ws) {
+    clientWss.emit('connection', ws, req);
+  });
+});
 
-wss.on('connection', function(ws) {
-  sendTo(ws, { type: 'full_state', state: state, clientCount: wss.clients.size });
+function setupConnection(ws) {
+  sendTo(ws, { type: 'full_state', state: state, clientCount: wss.clients.size + clientWss.clients.size });
   broadcastClientCount();
 
   ws.on('message', function(raw) {
@@ -147,7 +164,9 @@ wss.on('connection', function(ws) {
   });
 
   ws.on('close', function() { broadcastClientCount(); });
-});
+}
+wss.on('connection', setupConnection);
+clientWss.on('connection', setupConnection);
 
 function handleMessage(ws, msg) {
   var role = msg.role || 'control';
@@ -164,8 +183,7 @@ function handleMessage(ws, msg) {
         if (state.programs.length > 0 && state.currentProgramIndex > state.programs.length - 1) {
           state.currentProgramIndex = Math.max(0, state.programs.length - 1);
         }
-        saveState();
-        broadcastFullState();
+        commitState();
       }
       break;
 
@@ -177,8 +195,7 @@ function handleMessage(ws, msg) {
         if (state.programs[msg.index]) {
           state.programs[msg.index].status = 'active';
         }
-        saveState();
-        broadcastFullState();
+        commitState();
       }
       break;
 
@@ -202,16 +219,14 @@ function handleMessage(ws, msg) {
       state.programs.forEach(function(p) { p.status = 'pending'; });
       state.currentProgramIndex = 0;
       if (state.programs[0]) state.programs[0].status = 'active';
-      saveState();
-      broadcastFullState();
+      commitState();
       break;
 
     case 'reset_one':
       if (role !== 'control') return sendError(ws, 'forbidden', 'reset_one');
       if (typeof msg.idx === 'number' && state.programs[msg.idx]) {
         state.programs[msg.idx].status = 'pending';
-        saveState();
-        broadcastFullState();
+        commitState();
       }
       break;
 
@@ -219,8 +234,7 @@ function handleMessage(ws, msg) {
       if (!canEditField(role, msg.field)) return sendError(ws, 'forbidden', 'update_program_field');
       if (typeof msg.idx === 'number' && state.programs[msg.idx]) {
         state.programs[msg.idx][msg.field] = msg.value;
-        saveState();
-        broadcastFullState();
+        commitState();
       }
       break;
 
@@ -242,8 +256,7 @@ function handleMessage(ws, msg) {
       } else {
         state.programs = state.programs.concat(newProgs);
       }
-      saveState();
-      broadcastFullState();
+      commitState();
       break;
 
     // ---------- 字幕功能 ----------
@@ -252,8 +265,7 @@ function handleMessage(ws, msg) {
       if (role !== 'control') return sendError(ws, 'forbidden', 'set_subtitle_lines');
       state.subtitle.lines = (msg.lines || []).filter(function(l) { return typeof l === 'string'; });
       state.subtitle.currentIndex = -1;
-      saveState();
-      broadcastFullState();
+      commitState();
       break;
 
     case 'control_subtitle':
@@ -276,8 +288,7 @@ function handleMessage(ws, msg) {
         state.subtitle.currentIndex = -1;
         state.subtitle.visible = false;
       }
-      saveState();
-      broadcastFullState();
+      commitState();
       break;
   }
 }
@@ -293,8 +304,7 @@ function doAdvance() {
   if (state.programs[nextIdx] && state.programs[nextIdx].status !== 'completed') {
     state.programs[nextIdx].status = 'active';
   }
-  saveState();
-  broadcastFullState();
+  commitState();
 }
 
 // 上一个/下一个导航
@@ -307,31 +317,24 @@ function doNav(dir) {
   if (state.programs[newIdx] && state.programs[newIdx].status !== 'completed') {
     state.programs[newIdx].status = 'active';
   }
+  commitState();
+}
+
+// sendTo / sendError 来自 lib/server-shared.js
+// broadcast / broadcastFullState / broadcastClientCount 通过工厂注入服务器拓扑
+var broadcasters = createBroadcasters({
+  getServers: function() { return [wss, clientWss]; },
+  getState: function() { return state; },
+  getClientCount: function() { return wss.clients.size + clientWss.clients.size; }
+});
+var broadcast = broadcasters.broadcast;
+var broadcastFullState = broadcasters.broadcastFullState;
+var broadcastClientCount = broadcasters.broadcastClientCount;
+
+// 持久化状态并广播全量状态（saveState + broadcastFullState 的常用组合）
+function commitState() {
   saveState();
   broadcastFullState();
-}
-
-function sendTo(ws, obj) {
-  if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
-}
-
-function sendError(ws, code, action) {
-  sendTo(ws, { type: 'error', code: code, action: action });
-}
-
-function broadcast(obj) {
-  var data = JSON.stringify(obj);
-  wss.clients.forEach(function(c) {
-    if (c.readyState === WebSocket.OPEN) c.send(data);
-  });
-}
-
-function broadcastFullState() {
-  broadcast({ type: 'full_state', state: state, clientCount: wss.clients.size });
-}
-
-function broadcastClientCount() {
-  broadcast({ type: 'client_count', count: wss.clients.size });
 }
 
 // ---------- OSC 控制 (UDP 监听，零依赖) ----------
@@ -400,8 +403,7 @@ function handleOscMessage(msg) {
       console.log('[OSC] Goto ' + targetIdx);
       state.currentProgramIndex = targetIdx;
       if (state.programs[targetIdx]) state.programs[targetIdx].status = 'active';
-      saveState();
-      broadcastFullState();
+      commitState();
       handled = true;
     }
   }
@@ -482,31 +484,29 @@ var localIPs = getLocalIPs();
 var primaryIP = localIPs.length > 0 ? localIPs[0] : 'localhost';
 
 // ---------- 静态文件服务 ----------
-var MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.js': 'application/javascript; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-  '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
-  '.gz': 'application/gzip',
-  '.wasm': 'application/wasm',
-  '.exe': 'application/x-msdownload',
-  '.bat': 'application/x-msdownload',
-  '.command': 'application/octet-stream',
-  '.sh': 'application/octet-stream',
-  '': 'application/octet-stream'
-};
+// MIME 类型表来自 lib/server-shared.js
 
 var DOWNLOAD_DIR = path.join(__dirname, 'downloads');
+// OCR 资源（tess/）内存缓存：首次读取后缓存 {headers,data}，后续请求直接从内存返回，避免热路径重复磁盘 I/O
+var tessFileCache = {};
 
-function serveStatic(req, res) {
+function serveStatic(req, res, isClientPortal) {
   var urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+
+  // 聚合入口页：clientPort 根路径无 token 时返回 CLIENT_PORTAL_HTML
+  if (isClientPortal && (urlPath === '/' || urlPath === '/index.html')) {
+    var portalParams = new URL(req.url, 'http://localhost').searchParams;
+    if (!portalParams.get('token')) {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+      res.end(CLIENT_PORTAL_HTML);
+      return;
+    }
+  }
 
   // API: 服务器信息
   if (urlPath === '/api/server-info') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, ips: localIPs, oscPort: oscEnabled ? OSC_PORT : null }));
+    res.end(JSON.stringify({ ip: primaryIP, port: actualPort, clientPort: actualClientPort, configuredClientPort: _config.clientPort, clientPortOverride: CLIENT_PORT_ENV_OVERRIDE, ips: localIPs, oscPort: oscEnabled ? OSC_PORT : null }));
     return;
   }
 
@@ -514,7 +514,7 @@ function serveStatic(req, res) {
   if (urlPath === '/api/config') {
     if (req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ port: _config.port || 3000, oscPort: _config.oscPort || 5300 }));
+      res.end(JSON.stringify({ port: _config.port || 3000, clientPort: _config.clientPort, actualClientPort: actualClientPort, clientPortOverride: CLIENT_PORT_ENV_OVERRIDE, oscPort: _config.oscPort || 5300 }));
       return;
     }
     if (req.method === 'POST') {
@@ -524,10 +524,15 @@ function serveStatic(req, res) {
         try {
           var cfg = JSON.parse(body);
           if (cfg.port) _config.port = parseInt(cfg.port);
+          if (cfg.clientPort) {
+            var nextClientPort = parseInt(cfg.clientPort);
+            if (nextClientPort === _config.port) throw new Error('clientPort 不能与主端口相同');
+            _config.clientPort = nextClientPort;
+          }
           if (cfg.oscPort) _config.oscPort = parseInt(cfg.oscPort);
           saveConfig(_config);
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-          res.end(JSON.stringify({ ok: true, port: _config.port, oscPort: _config.oscPort }));
+          res.end(JSON.stringify({ ok: true, port: _config.port, clientPort: _config.clientPort, actualClientPort: actualClientPort, clientPortOverride: CLIENT_PORT_ENV_OVERRIDE, oscPort: _config.oscPort }));
         } catch(e) {
           res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
           res.end(JSON.stringify({ ok: false, error: e.message }));
@@ -590,13 +595,15 @@ function serveStatic(req, res) {
     return;
   }
 
-  // /tess/ 静态文件服务（PDF.js + Tesseract OCR，从磁盘读取）
+  // /tess/ 静态文件服务（PDF.js + Tesseract OCR，从磁盘读取，首次读取后内存缓存）
   if (urlPath.indexOf('/tess/') === 0) {
     var tessFile = urlPath.replace('/tess/', '');
     // 防路径穿越
     if (tessFile.indexOf('..') !== -1 || tessFile.indexOf('/') !== -1) {
       res.writeHead(403); res.end('Forbidden'); return;
     }
+    var tessCached = tessFileCache[tessFile];
+    if (tessCached) { res.writeHead(200, tessCached.headers); res.end(tessCached.data); return; }
     var tessPath = path.join(__dirname, 'tess', tessFile);
     fs.readFile(tessPath, function(err, data) {
       if (err) {
@@ -607,7 +614,10 @@ function serveStatic(req, res) {
       }
       var tessExt = path.extname(tessFile).toLowerCase();
       var tessMime = MIME[tessExt] || 'application/octet-stream';
-      res.writeHead(200, { 'Content-Type': tessMime, 'Content-Length': data.length, 'Cache-Control': 'no-cache' });
+      var tessHeaders = { 'Content-Type': tessMime, 'Content-Length': data.length, 'Cache-Control': 'no-cache' };
+      if (tessExt === '.gz') tessHeaders['Content-Encoding'] = 'gzip';
+      tessFileCache[tessFile] = { headers: tessHeaders, data: data };
+      res.writeHead(200, tessHeaders);
       res.end(data);
     });
     return;
@@ -779,6 +789,7 @@ function printStartupInfo() {
   }
   console.log('╠══════════════════════════════════════════════════╣');
   console.log('║  控制端:   /?role=control                          ║');
+  console.log('║  聚合入口:  http://localhost:' + actualClientPort + ''.padEnd(16 - String(actualClientPort).length, ' ') + '║');
   console.log('║  导演端:   /?role=director                          ║');
   console.log('║  助理端:   /?role=assistant                        ║');
   console.log('║  幕后端:   /?role=backstage                        ║');
@@ -794,3 +805,15 @@ function printStartupInfo() {
 
 // 启动服务器
 startListening(PORT);
+
+clientServer.on('error', function(e) {
+  if (e.code === 'EADDRINUSE') {
+    console.error('[!] 客户端入口端口 ' + CLIENT_PORT + ' 被占用: ' + e.message);
+  } else {
+    console.error('[!] clientServer 错误: ' + e.message);
+  }
+});
+clientServer.on('listening', function() {
+  actualClientPort = clientServer.address().port;
+});
+clientServer.listen(actualClientPort);
