@@ -20,6 +20,10 @@ if [ "$(uname -s)" != "Darwin" ] || [ "$(uname -m)" != "x86_64" ]; then
   exit 1
 fi
 
+if [ ! -x "$NODE_BIN" ] && command -v node >/dev/null 2>&1 && node -e 'var m=Number(process.versions.node.split(".")[0]); process.exit(m>=16?0:1)' >/dev/null 2>&1; then
+  NODE_BIN="$(command -v node)"
+fi
+
 if [ ! -x "$NODE_BIN" ]; then
   echo "[+] 首次运行，正在准备内置 Node.js 16.20.2..."
   if [ ! -f "$NODE_ARCHIVE" ]; then

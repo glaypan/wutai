@@ -96,6 +96,100 @@
     };
   }
 
+  function minutesToMilliseconds(value) {
+    var minutes = Number(value);
+    if (!isFinite(minutes) || minutes < 0 || minutes > 1440) return 0;
+    return Math.round(minutes * 60000);
+  }
+
+  function millisecondsToMinutes(value) {
+    var milliseconds = Number(value);
+    if (!isFinite(milliseconds) || milliseconds < 0 || milliseconds > 86400000) return 0;
+    return milliseconds / 60000;
+  }
+
+  function programDurationMs(program, preferRehearsal) {
+    var item = program && typeof program === 'object' ? program : {};
+    var rehearsalMs = asPositiveNumber(item.rehearsalDurationMs);
+    if (preferRehearsal !== false && rehearsalMs) return rehearsalMs;
+    return minutesToMilliseconds(item.duration);
+  }
+
+  function finishRehearsal(now, timerState, programIndex, program) {
+    var timer = normalizeRuntimeTimer(timerState, programIndex);
+    var timing = computeTimer(now, timer, program);
+    var stopped = applyTimerAction(now, timer, 'pause', programIndex);
+    return {
+      elapsedMs: timing.elapsedMs,
+      rehearsalDurationMs: timing.elapsedMs,
+      runtimeTimer: stopped
+    };
+  }
+
+  function shouldAutoStartTimer(mode, timingSettings, trigger) {
+    var settings = normalizeTimingSettings(timingSettings);
+    return mode === 'performance' && settings.enabled && settings.phase === 'show' &&
+      (trigger === 'go' || trigger === 'program_switch');
+  }
+
+  function timerInstruction(mode, timingSettings, timerState, program) {
+    var settings = normalizeTimingSettings(timingSettings);
+    var timer = timerState && typeof timerState === 'object' ? timerState : {};
+    var item = program && typeof program === 'object' ? program : {};
+    if (!settings.enabled) return '请先开启“启用节目计时”。';
+    if (settings.phase === 'rehearsal') {
+      if (timer.running) return '彩排计时中，点击“结束彩排”保存实际用时。';
+      if (asPositiveNumber(timer.startedAt)) return '彩排已暂停，可继续或结束并保存实际用时。';
+      return '选择节目后点击“开始彩排”记录实际用时。';
+    }
+    if (!programDurationMs(item, settings.preferRehearsal)) return '请先设置节目时长，再开始演出倒计时。';
+    if (mode !== 'performance') return '切换到演出模式后，GO 或节目切换会开始倒计时。';
+    if (timer.running) return '演出倒计时进行中。';
+    return '点击 GO 或切换节目开始演出倒计时。';
+  }
+
+  function formatTimerClock(value, signed) {
+    var raw = Number(value);
+    var milliseconds = isFinite(raw) ? raw : 0;
+    var prefix = signed && milliseconds < 0 ? '+' : '';
+    var absolute = Math.abs(milliseconds);
+    var minutes = Math.floor(absolute / 60000);
+    var seconds = Math.floor((absolute % 60000) / 1000);
+    var tenths = Math.floor((absolute % 1000) / 100);
+    return prefix + (minutes < 10 ? '0' : '') + minutes + ':' +
+      (seconds < 10 ? '0' : '') + seconds + '.' + tenths;
+  }
+
+  function nextCueSnapshot(timeline, programIndex, elapsedMs, triggeredIds, autoCue) {
+    var source = timeline || {};
+    var tracks = Array.isArray(source.tracks) ? source.tracks : [];
+    var cues = Array.isArray(source.cues) ? source.cues : [];
+    var enabledTracks = {};
+    var trackNames = {};
+    var triggered = triggeredIds || {};
+    var elapsed = Math.max(0, Number(elapsedMs) || 0);
+
+    tracks.forEach(function (track) {
+      if (!track || track.enabled === false) return;
+      enabledTracks[String(track.id)] = true;
+      trackNames[String(track.id)] = String(track.name || track.id || '');
+    });
+
+    var pending = cues.filter(function (cue) {
+      return cue && Number(cue.programIndex) === Number(programIndex) &&
+        enabledTracks[String(cue.trackId)] === true && !triggered[String(cue.id)];
+    }).sort(function (a, b) {
+      return (Number(a.offsetMs) || 0) - (Number(b.offsetMs) || 0);
+    });
+    var cue = pending.length ? pending[0] : null;
+    return {
+      cue: cue,
+      trackName: cue ? trackNames[String(cue.trackId)] || '' : '',
+      remainingMs: cue ? Math.max(0, Number(cue.offsetMs) || 0) - elapsed : null,
+      manual: !autoCue
+    };
+  }
+
   function collectDueCues(timeline, programIndex, elapsedMs, triggeredIds) {
     var source = timeline || {};
     var enabledTracks = {};
@@ -250,6 +344,14 @@
     resetTimerForProgram: resetTimerForProgram,
     applyTimerAction: applyTimerAction,
     computeTimer: computeTimer,
+    minutesToMilliseconds: minutesToMilliseconds,
+    millisecondsToMinutes: millisecondsToMinutes,
+    programDurationMs: programDurationMs,
+    finishRehearsal: finishRehearsal,
+    shouldAutoStartTimer: shouldAutoStartTimer,
+    timerInstruction: timerInstruction,
+    formatTimerClock: formatTimerClock,
+    nextCueSnapshot: nextCueSnapshot,
     collectDueCues: collectDueCues,
     buildChannels: buildChannels,
     removeChannelReferences: removeChannelReferences,

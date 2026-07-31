@@ -16,3 +16,8 @@ downloads/*安装包*.zip
 
 # 配置文件
 config.json
+
+# Local import leftovers; release packaging uses explicit resource allowlists.
+/tess/tess/
+/vendor/vendor/
+/media/media/
