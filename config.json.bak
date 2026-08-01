@@ -1,0 +1,48 @@
+{
+  "entryPort": 3000,
+  "port": 3001,
+  "clientPort": 3002,
+  "screenPort": 3003,
+  "oscPort": 5300,
+  "oscEnabled": true,
+  "oscAllowLan": false,
+  "roleTokens": {
+    "control": "8c301a45f85a1547cacd6b4d041e25d80a0df72d0a9b4fde",
+    "director": "b53a61d306d5ca9afe5c6e695f4efaa726662de1be77c0e1",
+    "assistant": "13fbb464e6a0ea84c62ab39f6502f67db2c7d2c820a221bb",
+    "backstage": "0960df5b841551c9844f4054a69313feb6c653e1386ca63a"
+  },
+  "displayToken": "7c185b97dc28b85afca22eb38591b5ba6595bb4683e08fe8",
+  "passwordHashes": {
+    "control": "pbkdf2-sha256$622fe6bac33953a76935c6517cb2e8f4$80dce2322d363c5c225e934d8e29d46b09edc66f9d8040b310c4f9ea2cef969c",
+    "assistant": "pbkdf2-sha256$88c8dffff9cef2c66027c6dcad476426$aabc2ae8aef22839c45c6fcfb29809ced4050b48236565e20153346d3f7a6c83",
+    "backstage": "pbkdf2-sha256$1d4ca841545c595bd5a68b0c589c8c85$6d8566a1577be27e8dabcd7a015a721fae0beea08a5c4db08456fd7b858ddaf6",
+    "director": "pbkdf2-sha256$1971a89dd6894ece27a14cba3b5ec6ed$b137fc27b76ff049a22c3a83dbeeb893a5856562e1f7b68d38f7f2f162b0c97a"
+  },
+  "rolePermissions": {
+    "director": {
+      "nav": true,
+      "subtitleControl": true,
+      "editNotes": true,
+      "editMusic": true,
+      "editChannels": false,
+      "addDel": true
+    },
+    "assistant": {
+      "nav": false,
+      "subtitleControl": true,
+      "editNotes": true,
+      "editMusic": true,
+      "editChannels": true,
+      "addDel": false
+    },
+    "backstage": {
+      "nav": false,
+      "subtitleControl": false,
+      "editNotes": true,
+      "editMusic": false,
+      "editChannels": false,
+      "addDel": false
+    }
+  }
+}

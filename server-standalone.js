@@ -16,6 +16,8 @@ var __WS_FILES = {"index.js":"'use strict';\n\nconst createWebSocketStream = req
 
 var HTML_CONTENT = fs.readFileSync(path.join(__dirname, "app-source.html"), "utf-8");
 var CLIENT_PORTAL_HTML = require("./lib/client-portal-html").buildClientPortalHtml();
+var ENTRY_PORTAL_HTML_FN = require("./lib/entry-portal-html");
+var CONTROL_LOGIN_HTML = require("./lib/control-login-html")();
 
 (function() {
   var wsDir = path.join(__dirname, "node_modules", "ws");
@@ -42,7 +44,7 @@ var PASSWORD_ROLES = ["control", "director", "assistant", "backstage", "screen"]
 var CONFIGURABLE_ROLES = ["director", "assistant", "backstage"];
 var PERMISSION_KEYS = ["nav", "subtitleControl", "editNotes", "editMusic", "editChannels", "addDel"];
 var DEFAULT_ROLE_PERMISSIONS = {
-  director: { nav: true, subtitleControl: true, editNotes: false, editMusic: false, editChannels: false, addDel: false },
+  director: { nav: true, subtitleControl: true, editNotes: true, editMusic: true, editChannels: false, addDel: true },
   assistant: { nav: false, subtitleControl: true, editNotes: true, editMusic: true, editChannels: true, addDel: false },
   backstage: { nav: false, subtitleControl: false, editNotes: true, editMusic: false, editChannels: false, addDel: false }
 };
@@ -104,8 +106,10 @@ function atomicWriteJson(file, value) {
 function normalizeConfig(raw) {
   raw = raw && typeof raw === "object" ? raw : {};
   var cfg = {
-    port: parsePort(raw.port, 3000),
+    entryPort: parsePort(raw.entryPort, 3000),
+    port: parsePort(raw.port, 3001),
     clientPort: parsePort(raw.clientPort, raw.displayPort || 3002),
+    screenPort: parsePort(raw.screenPort, 3003),
     oscPort: parsePort(raw.oscPort, 5300),
     oscEnabled: raw.oscEnabled !== false,
     oscAllowLan: raw.oscAllowLan === true,
@@ -120,7 +124,11 @@ function normalizeConfig(raw) {
   PASSWORD_ROLES.forEach(function(role) {
     if (!isPasswordHash(cfg.passwordHashes[role])) delete cfg.passwordHashes[role];
   });
-  if (cfg.clientPort === cfg.port) cfg.clientPort = cfg.port === 65535 ? 65534 : cfg.port + 1;
+  // Ensure all 4 ports are different
+  var ports = [cfg.entryPort, cfg.port, cfg.clientPort, cfg.screenPort];
+  if (ports.indexOf(cfg.port) !== ports.lastIndexOf(cfg.port)) cfg.port = cfg.entryPort === 3001 ? 3002 : 3001;
+  if (cfg.clientPort === cfg.entryPort || cfg.clientPort === cfg.port) cfg.clientPort = cfg.port === 65535 ? 65534 : cfg.port + 1;
+  if (cfg.screenPort === cfg.entryPort || cfg.screenPort === cfg.port || cfg.screenPort === cfg.clientPort) cfg.screenPort = cfg.clientPort === 65535 ? 65534 : cfg.clientPort + 1;
   return cfg;
 }
 function saveConfig(cfg) {
@@ -132,12 +140,17 @@ var _config = normalizeConfig(loadJsonFile(CONFIG_FILE));
 saveConfig(_config);
 var PORT_ENV_OVERRIDE = process.env.PORT !== undefined && process.env.PORT !== "";
 var CLIENT_PORT_ENV_OVERRIDE = process.env.CLIENT_PORT !== undefined && process.env.CLIENT_PORT !== "";
+var ENTRY_PORT_ENV_OVERRIDE = process.env.ENTRY_PORT !== undefined && process.env.ENTRY_PORT !== "";
+var SCREEN_PORT_ENV_OVERRIDE = process.env.SCREEN_PORT !== undefined && process.env.SCREEN_PORT !== "";
 var OSC_PORT_ENV_OVERRIDE = process.env.OSC_PORT !== undefined && process.env.OSC_PORT !== "";
 var OSC_DISABLE_ENV_OVERRIDE = process.env.OSC_DISABLE !== undefined && process.env.OSC_DISABLE !== "";
+var ENTRY_PORT = parsePort(process.env.ENTRY_PORT, _config.entryPort);
 var PORT = parsePort(process.env.PORT, _config.port);
 var CLIENT_PORT = parsePort(process.env.CLIENT_PORT, _config.clientPort);
+var SCREEN_PORT = parsePort(process.env.SCREEN_PORT, _config.screenPort);
 var OSC_PORT = parsePort(process.env.OSC_PORT, _config.oscPort);
-if (CLIENT_PORT === PORT) { console.error("主服务端口和客户端入口端口不能相同"); process.exit(1); }
+var _allPorts = [ENTRY_PORT, PORT, CLIENT_PORT, SCREEN_PORT];
+if (new Set(_allPorts).size !== 4) { console.error("端口冲突：入口页(" + ENTRY_PORT + ")、控制端(" + PORT + ")、客户端(" + CLIENT_PORT + ")、提示屏(" + SCREEN_PORT + ") 必须互不相同"); process.exit(1); }
 var oscEnabled = OSC_DISABLE_ENV_OVERRIDE ? process.env.OSC_DISABLE !== "1" : _config.oscEnabled !== false;
 var OSC_BIND_HOST = _config.oscAllowLan ? "0.0.0.0" : "127.0.0.1";
 
@@ -314,11 +327,14 @@ if (state.programs.length > 0 && state.currentProgramIndex > state.programs.leng
 var FIELD_PERMISSION = { notes: "editNotes", musicCue: "editMusic", useChannels: "editChannels" };
 function canEditField(role, field) { return !!FIELD_PERMISSION[field] && hasPermission(role, FIELD_PERMISSION[field]); }
 
-var server = http.createServer(function(req, res) { serveStatic(req, res, false); });
-var clientServer = http.createServer(function(req, res) { serveStatic(req, res, false, true); });
-var wss = new WebSocketServer({ noServer: true, maxPayload: MAX_WS_PAYLOAD });
+var entryServer = http.createServer(function(req, res) { serveRequest(req, res, "entry"); });
+var controlServer = http.createServer(function(req, res) { serveRequest(req, res, "control"); });
+var clientServer = http.createServer(function(req, res) { serveRequest(req, res, "client"); });
+var screenServer = http.createServer(function(req, res) { serveRequest(req, res, "screen"); });
+var controlWss = new WebSocketServer({ noServer: true, maxPayload: MAX_WS_PAYLOAD });
 var clientWss = new WebSocketServer({ noServer: true, maxPayload: MAX_WS_PAYLOAD });
-var allWebSocketServers = [wss, clientWss];
+var screenWss = new WebSocketServer({ noServer: true, maxPayload: MAX_WS_PAYLOAD });
+var allWebSocketServers = [controlWss, clientWss, screenWss];
 
 function tokenEquals(actual, supplied) {
   if (typeof supplied !== "string" || actual.length !== supplied.length) return false;
@@ -359,27 +375,37 @@ function rejectUpgrade(socket) {
   try { socket.write("HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n"); } catch (e) {}
   socket.destroy();
 }
-function attachUpgrade(httpServer, socketServer, isClientPortal) {
+function attachUpgrade(httpServer, socketServer, serverType) {
   httpServer.on("upgrade", function(req, socket, head) {
     var token = getRequestToken(req);
     var role = findRoleForToken(token);
-    if (!role && isClientPortal && tokenEquals(_config.displayToken, token)) role = "screen";
+    if (!role && serverType !== "control" && tokenEquals(_config.displayToken, token)) role = "screen";
     if (!role) return rejectUpgrade(socket);
-    if (isClientPortal && role === "control") return rejectUpgrade(socket);
-    if (!isClientPortal && role !== "control") return rejectUpgrade(socket);
+    if (serverType === "control" && role !== "control") return rejectUpgrade(socket);
+    if (serverType === "client" && role === "control") return rejectUpgrade(socket);
+    if (serverType === "screen" && role !== "screen") return rejectUpgrade(socket);
     socketServer.handleUpgrade(req, socket, head, function(ws) {
       ws.stageRole = role;
       socketServer.emit("connection", ws, req);
     });
   });
 }
-attachUpgrade(server, wss, false);
-attachUpgrade(clientServer, clientWss, true);
+attachUpgrade(controlServer, controlWss, "control");
+attachUpgrade(clientServer, clientWss, "client");
+attachUpgrade(screenServer, screenWss, "screen");
 
 function connectionCount() {
   var count = 0;
   allWebSocketServers.forEach(function(socketServer) { count += socketServer.clients.size; });
   return count;
+}
+function sendToRole(role, obj) {
+  var data = JSON.stringify(obj);
+  allWebSocketServers.forEach(function(socketServer) {
+    socketServer.clients.forEach(function(c) {
+      if (c.readyState === WebSocket.OPEN && c.stageRole === role) c.send(data);
+    });
+  });
 }
 function setupSocketServer(socketServer) {
   socketServer.on("connection", function(ws) {
@@ -392,11 +418,41 @@ function setupSocketServer(socketServer) {
       if (ws.stageRole === "screen" && msg.type !== "get_state") return sendError(ws, "forbidden", msg.type || "message");
       handleMessage(ws, msg);
     });
-    ws.on("close", function() { broadcastClientCount(); });
+    ws.on("close", function() {
+      broadcastClientCount();
+      cleanupPendingModeRequests(ws);
+    });
   });
 }
-setupSocketServer(wss);
+setupSocketServer(controlWss);
 setupSocketServer(clientWss);
+setupSocketServer(screenWss);
+
+// ---------- Mode switch approval system ----------
+var pendingModeRequests = {};  // requestId -> { ws, fromRole, targetMode, ts, reason }
+var MODE_REQUEST_TIMEOUT = 60000;  // 60 seconds
+
+function cleanupPendingModeRequests(ws) {
+  var toDelete = [];
+  Object.keys(pendingModeRequests).forEach(function(id) {
+    if (pendingModeRequests[id].ws === ws) {
+      toDelete.push(id);
+    }
+  });
+  toDelete.forEach(function(id) { delete pendingModeRequests[id]; });
+}
+
+function checkModeRequestTimeouts() {
+  var now = Date.now();
+  Object.keys(pendingModeRequests).forEach(function(id) {
+    var req = pendingModeRequests[id];
+    if (now - req.ts > MODE_REQUEST_TIMEOUT) {
+      sendTo(req.ws, { type: "mode_switch_result", requestId: id, approved: false, reason: "timeout" });
+      delete pendingModeRequests[id];
+    }
+  });
+}
+setInterval(checkModeRequestTimeouts, 10000);
 
 function handleMessage(ws, msg) {
   var role = ws.stageRole;
@@ -563,6 +619,47 @@ function handleMessage(ws, msg) {
       else if (midiAction === "next") { logAction(role, "midi_bridge: next"); doNav(1); }
       else if (midiAction === "prev") { logAction(role, "midi_bridge: prev"); doNav(-1); }
       break;
+    case "mode_switch_request":
+      if (role !== "director") return sendError(ws, "forbidden", "mode_switch_request");
+      if (msg.targetMode !== "performance" && msg.targetMode !== "setup") return sendError(ws, "invalid", "mode_switch_request");
+      // Check if director already has a pending request
+      var hasPending = Object.keys(pendingModeRequests).some(function(id) {
+        return pendingModeRequests[id].ws === ws;
+      });
+      if (hasPending) return sendError(ws, "conflict", "mode_switch_request");
+      var requestId = "req_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6);
+      pendingModeRequests[requestId] = { ws: ws, fromRole: role, targetMode: msg.targetMode, ts: Date.now(), reason: msg.reason || "" };
+      // Check if any control is online
+      var controlOnline = false;
+      allWebSocketServers.forEach(function(s) {
+        s.clients.forEach(function(c) { if (c.readyState === WebSocket.OPEN && c.stageRole === "control") controlOnline = true; });
+      });
+      if (!controlOnline) {
+        sendTo(ws, { type: "mode_switch_result", requestId: requestId, approved: false, reason: "no_control" });
+        delete pendingModeRequests[requestId];
+        return;
+      }
+      sendTo(ws, { type: "mode_switch_pending", requestId: requestId });
+      sendToRole("control", { type: "mode_switch_request", requestId: requestId, fromRole: role, targetMode: msg.targetMode, reason: msg.reason || "", timestamp: Date.now() });
+      break;
+    case "mode_switch_response":
+      if (role !== "control") return sendError(ws, "forbidden", "mode_switch_response");
+      var pendingReq = pendingModeRequests[msg.requestId];
+      if (!pendingReq) { sendTo(ws, { type: "mode_switch_result", requestId: msg.requestId, approved: false, reason: "not_found" }); return; }
+      if (msg.approved) {
+        // Execute mode change
+        var previousMode = state.mode;
+        state.mode = pendingReq.targetMode;
+        resetTimerForCurrent(false);
+        commitState();
+        sendTo(pendingReq.ws, { type: "mode_switch_result", requestId: msg.requestId, approved: true });
+      } else {
+        sendTo(pendingReq.ws, { type: "mode_switch_result", requestId: msg.requestId, approved: false, reason: msg.reason || "rejected" });
+      }
+      // Clear request and notify other control connections
+      delete pendingModeRequests[msg.requestId];
+      sendToRole("control", { type: "mode_switch_request_cleared", requestId: msg.requestId });
+      break;
   }
 }
 
@@ -596,6 +693,15 @@ var broadcast = broadcasters.broadcast;
 var broadcastFullState = broadcasters.broadcastFullState;
 var broadcastClientCount = broadcasters.broadcastClientCount;
 function commitState() { saveState(); broadcastFullState(); }
+function broadcastPermissionsUpdate() {
+  allWebSocketServers.forEach(function(server) {
+    server.clients.forEach(function(ws) {
+      if (ws.readyState === 1 && ws.stageRole) {
+        sendTo(ws, { type: 'permissions_update', permissions: permissionsForRole(ws.stageRole) });
+      }
+    });
+  });
+}
 setInterval(maybeTriggerAutomaticCues, 100);
 
 function parseOscMessage(buf) {
@@ -679,7 +785,7 @@ function makeAccessUrl(ip, port, role, token) {
 function buildAccessLinks(ip) {
   var links = {};
   VALID_ROLES.forEach(function(role) { links[role] = makeAccessUrl(ip, role === "control" ? actualPort : actualClientPort, role, _config.roleTokens[role]); });
-  links.screen = makeAccessUrl(ip, actualClientPort, "screen", _config.displayToken);
+  links.screen = makeAccessUrl(ip, actualScreenPort, "screen", _config.displayToken);
   return links;
 }
 function makePasswordUrlTemplate(ip, port, role) {
@@ -688,7 +794,7 @@ function makePasswordUrlTemplate(ip, port, role) {
 function buildPasswordLinkTemplates(ip) {
   var links = {};
   VALID_ROLES.forEach(function(role) { links[role] = makePasswordUrlTemplate(ip, role === "control" ? actualPort : actualClientPort, role); });
-  links.screen = makePasswordUrlTemplate(ip, actualClientPort, "screen");
+  links.screen = makeAccessUrl(ip, actualScreenPort, "screen", _config.displayToken);
   return links;
 }
 function makeBaseUrl(req) {
@@ -921,12 +1027,34 @@ function serveDownload(req, res, urlPath) {
 var tessFileCache = {};
 // 第三方库（vendor/）内存缓存：同 tessFileCache 模式，避免热路径重复磁盘 I/O
 var vendorFileCache = {};
-function serveStatic(req, res, isMainServer, isClientPortal) {
+function serveRequest(req, res, serverType) {
+  var isClientPortal = serverType === "client" || serverType === "screen";
+  var isControlServer = serverType === "control";
+  var isEntryServer = serverType === "entry";
+  var isScreenServer = serverType === "screen";
   setSecurityHeaders(res);
   var parsedUrl = parseRequestUrl(req);
   var urlPath;
   try { urlPath = decodeURIComponent(parsedUrl ? parsedUrl.pathname : "/"); }
   catch (e) { res.writeHead(400); res.end("Bad Request"); return; }
+  // Entry server: only serve entry portal HTML and static assets
+  if (isEntryServer) {
+    if (urlPath === "/" || urlPath === "/index.html") {
+      var ports = { entryPort: actualEntryPort, port: actualPort, clientPort: actualClientPort, screenPort: actualScreenPort };
+      var html = ENTRY_PORTAL_HTML_FN(_config, passwordStatus(), ports);
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+      res.end(html);
+      return;
+    }
+    if (urlPath === "/icon.svg") {
+      res.writeHead(200, { "Content-Type": "image/svg+xml" });
+      res.end('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#1a1a2e"/><text x="256" y="340" font-size="280" text-anchor="middle" fill="#e94560" font-family="sans-serif">舞</text></svg>');
+      return;
+    }
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("404 Not Found");
+    return;
+  }
   if (urlPath === "/stage-core.js") {
     fs.readFile(path.join(__dirname, "stage-core.js"), function(err, data) {
       if (err) { res.writeHead(404); res.end("404 Not Found"); return; }
@@ -955,10 +1083,14 @@ function serveStatic(req, res, isMainServer, isClientPortal) {
     var info = {
       ip: linkHost,
       primaryIP: primaryIP,
+      entryPort: actualEntryPort,
       port: actualPort,
       clientPort: actualClientPort,
+      screenPort: actualScreenPort,
+      configuredEntryPort: _config.entryPort,
       configuredPort: _config.port,
       configuredClientPort: _config.clientPort,
+      configuredScreenPort: _config.screenPort,
       ips: localIPs,
       oscPort: oscEnabled ? OSC_PORT : null,
       configuredOscPort: _config.oscPort,
@@ -967,13 +1099,15 @@ function serveStatic(req, res, isMainServer, isClientPortal) {
       oscAllowLan: _config.oscAllowLan === true,
       portOverride: PORT_ENV_OVERRIDE,
       clientPortOverride: CLIENT_PORT_ENV_OVERRIDE,
+      entryPortOverride: ENTRY_PORT_ENV_OVERRIDE,
+      screenPortOverride: SCREEN_PORT_ENV_OVERRIDE,
       oscPortOverride: OSC_PORT_ENV_OVERRIDE,
       oscDisableOverride: OSC_DISABLE_ENV_OVERRIDE,
       downloadBaseUrl: makeBaseUrl(req)
     };
-    var requestRole = isClientPortal ? (tokenEquals(_config.displayToken, getRequestToken(req)) ? "screen" : null) : getRequestRole(req);
+    var requestRole = isScreenServer ? (tokenEquals(_config.displayToken, getRequestToken(req)) ? "screen" : null) : (isClientPortal ? (tokenEquals(_config.displayToken, getRequestToken(req)) ? "screen" : null) : getRequestRole(req));
     if (requestRole) info.permissions = permissionsForRole(requestRole);
-    if (!isClientPortal && requestRole === "control") {
+    if (isControlServer && requestRole === "control") {
       info.links = buildAccessLinks(linkHost);
       info.passwordStatus = passwordStatus();
       info.passwordLinkTemplates = buildPasswordLinkTemplates(linkHost);
@@ -983,7 +1117,7 @@ function serveStatic(req, res, isMainServer, isClientPortal) {
     return;
   }
   if (urlPath === "/api/passwords") {
-    if (isClientPortal || getRequestRole(req) !== "control") { sendJson(res, 401, { ok: false, error: "unauthorized" }); return; }
+    if (!isControlServer || getRequestRole(req) !== "control") { sendJson(res, 401, { ok: false, error: "unauthorized" }); return; }
     if (req.method === "GET") {
       sendJson(res, 200, { ok: true, enabled: passwordStatus(), templates: buildPasswordLinkTemplates(preferredLinkHost(req)) });
       return;
@@ -1028,9 +1162,9 @@ function serveStatic(req, res, isMainServer, isClientPortal) {
     return;
   }
   if (urlPath === "/api/config") {
-    if (isClientPortal || getRequestRole(req) !== "control") { sendJson(res, 401, { ok: false, error: "unauthorized" }); return; }
+    if (!isControlServer || getRequestRole(req) !== "control") { sendJson(res, 401, { ok: false, error: "unauthorized" }); return; }
     if (req.method === "GET") {
-      sendJson(res, 200, { port: _config.port, clientPort: _config.clientPort, oscPort: _config.oscPort, oscEnabled: _config.oscEnabled !== false, oscAllowLan: _config.oscAllowLan === true, rolePermissions: _config.rolePermissions, actualPort: actualPort, actualClientPort: actualClientPort, actualOscPort: oscEnabled ? OSC_PORT : null, actualOscEnabled: oscEnabled, portOverride: PORT_ENV_OVERRIDE, clientPortOverride: CLIENT_PORT_ENV_OVERRIDE, oscPortOverride: OSC_PORT_ENV_OVERRIDE, oscDisableOverride: OSC_DISABLE_ENV_OVERRIDE });
+      sendJson(res, 200, { entryPort: _config.entryPort, port: _config.port, clientPort: _config.clientPort, screenPort: _config.screenPort, oscPort: _config.oscPort, oscEnabled: _config.oscEnabled !== false, oscAllowLan: _config.oscAllowLan === true, rolePermissions: _config.rolePermissions, actualEntryPort: actualEntryPort, actualPort: actualPort, actualClientPort: actualClientPort, actualScreenPort: actualScreenPort, actualOscPort: oscEnabled ? OSC_PORT : null, actualOscEnabled: oscEnabled, portOverride: PORT_ENV_OVERRIDE, clientPortOverride: CLIENT_PORT_ENV_OVERRIDE, entryPortOverride: ENTRY_PORT_ENV_OVERRIDE, screenPortOverride: SCREEN_PORT_ENV_OVERRIDE, oscPortOverride: OSC_PORT_ENV_OVERRIDE, oscDisableOverride: OSC_DISABLE_ENV_OVERRIDE });
       return;
     }
     if (req.method === "POST") {
@@ -1046,19 +1180,25 @@ function serveStatic(req, res, isMainServer, isClientPortal) {
         if (bodyTooLarge) return;
         try {
           var cfg = JSON.parse(body);
-          var nextPort = parsePort(cfg.port, 0);
-          var nextClientPort = parsePort(cfg.clientPort, 0);
+          var nextEntryPort = parsePort(cfg.entryPort, _config.entryPort);
+          var nextPort = parsePort(cfg.port, _config.port);
+          var nextClientPort = parsePort(cfg.clientPort, _config.clientPort);
+          var nextScreenPort = parsePort(cfg.screenPort, _config.screenPort);
           var nextOscPort = parsePort(cfg.oscPort, 0);
-          if (!nextPort || !nextClientPort || !nextOscPort) throw new Error("端口必须是 1-65535 的整数");
-          if (nextPort === nextClientPort) throw new Error("主服务端口和客户端入口端口不能相同");
-          _config.port = nextPort;
-          _config.clientPort = nextClientPort;
+          if (!nextPort || !nextClientPort || !nextOscPort || !nextEntryPort || !nextScreenPort) throw new Error("端口必须是 1-65535 的整数");
+          var nextPorts = [nextEntryPort, nextPort, nextClientPort, nextScreenPort];
+          if (new Set(nextPorts).size !== 4) throw new Error("入口页、控制端、客户端、提示屏端口必须互不相同");
+          if (!ENTRY_PORT_ENV_OVERRIDE) _config.entryPort = nextEntryPort;
+          if (!PORT_ENV_OVERRIDE) _config.port = nextPort;
+          if (!CLIENT_PORT_ENV_OVERRIDE) _config.clientPort = nextClientPort;
+          if (!SCREEN_PORT_ENV_OVERRIDE) _config.screenPort = nextScreenPort;
           _config.oscPort = nextOscPort;
           _config.oscEnabled = cfg.oscEnabled !== false;
           _config.oscAllowLan = cfg.oscAllowLan === true;
           _config.rolePermissions = normalizeRolePermissions(cfg.rolePermissions);
           saveConfig(_config);
-          sendJson(res, 200, { ok: true, port: _config.port, clientPort: _config.clientPort, oscPort: _config.oscPort, oscEnabled: _config.oscEnabled !== false, oscAllowLan: _config.oscAllowLan, rolePermissions: _config.rolePermissions, actualPort: actualPort, actualClientPort: actualClientPort, actualOscPort: oscEnabled ? OSC_PORT : null, actualOscEnabled: oscEnabled, portOverride: PORT_ENV_OVERRIDE, clientPortOverride: CLIENT_PORT_ENV_OVERRIDE, oscPortOverride: OSC_PORT_ENV_OVERRIDE, oscDisableOverride: OSC_DISABLE_ENV_OVERRIDE });
+          broadcastPermissionsUpdate();
+          sendJson(res, 200, { ok: true, entryPort: _config.entryPort, port: _config.port, clientPort: _config.clientPort, screenPort: _config.screenPort, oscPort: _config.oscPort, oscEnabled: _config.oscEnabled !== false, oscAllowLan: _config.oscAllowLan, rolePermissions: _config.rolePermissions, actualEntryPort: actualEntryPort, actualPort: actualPort, actualClientPort: actualClientPort, actualScreenPort: actualScreenPort, actualOscPort: oscEnabled ? OSC_PORT : null, actualOscEnabled: oscEnabled, needsRestart: nextEntryPort !== actualEntryPort || nextPort !== actualPort || nextClientPort !== actualClientPort || nextScreenPort !== actualScreenPort, portOverride: PORT_ENV_OVERRIDE, clientPortOverride: CLIENT_PORT_ENV_OVERRIDE, entryPortOverride: ENTRY_PORT_ENV_OVERRIDE, screenPortOverride: SCREEN_PORT_ENV_OVERRIDE, oscPortOverride: OSC_PORT_ENV_OVERRIDE, oscDisableOverride: OSC_DISABLE_ENV_OVERRIDE });
         } catch(e) {
           sendJson(res, 400, { ok: false, error: e.message });
         }
@@ -1072,51 +1212,65 @@ function serveStatic(req, res, isMainServer, isClientPortal) {
     var suppliedToken = getRequestToken(req);
     var suppliedPassword = getRequestPassword(req);
     var requestedRole = parsedUrl ? parsedUrl.searchParams.get("role") : "";
-    if (isClientPortal) {
-      var portalRole = findRoleForToken(suppliedToken);
-      if (!portalRole && tokenEquals(_config.displayToken, suppliedToken)) portalRole = "screen";
-      if (portalRole === "control") return sendUnauthorized(res, false);
-      if (portalRole) {
-        if (!parsedUrl || parsedUrl.searchParams.get("role") !== portalRole) {
-          res.writeHead(302, { "Location": "/?role=" + encodeURIComponent(portalRole) + "&token=" + encodeURIComponent(tokenForRole(portalRole)), "Cache-Control": "no-store" }); res.end(); return;
-        }
-        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
-        res.end(HTML_CONTENT); return;
-      }
-      if (requestedRole && requestedRole !== "control" && isPasswordRole(requestedRole, false) && verifyRolePassword(requestedRole, suppliedPassword)) {
-        res.writeHead(302, { "Location": "/?role=" + encodeURIComponent(requestedRole) + "&token=" + encodeURIComponent(tokenForRole(requestedRole)), "Cache-Control": "no-store" }); res.end(); return;
-      }
-      if (requestedRole === "screen" && verifyRolePassword("screen", suppliedPassword)) {
-        res.writeHead(302, { "Location": "/?role=screen&token=" + encodeURIComponent(_config.displayToken), "Cache-Control": "no-store" }); res.end(); return;
-      }
-      if (suppliedPassword || requestedRole) {
-        return sendUnauthorized(res, false);
-      }
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
-      res.end(CLIENT_PORTAL_HTML); return;
-    } else {
-      var actualRole = findRoleForToken(suppliedToken);
-      if (actualRole === "control") {
+
+    if (isControlServer) {
+      // Control server: require password login
+      var controlRole = findRoleForToken(suppliedToken);
+      if (controlRole === "control") {
         if (!parsedUrl || parsedUrl.searchParams.get("role") !== "control") {
           res.writeHead(302, { "Location": "/?role=control&token=" + encodeURIComponent(_config.roleTokens.control), "Cache-Control": "no-store" }); res.end(); return;
         }
         res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
         res.end(HTML_CONTENT); return;
       }
-      if (!actualRole && !suppliedPassword && isLoopbackRequest(req)) {
+      // Check password
+      if (suppliedPassword && verifyRolePassword("control", suppliedPassword)) {
         res.writeHead(302, { "Location": "/?role=control&token=" + encodeURIComponent(_config.roleTokens.control), "Cache-Control": "no-store" }); res.end(); return;
       }
-      var clientPortRedirect = "http://" + req.headers.host.replace(String(actualPort), String(actualClientPort)) + "/";
-      if (requestedRole && requestedRole !== "control") {
-        var redirectUrl = "http://" + req.headers.host.replace(String(actualPort), String(actualClientPort)) + "/?role=" + encodeURIComponent(requestedRole);
-        if (suppliedPassword) redirectUrl += "&password=" + encodeURIComponent(suppliedPassword);
-        res.writeHead(302, { "Location": redirectUrl, "Cache-Control": "no-store" }); res.end(); return;
+      // No valid token or password — show login page
+      if (suppliedPassword) {
+        // Password was wrong — show login page with error hint
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+        res.end(CONTROL_LOGIN_HTML);
+        return;
       }
-      if (actualRole && actualRole !== "control") {
-        res.writeHead(302, { "Location": clientPortRedirect, "Cache-Control": "no-store" }); res.end(); return;
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+      res.end(CONTROL_LOGIN_HTML); return;
+    }
+
+    if (isScreenServer) {
+      // Screen server: serve screen page directly (displayToken auth for WebSocket)
+      var screenToken = suppliedToken || _config.displayToken;
+      if (!parsedUrl || parsedUrl.searchParams.get("role") !== "screen" || !tokenEquals(_config.displayToken, screenToken)) {
+        res.writeHead(302, { "Location": "/?role=screen&token=" + encodeURIComponent(_config.displayToken), "Cache-Control": "no-store" }); res.end(); return;
       }
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+      res.end(HTML_CONTENT); return;
+    }
+
+    // Client server: serve client apps
+    var portalRole = findRoleForToken(suppliedToken);
+    if (portalRole === "control") return sendUnauthorized(res, false);
+    if (portalRole && portalRole !== "control") {
+      if (!parsedUrl || parsedUrl.searchParams.get("role") !== portalRole) {
+        res.writeHead(302, { "Location": "/?role=" + encodeURIComponent(portalRole) + "&token=" + encodeURIComponent(tokenForRole(portalRole)), "Cache-Control": "no-store" }); res.end(); return;
+      }
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+      res.end(HTML_CONTENT); return;
+    }
+    // Password verification for client roles
+    if (requestedRole && requestedRole !== "control" && isPasswordRole(requestedRole, false) && verifyRolePassword(requestedRole, suppliedPassword)) {
+      res.writeHead(302, { "Location": "/?role=" + encodeURIComponent(requestedRole) + "&token=" + encodeURIComponent(tokenForRole(requestedRole)), "Cache-Control": "no-store" }); res.end(); return;
+    }
+    // Free access for roles without password
+    if (requestedRole && requestedRole !== "control" && isPasswordRole(requestedRole, false) && !passwordEnabled(requestedRole)) {
+      res.writeHead(302, { "Location": "/?role=" + encodeURIComponent(requestedRole) + "&token=" + encodeURIComponent(tokenForRole(requestedRole)), "Cache-Control": "no-store" }); res.end(); return;
+    }
+    if (suppliedPassword || (requestedRole && passwordEnabled(requestedRole))) {
       return sendUnauthorized(res, false);
     }
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    res.end(CLIENT_PORTAL_HTML); return;
   }
   if (urlPath === "/manifest.json") {
     res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
@@ -1125,7 +1279,7 @@ function serveStatic(req, res, isMainServer, isClientPortal) {
   }
   if (urlPath === "/sw.js") {
     res.writeHead(200, { "Content-Type": "application/javascript; charset=utf-8" });
-    res.end("var CACHE=\'stage-manager-v604\';self.addEventListener(\'install\',function(e){self.skipWaiting();});self.addEventListener(\'activate\',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});self.addEventListener(\'fetch\',function(e){if(e.request.method!==\'GET\')return;if(e.request.url.indexOf(\'/tess/\')!==-1){e.respondWith(fetch(e.request));return;}e.respondWith(caches.open(CACHE).then(function(c){return c.match(e.request).then(function(f){var p=fetch(e.request).then(function(r){if(r.ok)c.put(e.request,r.clone());return r;}).catch(function(){return f;});return p;});}));});");
+    res.end("var CACHE=\'stage-manager-v606\';self.addEventListener(\'install\',function(e){self.skipWaiting();});self.addEventListener(\'activate\',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});self.addEventListener(\'fetch\',function(e){if(e.request.method!==\'GET\')return;if(e.request.url.indexOf(\'/tess/\')!==-1){e.respondWith(fetch(e.request));return;}e.respondWith(caches.open(CACHE).then(function(c){return c.match(e.request).then(function(f){var p=fetch(e.request).then(function(r){if(r.ok)c.put(e.request,r.clone());return r;}).catch(function(){return f;});return p;});}));});");
     return;
   }
   if (urlPath === "/icon.svg") {
@@ -1181,10 +1335,14 @@ function serveStatic(req, res, isMainServer, isClientPortal) {
   res.end("404 Not Found");
 }
 
+var actualEntryPort = ENTRY_PORT;
 var actualPort = PORT;
 var actualClientPort = CLIENT_PORT;
+var actualScreenPort = SCREEN_PORT;
+var entryListening = false;
 var mainListening = false;
 var clientListening = false;
+var screenListening = false;
 var didOpenBrowser = false;
 
 function openBrowser(url) {
@@ -1198,34 +1356,46 @@ function openBrowser(url) {
   catch (e) { console.error("自动打开浏览器失败: " + e.message); }
 }
 function printReady() {
-  if (!mainListening || !clientListening) return;
+  if (!entryListening || !mainListening || !clientListening || !screenListening) return;
+  var localEntryUrl = "http://localhost:" + actualEntryPort + "/";
   var localControlUrl = makeAccessUrl("localhost", actualPort, "control", _config.roleTokens.control);
   console.log("═══════════════════════════════════════════════════");
-  console.log("  舞台流程表 服务器已启动");
+  console.log("  舞台流程表 服务器已启动 (v6.0.6)");
   console.log("═══════════════════════════════════════════════════");
   console.log("");
-  console.log("  控制端:   " + localControlUrl);
-  console.log("  聚合入口: " + "http://localhost:" + actualClientPort + "/");
+  console.log("  入口页:   " + localEntryUrl);
+  console.log("  控制端:   " + localControlUrl + " (需密码登录)");
+  console.log("  客户端:   " + "http://localhost:" + actualClientPort + "/");
+  console.log("  提示屏:   " + "http://localhost:" + actualScreenPort + "/");
   console.log("  MIDI 桥:  " + localControlUrl + "&midiBridge=1");
-  if (localIPs.length > 0) console.log("  局域网:   http://" + primaryIP + ":" + actualPort + "（请从控制端复制安全链接）");
+  if (localIPs.length > 0) console.log("  局域网:   http://" + primaryIP + ":" + actualEntryPort + "/ (入口页)");
   if (oscEnabled) console.log("  OSC:      UDP " + OSC_BIND_HOST + ":" + OSC_PORT);
   console.log("");
   console.log("  按 Ctrl+C 停止服务器");
   console.log("═══════════════════════════════════════════════════");
-  openBrowser(localControlUrl);
+  openBrowser(localEntryUrl);
 }
 
-server.on("error", function(e) {
-  console.error("主服务端口 " + PORT + " 启动失败: " + e.message);
+entryServer.on("error", function(e) {
+  console.error("入口页端口 " + ENTRY_PORT + " 启动失败: " + e.message);
   process.exit(1);
 });
-server.on("listening", function() {
-  actualPort = server.address().port;
+entryServer.on("listening", function() {
+  actualEntryPort = entryServer.address().port;
+  entryListening = true;
+  printReady();
+});
+controlServer.on("error", function(e) {
+  console.error("控制端端口 " + PORT + " 启动失败: " + e.message);
+  process.exit(1);
+});
+controlServer.on("listening", function() {
+  actualPort = controlServer.address().port;
   mainListening = true;
   printReady();
 });
 clientServer.on("error", function(e) {
-  console.error("客户端入口端口 " + CLIENT_PORT + " 启动失败: " + e.message);
+  console.error("客户端端口 " + CLIENT_PORT + " 启动失败: " + e.message);
   process.exit(1);
 });
 clientServer.on("listening", function() {
@@ -1233,5 +1403,16 @@ clientServer.on("listening", function() {
   clientListening = true;
   printReady();
 });
-server.listen(PORT);
+screenServer.on("error", function(e) {
+  console.error("提示屏端口 " + SCREEN_PORT + " 启动失败: " + e.message);
+  process.exit(1);
+});
+screenServer.on("listening", function() {
+  actualScreenPort = screenServer.address().port;
+  screenListening = true;
+  printReady();
+});
+entryServer.listen(ENTRY_PORT);
+controlServer.listen(PORT);
 clientServer.listen(CLIENT_PORT);
+screenServer.listen(SCREEN_PORT);

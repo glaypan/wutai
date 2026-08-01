@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#000000">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icon.svg">
-<title>舞台流程表 v6.0.4</title>
+<title>舞台流程表 v6.0.5</title>
 <!-- PDF.js + Tesseract.js（从服务端加载，完全离线，带重试机制） -->
 <script>
 // 动态加载脚本，支持重试
@@ -323,28 +323,41 @@ body {
 .icon-btn:hover { background: rgba(58,58,60,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 .icon-btn:active { transform: scale(0.88); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
 .mode-toggle-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
   padding:11px 18px;
-  border-radius:8px;
+  border-radius:10px;
   border: 1px solid var(--stroke);
   font-size:15px;
-  font-weight:500;
+  font-weight:600;
   cursor:pointer;
   background: var(--bg-elev-2);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   color:var(--text);
-  transition: transform 0.12s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height:44px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 .mode-toggle-btn:hover { background: rgba(58,58,60,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 .mode-toggle-btn:active { transform: scale(0.96); }
 .mode-toggle-btn.performance {
-  background: var(--ios-blue);
+  background: linear-gradient(135deg, #0a84ff 0%, #0066ff 100%);
   border-color: rgba(10,132,255,0.5);
+  color:#fff;
   box-shadow: 0 2px 12px rgba(10,132,255,0.3);
+  animation: perfPulse 2.5s ease-in-out infinite;
 }
-.mode-toggle-btn.performance:hover { background: #3b9bff; box-shadow: 0 4px 16px rgba(10,132,255,0.4); }
+.mode-toggle-btn.performance:hover { box-shadow: 0 4px 16px rgba(10,132,255,0.4); }
+.mode-toggle-btn .icon-svg { width:16px; height:16px; flex-shrink:0; }
+@keyframes perfPulse {
+  0%, 100% { box-shadow: 0 2px 12px rgba(10,132,255,0.3); }
+  50% { box-shadow: 0 2px 20px rgba(10,132,255,0.55); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mode-toggle-btn.performance { animation: none; }
+}
 .main-layout {
   display:grid;
   grid-template-columns: 360px 1fr;
@@ -1360,7 +1373,7 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
 }
 :root[data-theme="light"] .console-section { background:#fff; }
 :root[data-theme="light"] .header .icon-btn, :root[data-theme="light"] .header .mode-toggle-btn { color:var(--text); }
-.icon-svg { width:18px; height:18px; display:block; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.icon-svg { width:18px; height:18px; display:block; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; transition: stroke 0.2s ease; }
 .toolbar-groups { display:flex; align-items:stretch; gap:var(--space-sm); min-width:0; flex:1 1 auto; overflow-x:auto; }
 .toolbar-group { display:flex; align-items:center; gap:var(--space-xs); padding:var(--space-xs); border:1px solid var(--stroke); border-radius:var(--radius-lg); background:var(--bg-1); min-width:max-content; }
 .toolbar-group-label { color:var(--text-3); font-size:11px; writing-mode:vertical-rl; text-orientation:mixed; padding:2px 3px; }
@@ -1386,10 +1399,41 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
   .icon-btn, .btn, .mode-toggle-btn, .text-input, select { min-height:44px; }
   .program-channel-tools, .quick-ch-row { flex-wrap:wrap; }
 }
+/* 客户端分发面板 */
+.client-dispatch { background: var(--bg-elev); border: 1px solid var(--stroke); border-radius: var(--radius-lg); margin: 0 12px 12px; overflow: hidden; }
+.cd-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; user-select: none; background: var(--bg-elev-2); transition: background 0.2s ease; }
+.cd-header:hover { background: var(--bg-1); }
+.cd-header-left { display: flex; align-items: center; gap: 8px; }
+.cd-header-icon { width: 18px; height: 18px; color: var(--primary); }
+.cd-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.cd-chevron { width: 18px; height: 18px; color: var(--text-3); transition: transform 0.25s ease; }
+.cd-body { padding: 12px; }
+.cd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.cd-card { background: var(--bg-1); border: 1px solid var(--stroke); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cd-card-top { display: flex; align-items: center; gap: 10px; }
+.cd-role-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cd-role-icon .icon-svg { width: 20px; height: 20px; color: #fff; }
+.cd-role-info { min-width: 0; }
+.cd-role-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.cd-role-desc { font-size: 11px; color: var(--text-3); }
+.cd-qr-wrapper { display: flex; align-items: center; justify-content: center; padding: 8px; background: #fff; border-radius: var(--radius-sm); min-height: 120px; }
+.cd-qr-wrapper canvas, .cd-qr-wrapper img { max-width: 120px; max-height: 120px; }
+.cd-link-row { display: flex; align-items: center; gap: 4px; }
+.cd-link-input { flex: 1; min-width: 0; font-size: 11px; padding: 6px 8px; border: 1px solid var(--stroke); border-radius: 8px; background: var(--bg-elev); color: var(--text-2); }
+.cd-copy-btn, .cd-open-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--stroke); border-radius: 8px; background: var(--bg-elev); color: var(--text-2); cursor: pointer; flex-shrink: 0; transition: background 0.2s ease; text-decoration: none; }
+.cd-copy-btn:hover, .cd-open-btn:hover { background: var(--bg-elev-2); color: var(--primary); }
+.cd-copy-btn .icon-svg, .cd-open-btn .icon-svg { width: 15px; height: 15px; }
+@media (max-width: 600px) { .cd-grid { grid-template-columns: 1fr; } }
+/* 详情弹窗通道编辑 */
+.detail-channel-list { display:flex; flex-wrap:wrap; gap:6px; }
+.detail-channel-check { display:inline-flex; align-items:center; gap:4px; padding:6px 10px; border:1px solid var(--stroke); border-radius:8px; background:var(--bg-elev-2); cursor:pointer; font-size:13px; transition: all 0.2s ease; }
+.detail-channel-check.active { border-color: var(--primary); background: rgba(10,132,255,0.12); color: var(--primary); }
+.detail-channel-check input { width:14px; height:14px; accent-color: var(--primary); cursor:pointer; }
+.detail-channel-check .dc-type { font-size:11px; color:var(--text-3); }
 </style>
 </head>
 <body>
-  <svg id="local-icon-sprite" aria-hidden="true" width="0" height="0" style="position:absolute"><symbol id="icon-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol><symbol id="icon-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="m19.4 15 .1.1a2 2 0 0 1-2.8 2.8l-.1-.1a2 2 0 0 0-3.4 1.4v.2a2 2 0 0 1-4 0v-.2a2 2 0 0 0-3.4-1.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A2 2 0 0 0 1.6 11H1.5a2 2 0 0 1 0-4h.2a2 2 0 0 0 1.4-3.4l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A2 2 0 0 0 9.3 2.2V2a2 2 0 0 1 4 0v.2a2 2 0 0 0 3.4 1.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A2 2 0 0 0 20.9 10h.2a2 2 0 0 1 0 4h-.2a2 2 0 0 0-1.5 1Z"/></symbol><symbol id="icon-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></symbol><symbol id="icon-import" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol><symbol id="icon-display" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></symbol><symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="icon-cue" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h16"/><circle cx="18" cy="12" r="2"/></symbol><symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></symbol></svg>
+  <svg id="local-icon-sprite" aria-hidden="true" width="0" height="0" style="position:absolute"><symbol id="icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/><path d="M9 6h11M9 12h11M9 18h11"/></symbol><symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 13h6M9 17h4"/></symbol><symbol id="icon-import" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol><symbol id="icon-display" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><circle cx="8" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="14" cy="12" r="1" fill="currentColor" stroke="none"/></symbol><symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol><symbol id="icon-cue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h12M3 18h18"/><circle cx="18" cy="12" r="2.5" fill="currentColor" stroke="none"/></symbol><symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol><symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol><symbol id="icon-clapperboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M3 11 4.5 5.5a2 2 0 0 1 2.4-1.5L20 7"/><path d="m7 6 1.5 4M12 5l1.5 4M17 4l1.5 4"/></symbol><symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="icon-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/></symbol><symbol id="icon-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol><symbol id="icon-clients" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h6M7 12h4"/></symbol><symbol id="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z" fill="currentColor" stroke="none"/></symbol><symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol><symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></symbol><symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></symbol><symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol><symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol><symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol><symbol id="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol><symbol id="icon-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M21 14h-3a2 2 0 0 0-2 2v3M21 21v.01M14 10v.01M14 14v.01"/></symbol><symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></symbol><symbol id="icon-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol><symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="icon-cast" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M2 12a4 4 0 0 1 4 4M2 16a2 2 0 0 1 2 2M2 20h.01"/></symbol><symbol id="icon-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14 0M8.5 16.1a6 6 0 0 1 7 0M2 8.82a15 15 0 0 1 20 0"/><path d="M12 20h.01"/></symbol><symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol><symbol id="icon-panel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6M3 15h6"/></symbol><symbol id="icon-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol></svg>
   <section id="midi-bridge-view" class="midi-bridge-view hidden" aria-label="服务器 MIDI 桥">
     <div class="midi-bridge-shell">
       <header class="midi-bridge-header">
@@ -1455,7 +1499,7 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
       <span id="server-ip-display" class="server-ip-display" style="display:none"></span>
     </div>
     <div class="header-center">
-      <button class="mode-toggle-btn" id="mode-toggle-btn" onclick="toggleMode()">设置模式</button>
+      <button class="mode-toggle-btn" id="mode-toggle-btn" onclick="toggleMode()"><svg class="icon-svg"><use href="#icon-settings"/></svg><span class="mode-toggle-text">设置模式</span></button>
       <div id="conn-status" class="conn-status disconnected" onclick="onConnStatusClick()">
         <span class="conn-dot"></span>
         <span class="conn-text">连接中...</span>
@@ -1465,13 +1509,40 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
     <div class="header-right toolbar-groups" aria-label="桌面控制工具栏">
       <span id="client-count" class="client-count"></span>
       <div class="toolbar-group"><span class="toolbar-group-label">节目</span><button class="toolbar-command" type="button" id="perf-list-toggle-btn" onclick="togglePerfList()" title="节目列表" aria-label="节目列表" style="display:none"><svg class="icon-svg"><use href="#icon-list"/></svg><span>列表</span></button><button class="toolbar-command" type="button" id="global-setting-btn" onclick="openGlobalSetting()" title="全局通道设置" aria-label="全局通道设置"><svg class="icon-svg"><use href="#icon-settings"/></svg><span>通道</span></button></div>
-      <div class="toolbar-group"><span class="toolbar-group-label">舞台控制</span><button class="toolbar-command" type="button" id="timeline-btn" onclick="openTimelinePanel()" title="时间轴与多轨 Cue" aria-label="时间轴与多轨 Cue" style="display:none"><svg class="icon-svg"><use href="#icon-clock"/></svg><span>计时 / Cue</span></button><button class="icon-btn" type="button" id="subtitle-btn" onclick="openSubtitlePanel()" title="字幕管理" aria-label="字幕管理" style="display:none"><svg class="icon-svg"><use href="#icon-file"/></svg></button><button class="icon-btn" type="button" id="osc-midi-btn" onclick="openOscMidiPanel()" title="OSC/MIDI 控制" aria-label="OSC/MIDI 控制" style="display:none"><svg class="icon-svg"><use href="#icon-cue"/></svg></button></div>
+      <div class="toolbar-group"><span class="toolbar-group-label">舞台控制</span><button class="toolbar-command" type="button" id="timeline-btn" onclick="openTimelinePanel()" title="时间轴与多轨 Cue" aria-label="时间轴与多轨 Cue" style="display:none"><svg class="icon-svg"><use href="#icon-clock"/></svg><span>计时 / Cue</span></button><button class="icon-btn" type="button" id="subtitle-btn" onclick="openSubtitlePanel()" title="字幕管理" aria-label="字幕管理" style="display:none"><svg class="icon-svg"><use href="#icon-megaphone"/></svg></button><button class="icon-btn" type="button" id="osc-midi-btn" onclick="openOscMidiPanel()" title="OSC/MIDI 控制" aria-label="OSC/MIDI 控制" style="display:none"><svg class="icon-svg"><use href="#icon-cue"/></svg></button></div>
       <div class="toolbar-group"><span class="toolbar-group-label">文件</span><button class="toolbar-command" type="button" id="import-btn" onclick="openImport()" title="导入 PDF/Word" aria-label="导入 PDF/Word" style="display:none"><svg class="icon-svg"><use href="#icon-import"/></svg><span>导入</span></button><button class="toolbar-command" type="button" id="export-channel-btn" onclick="exportChannelList()" title="导出通道清单" aria-label="导出通道清单"><svg class="icon-svg"><use href="#icon-file"/></svg><span>导出</span></button></div>
-      <div class="toolbar-group"><span class="toolbar-group-label">输出</span><button class="icon-btn" type="button" id="qr-btn" onclick="showQR()" title="显示二维码" aria-label="显示二维码"><svg class="icon-svg"><use href="#icon-display"/></svg></button><button class="icon-btn" type="button" id="download-btn" onclick="openDownloadModal()" title="下载客户端" aria-label="下载客户端"><svg class="icon-svg"><use href="#icon-import"/></svg></button><button class="icon-btn" type="button" id="screen-setting-btn" onclick="openScreenSetting()" title="提示屏设置" aria-label="提示屏设置" style="display:none"><svg class="icon-svg"><use href="#icon-display"/></svg></button></div>
-      <div class="toolbar-group"><span class="toolbar-group-label">系统</span><button class="icon-btn" type="button" id="project-tools-btn" onclick="openProjectTools()" title="工程、撤销与日志" aria-label="工程、撤销与日志" style="display:none"><svg class="icon-svg"><use href="#icon-settings"/></svg></button><button class="icon-btn" type="button" id="theme-toggle-btn" onclick="toggleTheme()" title="切换浅色模式" aria-label="切换浅色模式"><svg class="icon-svg"><use href="#icon-moon"/></svg></button><button class="icon-btn header-reset" type="button" id="header-reset-btn" onclick="resetProgram('all')" title="重置全部节目状态" aria-label="重置全部节目状态" style="display:none">↺</button></div>
+      <div class="toolbar-group"><span class="toolbar-group-label">输出</span><button class="icon-btn" type="button" id="qr-btn" onclick="showQR()" title="显示二维码" aria-label="显示二维码"><svg class="icon-svg"><use href="#icon-qr"/></svg></button><button class="icon-btn" type="button" id="download-btn" onclick="openDownloadModal()" title="下载客户端" aria-label="下载客户端"><svg class="icon-svg"><use href="#icon-download"/></svg></button><button class="icon-btn" type="button" id="screen-setting-btn" onclick="openScreenSetting()" title="提示屏设置" aria-label="提示屏设置" style="display:none"><svg class="icon-svg"><use href="#icon-display"/></svg></button></div>
+      <div class="toolbar-group"><span class="toolbar-group-label">系统</span><button class="icon-btn" type="button" id="project-tools-btn" onclick="openProjectTools()" title="工程、撤销与日志" aria-label="工程、撤销与日志" style="display:none"><svg class="icon-svg"><use href="#icon-settings"/></svg></button><button class="icon-btn" type="button" id="theme-toggle-btn" onclick="toggleTheme()" title="切换浅色模式" aria-label="切换浅色模式"><svg class="icon-svg"><use href="#icon-moon"/></svg></button><button class="icon-btn header-reset" type="button" id="header-reset-btn" onclick="resetProgram('all')" title="重置全部节目状态" aria-label="重置全部节目状态" style="display:none"><svg class="icon-svg"><use href="#icon-refresh"/></svg></button></div>
     </div>
   </header>
+  <section id="client-dispatch" class="client-dispatch" style="display:none">
+    <div class="cd-header" onclick="toggleClientDispatch()">
+      <div class="cd-header-left">
+        <svg class="icon-svg cd-header-icon"><use href="#icon-clients"/></svg>
+        <span class="cd-title">客户端分发</span>
+      </div>
+      <svg class="icon-svg cd-chevron" id="cd-chevron"><use href="#icon-chevron-right"/></svg>
+    </div>
+    <div class="cd-body" id="cd-body">
+      <div class="cd-grid" id="cd-grid"></div>
+    </div>
+  </section>
   <nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="手机导航"><button type="button" class="is-active" data-mobile-view="programs" onclick="setMobileView('programs')"><svg class="icon-svg"><use href="#icon-list"/></svg><span>节目</span></button><button type="button" data-mobile-view="timer" onclick="setMobileView('timer')"><svg class="icon-svg"><use href="#icon-clock"/></svg><span>计时</span></button><button type="button" data-mobile-view="cue" onclick="setMobileView('cue')"><svg class="icon-svg"><use href="#icon-cue"/></svg><span>Cue</span></button><button type="button" data-mobile-view="settings" onclick="setMobileView('settings')"><svg class="icon-svg"><use href="#icon-settings"/></svg><span>设置</span></button></nav>
+
+  <!-- 模式切换审批弹窗 (控制端) -->
+  <div id="modal-mode-approval" class="modal" style="display:none;">
+    <div class="modal-box" style="max-width:440px">
+      <h3>模式切换审批</h3>
+      <div style="margin:16px 0;">
+        <p id="mode-approval-info" style="font-size:16px;font-weight:600;margin-bottom:8px;"></p>
+        <p style="color:var(--text-muted,#888);font-size:13px;">理由：<span id="mode-approval-reason"></span></p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="approveModeSwitch(false)">拒绝</button>
+        <button class="btn btn-primary" onclick="approveModeSwitch(true)" style="background:#0a8419;">批准</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 编辑演出名称弹窗 -->
   <div id="modal-show-name" class="modal hidden">
@@ -1843,12 +1914,20 @@ body.mode-setup .completed-check-icon { cursor:pointer; pointer-events:auto; }
                 </div>
                 <div style="display:flex;gap:12px;flex-wrap:wrap">
                   <div style="flex:1;min-width:140px">
-                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">主服务端口 (HTTP)</label>
-                    <input type="number" id="config-server-port" placeholder="3000" min="1" max="65535" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px;font-family:monospace">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">入口页端口</label>
+                    <input type="number" id="config-entry-port" placeholder="3000" min="1" max="65535" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px;font-family:monospace">
                   </div>
                   <div style="flex:1;min-width:140px">
-                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">客户端入口端口 (HTTP/WS)</label>
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">控制端端口</label>
+                    <input type="number" id="config-server-port" placeholder="3001" min="1" max="65535" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px;font-family:monospace">
+                  </div>
+                  <div style="flex:1;min-width:140px">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">客户端端口</label>
                     <input type="number" id="client-port-input" placeholder="3002" min="1" max="65535" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px;font-family:monospace">
+                  </div>
+                  <div style="flex:1;min-width:140px">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">提示屏端口</label>
+                    <input type="number" id="config-screen-port" placeholder="3003" min="1" max="65535" style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-1);color:var(--text-1);font-size:13px;font-family:monospace">
                   </div>
                   <div style="flex:1;min-width:140px">
                     <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">OSC 端口 (UDP)</label>
@@ -2659,7 +2738,7 @@ function authHeaders(extra) {
 }
 var PERM = {
   control:    { mode:true, addDel:true, drag:true, editName:true, editDuration:true, editMusic:true, editChannel:true, editNotes:true, channelAdmin:true, importIt:true, nav:true, reset:true, exportIt:true, rename:true, subtitleInput:true, subtitleControl:true },
-  director:   { nav:true, subtitleControl:true },
+  director:   { nav:true, subtitleControl:true, editNotes:true, editMusic:true, editChannel:false, addDel:true },
   assistant:  { editMusic:true, editChannel:true, editNotes:true, subtitleControl:true },
   backstage:  { editNotes:true },
   screen:     {}
@@ -2759,11 +2838,44 @@ function tryConnectWS(backgroundOnly) {
             renderTimer();
           }
           break;
+        case "permissions_update":
+          if (data.permissions) {
+            applyServerPermissions(data.permissions);
+            renderAll();
+          }
+          break;
+        case "mode_switch_request":
+          // Control panel receives director's request
+          if (ROLE === 'control') showModeApprovalModal(data);
+          break;
+        case "mode_switch_result":
+          // Director receives approval/rejection result
+          if (ROLE === 'director') {
+            resetModeSwitchButton();
+            if (data.approved) {
+              showToast('模式切换已批准');
+            } else {
+              var reasonMap = { timeout: '审批超时', no_control: '控制端不在线', rejected: '被拒绝' };
+              showToast('模式切换未通过：' + (reasonMap[data.reason] || data.reason || '未知原因'));
+            }
+          }
+          break;
+        case "mode_switch_pending":
+          // Director receives confirmation that request is pending
+          if (ROLE === 'director') {
+            showToast('请求已提交，等待控制端审批');
+          }
+          break;
+        case "mode_switch_request_cleared":
+          // Control panel: another control connection handled the request
+          if (ROLE === 'control') closeModeApprovalModal();
+          break;
         case "error":
           if (data.code === 'persistence_failed' && data.operation === 'finish_rehearsal') {
             showToast('保存失败，请重试');
             renderTimer();
           } else if (data.code === 'forbidden') showToast('无权限：' + (data.action || ''));
+          else if (data.code === 'conflict') showToast('已有待处理的请求');
           break;
       }
     };
@@ -2971,6 +3083,28 @@ function tryConnectManualServer(serverUrl) {
             showToast('已保存 ' + StageCore.millisecondsToMinutes(savedElapsedMs) + ' 分钟');
             renderTimer();
           }
+          break;
+        case "permissions_update":
+          if (data.permissions) {
+            applyServerPermissions(data.permissions);
+            renderAll();
+          }
+          break;
+        case "mode_switch_request":
+          if (ROLE === 'control') showModeApprovalModal(data);
+          break;
+        case "mode_switch_result":
+          if (ROLE === 'director') {
+            resetModeSwitchButton();
+            if (data.approved) showToast('模式切换已批准');
+            else showToast('模式切换未通过');
+          }
+          break;
+        case "mode_switch_pending":
+          if (ROLE === 'director') showToast('请求已提交，等待控制端审批');
+          break;
+        case "mode_switch_request_cleared":
+          if (ROLE === 'control') closeModeApprovalModal();
           break;
         case "error":
           if (data.code === 'persistence_failed' && data.operation === 'finish_rehearsal') {
@@ -3343,6 +3477,61 @@ window.toggleMode = function () {
   sendMsg({ type: "update_state", data: { mode: newMode } });
   renderAll();  // 立即更新UI，不等待服务器广播
 };
+
+// ---------- 导演端模式切换审批 ----------
+var pendingModeSwitchBtn = null;
+window.requestModeSwitch = function() {
+  var targetMode = localState.mode === 'setup' ? 'performance' : 'setup';
+  if (targetMode === 'setup') {
+    showToast('导演端只能切换到演出模式，不能切回设置模式');
+    return;
+  }
+  sendMsg({ type: 'mode_switch_request', targetMode: targetMode, reason: '导演端请求切换到演出模式' });
+  var btn = document.getElementById('mode-toggle-btn');
+  if (btn) {
+    pendingModeSwitchBtn = btn;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    var origText = btn.querySelector('.mode-toggle-text');
+    if (origText) origText.textContent = '等待审批...';
+  }
+  showToast('已发送模式切换请求，等待控制端审批');
+};
+
+function resetModeSwitchButton() {
+  if (pendingModeSwitchBtn) {
+    pendingModeSwitchBtn.disabled = false;
+    pendingModeSwitchBtn.style.opacity = '';
+    pendingModeSwitchBtn = null;
+  }
+}
+
+// ---------- 控制端审批弹窗 ----------
+window.approveModeSwitch = function(approved) {
+  var modal = document.getElementById('modal-mode-approval');
+  var requestId = modal ? modal.dataset.requestId : '';
+  if (!requestId) return;
+  sendMsg({ type: 'mode_switch_response', requestId: requestId, approved: approved });
+  if (modal) modal.style.display = 'none';
+};
+
+function showModeApprovalModal(data) {
+  var modal = document.getElementById('modal-mode-approval');
+  if (!modal) return;
+  modal.dataset.requestId = data.requestId || '';
+  var modeText = data.targetMode === 'performance' ? '演出模式' : '设置模式';
+  var roleLabel = data.fromRole === 'director' ? '导演端' : data.fromRole;
+  var infoEl = document.getElementById('mode-approval-info');
+  if (infoEl) infoEl.textContent = roleLabel + ' 请求切换到【' + modeText + '】';
+  var reasonEl = document.getElementById('mode-approval-reason');
+  if (reasonEl) reasonEl.textContent = data.reason || '无';
+  modal.style.display = 'block';
+}
+
+function closeModeApprovalModal() {
+  var modal = document.getElementById('modal-mode-approval');
+  if (modal) modal.style.display = 'none';
+}
 
 // ---------- 全局通道设置弹窗 ----------
 window.openGlobalSetting = function() {
@@ -3853,6 +4042,30 @@ function applyRoleVisibility() {
     badge.textContent = ROLE_ICONS[ROLE] || '控';
     badge.title = '当前: ' + (ROLE_LABELS[ROLE] || '控制端') + ' - 点击切换角色';
   }
+  // 未获节目新增删除权限的非控制角色固定为演出视图（必须在导航按钮检查之前强制模式）。
+  if (ROLE !== 'control' && !can('addDel')) {
+    localState.mode = 'performance';
+    // 首次进入时默认显示列表，但用户手动隐藏后不强制弹出
+    if (!userListToggleInit) {
+      perfListVisible = true;
+      userListToggleInit = true;
+    }
+    document.getElementById('setup-view').classList.add('hidden');
+    document.getElementById('performance-view').classList.remove('hidden');
+    var mt = document.getElementById('mode-toggle-btn');
+    if (mt) mt.style.display = 'none';
+  }
+  // 导演端有 addDel 权限但模式切换需审批：显示模式切换按钮但改为请求审批
+  if (ROLE === 'director' && can('addDel')) {
+    var dirModeBtn = document.getElementById('mode-toggle-btn');
+    if (dirModeBtn) {
+      dirModeBtn.style.display = '';
+      dirModeBtn.onclick = function() { requestModeSwitch(); };
+    }
+  }
+  // 客户端分发面板：仅控制端可见
+  var cdPanel = document.getElementById('client-dispatch');
+  if (cdPanel) cdPanel.style.display = ROLE === 'control' ? '' : 'none';
   // 按权限显隐按钮
   var showMap = {
     'mode-toggle-btn': can('mode'),
@@ -3916,20 +4129,6 @@ function applyRoleVisibility() {
   }
   if (screenView) screenView.classList.add('hidden');
   document.querySelector('.main-layout').style.display = '';
-
-  // 未获节目新增删除权限的非控制角色固定为演出视图。
-  if (ROLE !== 'control' && !can('addDel')) {
-    localState.mode = 'performance';
-    // 首次进入时默认显示列表，但用户手动隐藏后不强制弹出
-    if (!userListToggleInit) {
-      perfListVisible = true;
-      userListToggleInit = true;
-    }
-    document.getElementById('setup-view').classList.add('hidden');
-    document.getElementById('performance-view').classList.remove('hidden');
-    var mt = document.getElementById('mode-toggle-btn');
-    if (mt) mt.style.display = 'none';
-  }
 }
 
 // ---------- 提示屏渲染 ----------
@@ -4058,19 +4257,114 @@ window.openRoleSwitcher = function() {
   window.open('http://' + host + ':' + port + '/', '_blank');
 };
 
+// ---------- 客户端分发面板 ----------
+var cdDispatchInitDone = false;
+var cdExpanded = true;
+window.toggleClientDispatch = function() {
+  cdExpanded = !cdExpanded;
+  var body = document.getElementById('cd-body');
+  var chevron = document.getElementById('cd-chevron');
+  if (body) body.style.display = cdExpanded ? '' : 'none';
+  if (chevron) chevron.style.transform = cdExpanded ? 'rotate(90deg)' : 'rotate(0deg)';
+};
+window.loadClientDispatch = function() {
+  var grid = document.getElementById('cd-grid');
+  if (!grid) return;
+  var roleDefs = [
+    {key:'director', icon:'#icon-users', name:'导演端', desc:'导航节目、字幕控制', color:'#7c3aed'},
+    {key:'assistant', icon:'#icon-clipboard', name:'助理端', desc:'备注、音乐、通道编辑', color:'#ea580c'},
+    {key:'backstage', icon:'#icon-panel', name:'幕后端', desc:'查看节目备注', color:'#475569'},
+    {key:'screen', icon:'#icon-monitor', name:'提示屏', desc:'全屏聚合展示', color:'#059669'}
+  ];
+  function buildCards(links) {
+    grid.innerHTML = '';
+    roleDefs.forEach(function(r) {
+      var url = links[r.key] || '';
+      var card = document.createElement('div');
+      card.className = 'cd-card';
+      card.innerHTML =
+        '<div class="cd-card-top">' +
+          '<div class="cd-role-icon" style="background:' + r.color + '"><svg class="icon-svg"><use href="' + r.icon + '"/></svg></div>' +
+          '<div class="cd-role-info"><div class="cd-role-name">' + r.name + '</div><div class="cd-role-desc">' + r.desc + '</div></div>' +
+        '</div>' +
+        '<div class="cd-qr-wrapper" data-url="' + escapeHtml(url) + '"></div>' +
+        '<div class="cd-link-row">' +
+          '<input class="cd-link-input" value="' + escapeHtml(url) + '" readonly />' +
+          '<button class="cd-copy-btn" type="button" data-role="' + r.key + '" title="复制链接"><svg class="icon-svg"><use href="#icon-copy"/></svg></button>' +
+          '<a class="cd-open-btn" href="' + escapeHtml(url) + '" target="_blank" rel="noopener" title="打开链接"><svg class="icon-svg"><use href="#icon-cast"/></svg></a>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+    grid.querySelectorAll('.cd-copy-btn').forEach(function(btn) {
+      btn.onclick = function() { cdCopyLink(this.getAttribute('data-role')); };
+    });
+    if (typeof QRCode !== 'undefined') {
+      grid.querySelectorAll('.cd-qr-wrapper').forEach(function(item) {
+        var u = item.getAttribute('data-url');
+        if (u) new QRCode(item, { text: u, width: 120, height: 120, colorDark: '#000000', colorLight: '#ffffff' });
+      });
+    }
+  }
+  if (cachedAccessLinks) {
+    buildCards(cachedAccessLinks);
+  } else {
+    fetch('/api/server-info', { headers: authHeaders() })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.links) {
+          cachedServerIP = data.ip || cachedServerIP;
+          cachedServerPort = data.port || 3000;
+          cachedClientPort = data.clientPort || 3002;
+          cachedAccessLinks = data.links;
+          buildCards(data.links);
+        }
+      })
+      .catch(function() {});
+  }
+};
+window.cdCopyLink = function(role) {
+  var url = (cachedAccessLinks && cachedAccessLinks[role]) || '';
+  if (!url) { showToast('链接未就绪'); return; }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function() {
+        showToast((ROLE_LABELS[role] || role) + '链接已复制');
+      }).catch(function() { execCopy(url, role); });
+    } else { execCopy(url, role); }
+  } catch(e) { execCopy(url, role); }
+  function execCopy(u, r) {
+    var ta = document.createElement('textarea');
+    ta.value = u; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); showToast((ROLE_LABELS[r] || r) + '链接已复制'); }
+    catch(e) { showToast('复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  }
+};
+window.initClientDispatch = function() {
+  if (cdDispatchInitDone) return;
+  if (ROLE !== 'control') return;
+  cdDispatchInitDone = true;
+  cdExpanded = true;
+  var chevron = document.getElementById('cd-chevron');
+  if (chevron) chevron.style.transform = 'rotate(90deg)';
+  loadClientDispatch();
+};
+
 // ---------- 全局渲染入口 ----------
 function renderAll() {
   if (localState.screenSettings) screenSettings = Object.assign({}, screenSettings, localState.screenSettings);
   // 先应用角色权限（可能强制修改 mode），再做布局
   applyRoleVisibility();
+  initClientDispatch();
 
   document.getElementById('show-name-display').innerText = localState.showName || "舞台流程表";
   const toggleBtn = document.getElementById('mode-toggle-btn');
   if (localState.mode === 'setup') {
-    toggleBtn.textContent = "⚙️ 设置模式";
+    toggleBtn.innerHTML = '<svg class="icon-svg"><use href="#icon-settings"/></svg><span class="mode-toggle-text">设置模式</span>';
     toggleBtn.classList.remove('performance');
   } else {
-    toggleBtn.textContent = "🎬 演出模式";
+    toggleBtn.innerHTML = '<svg class="icon-svg"><use href="#icon-clapperboard"/></svg><span class="mode-toggle-text">演出模式</span>';
     toggleBtn.classList.add('performance');
   }
   document.getElementById('setup-view').classList.toggle('hidden', localState.mode !== 'setup');
@@ -4924,7 +5218,7 @@ var PASSWORD_ROLES = ['control', 'director', 'assistant', 'backstage', 'screen']
 var PASSWORD_ROLE_LABELS = { control:'控制端', director:'导演端', assistant:'助理端', backstage:'幕后端', screen:'提示屏' };
 var cachedPasswordTemplates = {};
 var cachedRolePermissions = {
-  director: { nav:true, subtitleControl:true, editNotes:false, editMusic:false, editChannels:false, addDel:false },
+  director: { nav:true, subtitleControl:true, editNotes:true, editMusic:true, editChannels:false, addDel:true },
   assistant: { nav:false, subtitleControl:true, editNotes:true, editMusic:true, editChannels:true, addDel:false },
   backstage: { nav:false, subtitleControl:false, editNotes:true, editMusic:false, editChannels:false, addDel:false }
 };
@@ -4957,15 +5251,19 @@ function collectRolePermissions() {
 function renderPortRuntimeStatus(cfg) {
   var el = document.getElementById('port-runtime-status');
   if (!el || !cfg) return;
-  var actualMain = cfg.actualPort || cfg.port || cachedServerPort || 3000;
+  var actualEntry = cfg.actualEntryPort || cfg.entryPort || 3000;
+  var actualMain = cfg.actualPort || cfg.port || cachedServerPort || 3001;
   var actualClient = cfg.actualClientPort || cfg.clientPort || cachedClientPort || 3002;
+  var actualScreen = cfg.actualScreenPort || cfg.screenPort || 3003;
   var actualOsc = cfg.actualOscEnabled === false || cfg.actualOscPort === null ? '关' : (cfg.actualOscPort || cfg.oscPort || 5300);
-  var configuredMain = cfg.port || cfg.configuredPort || 3000;
+  var configuredEntry = cfg.entryPort || cfg.configuredEntryPort || 3000;
+  var configuredMain = cfg.port || cfg.configuredPort || 3001;
   var configuredClient = cfg.clientPort || cfg.configuredClientPort || 3002;
+  var configuredScreen = cfg.screenPort || cfg.configuredScreenPort || 3003;
   var configuredOsc = cfg.oscEnabled === false ? '关' : (cfg.oscPort || cfg.configuredOscPort || 5300);
-  var changed = actualMain !== configuredMain || actualClient !== configuredClient || actualOsc !== configuredOsc;
-  var override = cfg.portOverride || cfg.clientPortOverride || cfg.oscPortOverride || cfg.oscDisableOverride;
-  el.textContent = '当前运行 HTTP ' + actualMain + ' / 客户端入口 ' + actualClient + ' / OSC ' + actualOsc + '；下次启动配置 HTTP ' + configuredMain + ' / 客户端入口 ' + configuredClient + ' / OSC ' + configuredOsc + (override ? '；当前由启动环境变量覆盖' : (changed ? '；重启后切换到配置端口' : ''));
+  var changed = actualEntry !== configuredEntry || actualMain !== configuredMain || actualClient !== configuredClient || actualScreen !== configuredScreen || actualOsc !== configuredOsc;
+  var override = cfg.portOverride || cfg.clientPortOverride || cfg.entryPortOverride || cfg.screenPortOverride || cfg.oscPortOverride || cfg.oscDisableOverride;
+  el.textContent = '当前运行: 入口' + actualEntry + ' / 控制' + actualMain + ' / 客户' + actualClient + ' / 提示屏' + actualScreen + ' / OSC ' + actualOsc + '；下次启动: 入口' + configuredEntry + ' / 控制' + configuredMain + ' / 客户' + configuredClient + ' / 提示屏' + configuredScreen + ' / OSC ' + configuredOsc + (override ? '；当前由启动环境变量覆盖' : (changed ? '；重启后切换到配置端口' : ''));
   el.style.color = override ? '#fbbf24' : (changed ? 'var(--ios-orange)' : 'var(--text-2)');
 }
 
@@ -4983,14 +5281,18 @@ window.syncOscPortInputs = function(sourceId) {
 // 端口配置：读取
 function loadPortConfig() {
   fetch('/api/config', { headers: authHeaders() }).then(function(r) { return r.json(); }).then(function(cfg) {
+    var ep = document.getElementById('config-entry-port');
     var sp = document.getElementById('config-server-port');
     var cp = document.getElementById('client-port-input');
+    var scp = document.getElementById('config-screen-port');
     var op = document.getElementById('config-osc-port');
     var opInline = document.getElementById('config-osc-port-inline');
     var oe = document.getElementById('config-osc-enabled');
     var lan = document.getElementById('config-osc-lan');
-    if (sp) sp.value = cfg.port || 3000;
+    if (ep) ep.value = cfg.entryPort || 3000;
+    if (sp) sp.value = cfg.port || 3001;
     if (cp) cp.value = cfg.clientPort || 3002;
+    if (scp) scp.value = cfg.screenPort || 3003;
     if (op) op.value = cfg.oscPort || 5300;
     if (opInline) opInline.value = cfg.oscPort || 5300;
     if (oe) oe.checked = cfg.oscEnabled !== false;
@@ -5002,31 +5304,38 @@ function loadPortConfig() {
 
 // 端口配置：保存
 window.savePortConfig = function() {
+  var ep = document.getElementById('config-entry-port');
   var sp = document.getElementById('config-server-port');
   var cp = document.getElementById('client-port-input');
+  var scp = document.getElementById('config-screen-port');
   var op = document.getElementById('config-osc-port');
   var opInline = document.getElementById('config-osc-port-inline');
   var oe = document.getElementById('config-osc-enabled');
   var lan = document.getElementById('config-osc-lan');
   var resultEl = document.getElementById('port-config-result');
-  var port = parseInt(sp ? sp.value : '3000') || 3000;
+  var entryPort = parseInt(ep ? ep.value : '3000') || 3000;
+  var port = parseInt(sp ? sp.value : '3001') || 3001;
   var clientPort = parseInt(cp ? cp.value : '3002') || 3002;
+  var screenPort = parseInt(scp ? scp.value : '3003') || 3003;
   var oscPort = parseInt(op ? op.value : (opInline ? opInline.value : '5300')) || 5300;
-  if (port < 1 || port > 65535) { if (resultEl) { resultEl.textContent = '❌ 服务器端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
-  if (clientPort < 1 || clientPort > 65535) { if (resultEl) { resultEl.textContent = '❌ 客户端入口端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
-  if (clientPort === port) { if (resultEl) { resultEl.textContent = '❌ 主服务端口和客户端入口端口不能相同'; resultEl.style.color = '#f87171'; } return; }
+  if (entryPort < 1 || entryPort > 65535) { if (resultEl) { resultEl.textContent = '❌ 入口页端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
+  if (port < 1 || port > 65535) { if (resultEl) { resultEl.textContent = '❌ 控制端端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
+  if (clientPort < 1 || clientPort > 65535) { if (resultEl) { resultEl.textContent = '❌ 客户端端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
+  if (screenPort < 1 || screenPort > 65535) { if (resultEl) { resultEl.textContent = '❌ 提示屏端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
+  var ports = [entryPort, port, clientPort, screenPort];
+  if (new Set(ports).size !== 4) { if (resultEl) { resultEl.textContent = '❌ 入口页、控制端、客户端、提示屏端口必须互不相同'; resultEl.style.color = '#f87171'; } return; }
   if (oscPort < 1 || oscPort > 65535) { if (resultEl) { resultEl.textContent = '❌ OSC 端口无效 (1-65535)'; resultEl.style.color = '#f87171'; } return; }
   fetch('/api/config', {
     method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ port: port, clientPort: clientPort, oscPort: oscPort, oscEnabled: !!(oe && oe.checked), oscAllowLan: !!(lan && lan.checked), rolePermissions: collectRolePermissions() })
+    body: JSON.stringify({ entryPort: entryPort, port: port, clientPort: clientPort, screenPort: screenPort, oscPort: oscPort, oscEnabled: !!(oe && oe.checked), oscAllowLan: !!(lan && lan.checked), rolePermissions: collectRolePermissions() })
   }).then(function(r) { return r.json().then(function(data) { if (!r.ok) throw new Error(data.error || '保存失败'); return data; }); }).then(function(data) {
     cachedAccessLinks = null;
     if (data.rolePermissions) renderRolePermissions(data.rolePermissions);
     renderPortRuntimeStatus(data);
-    var override = data.portOverride || data.clientPortOverride || data.oscPortOverride || data.oscDisableOverride;
+    var override = data.portOverride || data.clientPortOverride || data.entryPortOverride || data.screenPortOverride || data.oscPortOverride || data.oscDisableOverride;
     if (resultEl) {
-      resultEl.textContent = override ? '✅ 已保存；但当前启动环境正在覆盖端口，关闭后用启动脚本重新运行才会使用配置端口' : '✅ 已保存！请关闭服务器窗口并重新运行安装包以使端口生效';
+      resultEl.textContent = override ? '✅ 已保存；但当前启动环境正在覆盖端口，关闭后用启动脚本重新运行才会使用配置端口' : '✅ 已保存！请关闭服务器窗口并重新运行以使端口生效';
       resultEl.style.color = '#4ade80';
     }
     showToast('端口配置已保存，重启服务器后生效');
@@ -5816,12 +6125,29 @@ window.openProgramDetail = function(idx) {
 
   var canMusic = typeof can === 'function' ? can('editMusic') : true;
   var canNotes = typeof can === 'function' ? can('editNotes') : true;
+  var canChannel = typeof can === 'function' ? can('editChannel') : true;
+
+  // 通道区域：有编辑权限时显示复选框列表，否则只读展示
+  var channelHtml;
+  if (canChannel && allChannels.length > 0) {
+    var usedIds = prog.useChannels || [];
+    channelHtml = '<div class="detail-channel-list" id="detail-channel-list">' + allChannels.map(function(ch) {
+      var isActive = usedIds.indexOf(ch.id) !== -1;
+      var typeName = getTypeName(ch);
+      return '<label class="detail-channel-check' + (isActive ? ' active' : '') + '">' +
+        '<input type="checkbox" data-cid="' + escapeHtml(ch.id) + '"' + (isActive ? ' checked' : '') + '/>' +
+        '<span class="dc-name">' + escapeHtml(ch.name) + '</span>' +
+        '<span class="dc-type">' + escapeHtml(typeName) + '</span></label>';
+    }).join('') + '</div>';
+  } else {
+    channelHtml = '<div class="detail-channels">' + (used.length ? used.map(buildChannelTag).join('') : '<span style="color:#64748b;">未设置</span>') + '</div>';
+  }
 
   body.innerHTML =
     '<div class="detail-status-row"><span class="status-pill ' + statusClass + '">' + statusText + '</span></div>' +
     '<div class="detail-row"><div class="card-label">🎵 音乐播放提示</div>' +
       '<textarea class="detail-edit-area" id="detail-edit-musiccue" placeholder="如：前奏8小节后进人声" ' + (canMusic ? '' : 'disabled') + '>' + escapeHtml(prog.musicCue || '') + '</textarea></div>' +
-    '<div class="detail-row"><div class="card-label">🎛 启用通道</div><div class="detail-channels">' + (used.length ? used.map(buildChannelTag).join('') : '<span style="color:#64748b;">未设置</span>') + '</div></div>' +
+    '<div class="detail-row"><div class="card-label">🎛 启用通道</div>' + channelHtml + '</div>' +
     '<div class="detail-row"><div class="card-label">📝 备注</div>' +
       '<textarea class="detail-edit-area" id="detail-edit-notes" placeholder="舞台、灯光、演员提示" ' + (canNotes ? '' : 'disabled') + '>' + escapeHtml(prog.notes || '') + '</textarea></div>' +
     '<div class="detail-row"><div class="card-label">⏱ 时长</div><div class="detail-duration">' + (prog.duration > 0 ? formatDuration(prog.duration) : '不计时') + '</div></div>';
@@ -5838,6 +6164,26 @@ window.openProgramDetail = function(idx) {
     notesEl.onchange = function() {
       sendMsg({ type: 'update_program_field', idx: idx, field: 'notes', value: this.value, role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
     };
+  }
+
+  // 通道编辑：复选框切换时即时同步
+  if (canChannel) {
+    var channelList = document.getElementById('detail-channel-list');
+    if (channelList) {
+      channelList.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+        cb.onchange = function() {
+          var usedArr = prog.useChannels ? prog.useChannels.slice() : [];
+          var cid = this.getAttribute('data-cid');
+          var pos = usedArr.indexOf(cid);
+          if (this.checked && pos === -1) usedArr.push(cid);
+          else if (!this.checked && pos !== -1) usedArr.splice(pos, 1);
+          prog.useChannels = usedArr;
+          var label = this.closest('.detail-channel-check');
+          if (label) label.classList.toggle('active', this.checked);
+          sendMsg({ type: 'update_program_field', idx: idx, field: 'useChannels', value: usedArr, role: (typeof ROLE !== 'undefined' ? ROLE : 'control') });
+        };
+      });
+    }
   }
 
   var setBtn = document.getElementById('detail-set-current-btn');

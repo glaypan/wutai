@@ -1,0 +1,428 @@
+{
+  "showName": "舞台流程表",
+  "mode": "setup",
+  "currentProgramIndex": 0,
+  "version": 5,
+  "globalChannels": {
+    "mics": [],
+    "lines": []
+  },
+  "programs": [
+    {
+      "name": "16：30~17：00 仪式 彩排",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "新人、新娘 父母 参与 。具体 以策划师或管家的全 天流程为准",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "17：30 ~1 8：50",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "新人 迎宾 具体 以策划师或管家的全天流程为准 新人换装、稍作调整 。具体 以策划师或管家的全",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "18：30~19：00 换装 休息",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "天流程为准\n【晚宴仪式  （ 19 ： 00 ～ 19 ： 45 ）】",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：00 预告",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "主持人婚礼开场前提示，请宾客就坐",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：01~19：05 接亲回放",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "播放视频",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：06 灯光秀",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：07~19：09 主持人开场",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "主持人致开场白，晚宴仪式正式开始",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：10 兄弟姊妹进场",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "通道到舞台",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：11 新郎 出场",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "亮相 主舞台",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：12 新娘 出场",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "新娘在爸爸的陪同下进场",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：13 新郎走向 新娘",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：14 新娘父亲 交接",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "中心台 。交接后父亲回到主桌就座",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：15 新人进场",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "从中心台 走到主舞台",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：16 兄弟姊妹退场",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：17 交换戒指",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "2 个花童送戒指， T 台",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：18~19：24 新人共同发言",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "看稿",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：25 双方父母上台",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "T 台，新郎父母先走，新娘父母走后面",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：26~19：31 新郎 爸爸发言",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：32~19：35 新郎妈妈发言",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：36~19：39 新娘 爸爸发言",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：40 新郎舅舅上台发言",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：41 祝酒嘉宾上台",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "爷爷奶奶上台",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：42 祝酒",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "酒店送上 9 杯祝酒",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：43 抛花球",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：44 新人 退场",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "从主舞台退到宴会厅门外",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：45 上菜",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "【晚宴开始（ 19 ： 45 ～ 22： 00 ）】",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "19：45~20：15 新人换装",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "具体 以策划师或管家的全天流程为准",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "20：15~21：00 逐围敬酒",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "具体 以策划师或管家的全天流程为准",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "21：10 舅舅再次上台",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "宣布晚宴仪式结束",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "21：40 送客",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "具体 以策划师或管家的全天流程为准",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    },
+    {
+      "name": "22：00 大合照",
+      "duration": 0,
+      "rehearsalDurationMs": 0,
+      "notes": "具体 以策划师或管家的全天流程为准\n【备注 ：以上时间及内容仅供参考 ，具体时间及内容请根据与客人沟通后的实际情况进行调整 。】",
+      "musicCue": "",
+      "status": "pending",
+      "useChannels": []
+    }
+  ],
+  "subtitle": {
+    "lines": [],
+    "currentIndex": -1,
+    "visible": false
+  },
+  "screenSettings": {
+    "fontSize": 72,
+    "showStatus": true,
+    "showChannels": true,
+    "showMusic": true,
+    "showNotes": true,
+    "showNext": true,
+    "showProgress": true,
+    "displayMode": "live"
+  },
+  "timeline": {
+    "tracks": [
+      {
+        "id": "audio",
+        "name": "音频",
+        "type": "audio",
+        "enabled": true
+      },
+      {
+        "id": "video",
+        "name": "视频",
+        "type": "video",
+        "enabled": true
+      },
+      {
+        "id": "subtitle",
+        "name": "字幕",
+        "type": "subtitle",
+        "enabled": true
+      },
+      {
+        "id": "osc",
+        "name": "OSC",
+        "type": "osc",
+        "enabled": true
+      },
+      {
+        "id": "midi",
+        "name": "MIDI",
+        "type": "midi",
+        "enabled": true
+      }
+    ],
+    "cues": []
+  },
+  "timingSettings": {
+    "enabled": false,
+    "phase": "rehearsal",
+    "autoCue": false,
+    "preferRehearsal": true
+  },
+  "runtimeTimer": {
+    "programIndex": 0,
+    "startedAt": 0,
+    "pausedAt": 0,
+    "pausedTotalMs": 0,
+    "running": false
+  },
+  "midiBridgeSettings": {
+    "enabled": true,
+    "channel": 0,
+    "go": {
+      "type": "note",
+      "val": 60
+    },
+    "next": {
+      "type": "note",
+      "val": 62
+    },
+    "prev": {
+      "type": "note",
+      "val": 58
+    }
+  },
+  "channelTypes": {
+    "mics": [
+      {
+        "v": "wireless_headset",
+        "t": "头戴无线麦"
+      },
+      {
+        "v": "wireless_hand",
+        "t": "无线手持麦"
+      },
+      {
+        "v": "podium",
+        "t": "讲台麦"
+      },
+      {
+        "v": "wired",
+        "t": "有线话筒"
+      },
+      {
+        "v": "host",
+        "t": "主持人话筒"
+      },
+      {
+        "v": "guest",
+        "t": "嘉宾话筒"
+      },
+      {
+        "v": "custom",
+        "t": "自定义"
+      }
+    ],
+    "lines": [
+      {
+        "v": "stereo_line",
+        "t": "立体声线路"
+      },
+      {
+        "v": "mono_line",
+        "t": "单声道线路"
+      },
+      {
+        "v": "drum",
+        "t": "电子鼓"
+      },
+      {
+        "v": "keyboard",
+        "t": "键盘"
+      },
+      {
+        "v": "guitar",
+        "t": "吉他"
+      },
+      {
+        "v": "custom",
+        "t": "自定义"
+      }
+    ]
+  }
+}

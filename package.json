@@ -1,6 +1,6 @@
 {
   "name": "stage-manager",
-  "version": "6.0.4",
+  "version": "6.0.6",
   "description": "舞台流程表 - 全平台离线舞台流程与 Cue 管理系统",
   "private": true,
   "main": "server-standalone.js",
