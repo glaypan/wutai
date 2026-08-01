@@ -1360,7 +1360,7 @@ function printReady() {
   var localEntryUrl = "http://localhost:" + actualEntryPort + "/";
   var localControlUrl = makeAccessUrl("localhost", actualPort, "control", _config.roleTokens.control);
   console.log("═══════════════════════════════════════════════════");
-  console.log("  舞台流程表 服务器已启动 (v6.0.6)");
+  console.log("  舞台流程表 服务器已启动 (v6.0.6beta-design)");
   console.log("═══════════════════════════════════════════════════");
   console.log("");
   console.log("  入口页:   " + localEntryUrl);
