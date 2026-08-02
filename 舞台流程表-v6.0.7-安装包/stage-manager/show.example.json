@@ -1,0 +1,8 @@
+{
+  "showName": "新节目单",
+  "mode": "setup",
+  "currentProgramIndex": 0,
+  "version": 5,
+  "globalChannels": { "mics": [], "lines": [] },
+  "programs": []
+}

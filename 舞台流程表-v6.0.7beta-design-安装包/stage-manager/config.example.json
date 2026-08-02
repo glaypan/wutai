@@ -1,0 +1,58 @@
+{
+  "entryPort": 3000,
+  "port": 3001,
+  "clientPort": 3002,
+  "screenPort": 3003,
+  "subtitlePort": 0,
+  "subtitleEnabled": false,
+  "oscPort": 5300,
+  "oscEnabled": false,
+  "oscAllowLan": false,
+  "roleTokens": {
+    "control": "generate-local-token",
+    "director": "generate-local-token",
+    "assistant": "generate-local-token",
+    "backstage": "generate-local-token",
+    "console": "generate-local-token"
+  },
+  "displayToken": "generate-local-token",
+  "passwordHashes": {},
+  "rolePermissions": {
+    "director": {
+      "nav": true,
+      "subtitleControl": true,
+      "subtitleInput": true,
+      "editNotes": true,
+      "editMusic": true,
+      "editChannels": true,
+      "addDel": true
+    },
+    "assistant": {
+      "nav": false,
+      "subtitleControl": true,
+      "subtitleInput": true,
+      "editNotes": true,
+      "editMusic": true,
+      "editChannels": true,
+      "addDel": false
+    },
+    "backstage": {
+      "nav": false,
+      "subtitleControl": false,
+      "subtitleInput": false,
+      "editNotes": true,
+      "editMusic": false,
+      "editChannels": false,
+      "addDel": false
+    },
+    "console": {
+      "nav": false,
+      "subtitleControl": true,
+      "subtitleInput": true,
+      "editNotes": true,
+      "editMusic": true,
+      "editChannels": true,
+      "addDel": false
+    }
+  }
+}

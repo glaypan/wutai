@@ -1,0 +1,12 @@
+**/node_modules/
+**/.runtime/
+**/*.log
+**/*.tmp
+**/exports/
+**/config.json
+**/config.json.bak
+**/show.json
+**/*.zip
+**/media/
+.superpowers/
+.trae/
