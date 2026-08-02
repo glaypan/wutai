@@ -6,6 +6,7 @@
 **/config.json
 **/config.json.bak
 **/show.json
+**/show.json.bak
 **/*.zip
 **/media/
 .superpowers/
