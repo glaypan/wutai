@@ -4,11 +4,17 @@
 
 ## 版本
 
-- `舞台流程表-v6.3.1-安装包/stage-manager`：正式版（当前最新）
+- `舞台流程表-v6.4.0-安装包/stage-manager`：正式版（当前最新）
 - `舞台流程表-v6.2.0-安装包/stage-manager`：上一版
 - `舞台流程表-v6.1.0-安装包/stage-manager`：上一版
 - `舞台流程表-v6.0.7-安装包/stage-manager`：历史正式版
 - `舞台流程表-v6.0.7beta-design-安装包/stage-manager`：beta-design 版（增强视觉反馈）
+
+## v6.4.0 更新内容
+
+1. **模板库**：内置婚礼/年会/演出模板 + 新建向导 + 另存为模板 + 模板管理
+2. **防误触**：GO 长按 500ms + 服务端幂等（commandId + reservation token）
+3. **UI 美化**：SVG 图标系统 + 角色色/状态色令牌 + 入口页重设计
 
 ## v6.3.1 更新内容
 
@@ -75,6 +81,7 @@ node server-standalone.js
 
 ## Release 下载
 
+- v6.4.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.4.0/wutai-server.zip
 - v6.3.1：https://github.com/glaypan/wutai/releases/download/wutai-v6.3.1/wutai-server.zip
 - v6.3.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.3.0/wutai-server.zip
 - v6.2.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.2.0/wutai-server.zip
