@@ -1,0 +1,18 @@
+{
+  "name": "stage-manager",
+  "version": "6.3.1",
+  "description": "舞台流程表 - 全平台离线舞台流程与 Cue 管理系统",
+  "private": true,
+  "main": "server-standalone.js",
+  "scripts": {
+    "start": "node server-standalone.js",
+    "test": "node --test tests/stage-core.test.js tests/server-shared.test.js tests/source-contract.test.js tests/session-auth.test.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "license": "MIT"
+}

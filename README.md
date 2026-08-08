@@ -4,11 +4,18 @@
 
 ## 版本
 
-- `舞台流程表-v6.3.0-安装包/stage-manager`：正式版（当前最新）
+- `舞台流程表-v6.3.1-安装包/stage-manager`：正式版（当前最新）
 - `舞台流程表-v6.2.0-安装包/stage-manager`：上一版
 - `舞台流程表-v6.1.0-安装包/stage-manager`：上一版
 - `舞台流程表-v6.0.7-安装包/stage-manager`：历史正式版
 - `舞台流程表-v6.0.7beta-design-安装包/stage-manager`：beta-design 版（增强视觉反馈）
+
+## v6.3.1 更新内容
+
+1. **自动 Tally 触发修复**：节目预设不触发的根因修复（老数据无 id 兼容）+ 去重误拦截修复
+2. **手机端优化**：单屏舞台（列表抽屉化）/ Tally 胶囊化 / 弹窗滚动锁定
+3. **角色独立端口**：导演 18092 / 助理 18093 / 幕后 18094 / 控台 18095
+4. **教程脱敏**：文档不暴露实际外网地址
 
 ## v6.3.0 更新内容
 
@@ -68,6 +75,7 @@ node server-standalone.js
 
 ## Release 下载
 
+- v6.3.1：https://github.com/glaypan/wutai/releases/download/wutai-v6.3.1/wutai-server.zip
 - v6.3.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.3.0/wutai-server.zip
 - v6.2.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.2.0/wutai-server.zip
 - v6.1.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.1.0/wutai-server.zip
