@@ -83,7 +83,7 @@ sudo ufw allow 443/tcp
 ### 1. 配置（Mac 已配好，见 Caddyfile）
 
 ```caddyfile
-panloveli.top:8443 {
+你的域名:8443 {
     tls internal          # 自签证书，无需公网 443
     encode zstd gzip
 
@@ -96,10 +96,10 @@ panloveli.top:8443 {
 
 ### 2. 访问地址
 
-- 入口页：`https://panloveli.top:8443/wutai/`
-- 控制端：`https://panloveli.top:8443/wutai-ctrl/`
-- 客户端：`https://panloveli.top:8443/wutai-client/`
-- 提示屏：`https://panloveli.top:8443/wutai-screen/`
+- 入口页：`https://你的域名:8443/wutai/`
+- 控制端：`https://你的域名:8443/wutai-ctrl/`
+- 客户端：`https://你的域名:8443/wutai-client/`
+- 提示屏：`https://你的域名:8443/wutai-screen/`
 
 ### 3. 手机信任自签证书
 
@@ -112,8 +112,8 @@ panloveli.top:8443 {
 家庭宽带若要公网 HTTPS：
 1. 运营商宽带需要公网 IP + 开放 443 端口（部分运营商封锁）
 2. OpenWrt 转发 443 → Mac
-3. Caddy 改 `panloveli.top { tls ... }` 自动申请 Let's Encrypt
-4. 或直接用 8443 端口（不依赖 443，手机流量可访问 `https://panloveli.top:8443/`）
+3. Caddy 改 `你的域名 { tls ... }` 自动申请 Let's Encrypt
+4. 或直接用 8443 端口（不依赖 443，手机流量可访问 `https://你的域名:8443/`）
 
 ## WebSocket 注意事项
 

@@ -14,10 +14,10 @@
 
 - 新增 `docs/HTTPS与反向代理教程.md`：云服务器 Nginx + Let's Encrypt 方案 + 家庭 Caddy 自签方案 + WebSocket 注意事项
 - Mac 本地已配置 Caddy HTTPS 反代（8443 端口，自签证书）：
-  - `https://panloveli.top:8443/wutai/` → 18088 入口
-  - `https://panloveli.top:8443/wutai-ctrl/` → 18089 控制端
-  - `https://panloveli.top:8443/wutai-client/` → 18090 客户端
-  - `https://panloveli.top:8443/wutai-screen/` → 18091 提示屏
+  - `https://你的域名:8443/wutai/` → 18088 入口
+  - `https://你的域名:8443/wutai-ctrl/` → 18089 控制端
+  - `https://你的域名:8443/wutai-client/` → 18090 客户端
+  - `https://你的域名:8443/wutai-screen/` → 18091 提示屏
 
 ### 其他
 
