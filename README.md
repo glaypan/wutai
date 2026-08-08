@@ -1,35 +1,53 @@
-# Stage Manager v6.0.8
+# Stage Manager（舞台流程表）
 
-本仓库维护舞台流程表正式版与 beta-design 版。两个安装包独立运行，复用实时协议、`stage-core.js` 业务逻辑、认证模型和测试契约；正式版保持紧凑稳定，beta-design 增强视觉反馈。
+全平台离线舞台流程与 Cue 管理系统，婚礼/演出/年会现场多设备协作。
 
-## 目录
+## 版本
 
-- `舞台流程表-v6.0.7-安装包/stage-manager`：正式版。
-- `舞台流程表-v6.0.7beta-design-安装包/stage-manager`：beta-design 版。
-- `docs/使用说明与优化建议.md`：部署、登录、运行检查和后续迭代建议。
-- `docs/superpowers/specs`：双版本设计规范。
-- `docs/superpowers/plans`：已执行的实现计划。
+- `舞台流程表-v6.1.0-安装包/stage-manager`：正式版（当前最新）
+- `舞台流程表-v6.0.7-安装包/stage-manager`：历史正式版
+- `舞台流程表-v6.0.7beta-design-安装包/stage-manager`：beta-design 版（增强视觉反馈）
+
+## v6.1.0 更新内容
+
+1. **节目列表独立滚动**：拉动列表时"正在进行/下一节目"提示卡片保持固定
+2. **手机端悬浮隐藏/显示列表按钮**：各客户端（导演/助理/幕后/控制端）右下角蓝色悬浮按钮
+3. **手机端演出模式列表默认收起**（桌面保持展开）
+4. **各客户端可切换控制端**：修复"无法切换到控制端"问题
+5. **提示屏 18091 修复**：修复 502（CLIENT_PORTAL_HTML_FN 错误调用）
+6. **端口绑定 0.0.0.0**：局域网/公网 IPv4 可访问
+
+详见 `舞台流程表-v6.1.0-安装包/stage-manager/CHANGELOG.md`
 
 ## 快速启动
 
-每个版本独立进入其 `stage-manager` 目录执行：
+进入 `舞台流程表-v6.1.0-安装包/stage-manager` 目录：
 
-```powershell
-Copy-Item config.example.json config.json
-Copy-Item show.example.json show.json
+```bash
+cp config.example.json config.json
+cp show.example.json show.json
 npm install
-npm start
+node server-standalone.js
 ```
 
-需要 Node.js `>=18.17`。`config.json` 和 `show.json` 被 Git 忽略，不能提交真实密码哈希、Token、内网地址或演出数据。
+或使用 `启动-Linux.sh`（自动下载 Node，免安装）。
 
-启动后打开入口页，选择角色并输入该角色密码。密码仅作为 POST 请求体提交，成功后浏览器保存 12 小时 HttpOnly 会话 Cookie；地址栏只保留 `?role=角色`，不含密码或 Token。
+## 端口
 
-## 验证
+| 端口 | 用途 |
+|------|------|
+| 18088 | 入口页（角色选择） |
+| 18089 | 控制端（导演/控台） |
+| 18090 | 客户端（助理/幕后） |
+| 18091 | 提示屏（大屏显示） |
 
-```powershell
-npm test
-node --check server-standalone.js
-```
+## 部署
 
-两套安装包均应独立执行以上命令。详见 [使用说明与优化建议](docs/使用说明与优化建议.md)。
+- 云服务器部署：`舞台流程表-v6.1.0-安装包/stage-manager/docs/云服务器部署教程.md`
+- 安卓手机（Termux）：`android-files/` + `安卓手机安装说明.md`
+- 桌面 Mac/Windows：直接 `node server-standalone.js`
+
+## Release 下载
+
+- v6.1.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.1.0/wutai-server.zip
+- 安卓安装文件包：https://github.com/glaypan/wutai/releases/download/android-files-v1/termux.apk 等
