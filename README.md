@@ -4,11 +4,15 @@
 
 ## 版本
 
-- `舞台流程表-v6.4.0-安装包/stage-manager`：正式版（当前最新）
+- `舞台流程表-v6.4.1-安装包/stage-manager`：正式版（当前最新）
 - `舞台流程表-v6.2.0-安装包/stage-manager`：上一版
 - `舞台流程表-v6.1.0-安装包/stage-manager`：上一版
 - `舞台流程表-v6.0.7-安装包/stage-manager`：历史正式版
 - `舞台流程表-v6.0.7beta-design-安装包/stage-manager`：beta-design 版（增强视觉反馈）
+
+## v6.4.1 更新内容
+
+1. **幂等增强**：pending 短租约 60s + 容量淘汰只删 done + 严格 token 校验 + ID 强唯一
 
 ## v6.4.0 更新内容
 
@@ -81,6 +85,7 @@ node server-standalone.js
 
 ## Release 下载
 
+- v6.4.1：https://github.com/glaypan/wutai/releases/download/wutai-v6.4.1/wutai-server.zip
 - v6.4.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.4.0/wutai-server.zip
 - v6.3.1：https://github.com/glaypan/wutai/releases/download/wutai-v6.3.1/wutai-server.zip
 - v6.3.0：https://github.com/glaypan/wutai/releases/download/wutai-v6.3.0/wutai-server.zip
